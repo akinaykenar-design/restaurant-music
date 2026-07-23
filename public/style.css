@@ -110,6 +110,12 @@ button { cursor: pointer; }
 .track-list li.empty { color: var(--muted); font-style: italic; justify-content: flex-start; background: transparent; border-style: dashed; }
 .del { color: #ff7b72 !important; }
 
+.stream-card { margin-top: 24px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+.stream-card h3 { margin: 0 0 6px; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+.stream-url { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.stream-url code { flex: 1; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font-size: 14px; word-break: break-all; }
+.stream-url button { background: var(--accent); border: none; color: #04101f; border-radius: 6px; padding: 8px 12px; }
+
 @media (max-width: 720px) {
   .pl-layout { grid-template-columns: 1fr; }
   .pl-cols { grid-template-columns: 1fr; }

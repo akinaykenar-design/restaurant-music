@@ -347,6 +347,35 @@ async function boot() {
   renderPlaylistNames();
   renderEditor();
   applySchedule(true);
+  loadStreamInfo();
+}
+
+// Show the venue stream URL(s) so they can be handed to the Q-SYS programmer.
+function loadStreamInfo() {
+  api('/api/stream-info')
+    .then((info) => {
+      if (!info || !info.urls || !info.urls.length) return;
+      const card = $('stream-card');
+      const box = $('stream-urls');
+      box.innerHTML = '';
+      info.urls.forEach((u) => {
+        const row = document.createElement('div');
+        row.className = 'stream-url';
+        const code = document.createElement('code');
+        code.textContent = u;
+        const copy = document.createElement('button');
+        copy.textContent = 'Copy';
+        copy.addEventListener('click', () => {
+          navigator.clipboard && navigator.clipboard.writeText(u);
+          copy.textContent = 'Copied';
+          setTimeout(() => (copy.textContent = 'Copy'), 1500);
+        });
+        row.append(code, copy);
+        box.appendChild(row);
+      });
+      card.hidden = false;
+    })
+    .catch(() => {});
 }
 
 boot();

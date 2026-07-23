@@ -3,10 +3,13 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const HOST = process.env.HOST || '127.0.0.1'; // loopback only by default
+// Bind to all interfaces so the venue's Q-SYS Core can pull /stream over the
+// LAN. Set HOST=127.0.0.1 to restrict to this machine only.
+const HOST = process.env.HOST || '0.0.0.0';
 
 const ROOT = __dirname;
 const MUSIC_DIR = path.join(ROOT, 'music');
@@ -157,6 +160,158 @@ app.get('/audio/:file', (req, res) => {
   }
 });
 
+// ---- venue stream: a continuous MP3 "radio" the Q-SYS Core can pull --------
+//
+// The app's browser tab plays on this computer's own audio. To reach the
+// venue's Q-SYS system (which pulls a network stream, like Mustard does), we
+// run a server-side station that follows the schedule and broadcasts one
+// continuous MP3 stream at /stream. Point the Q-SYS streaming input at it.
+
+function dayKey(d) {
+  return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()];
+}
+
+function currentBlockId(now) {
+  const mins = now.getHours() * 60 + now.getMinutes();
+  const parsed = data.blocks
+    .map((b) => {
+      const [h, m] = b.start.split(':').map(Number);
+      return { id: b.id, at: h * 60 + m };
+    })
+    .sort((a, b) => a.at - b.at);
+  let active = parsed[parsed.length - 1]; // wraps past midnight
+  for (const b of parsed) if (mins >= b.at) active = b;
+  return active ? active.id : null;
+}
+
+// Parse the first MP3 frame header to get the (CBR) byte rate, so we can pace
+// the broadcast at real-time speed. Skips a leading ID3v2 tag if present.
+function mp3ByteRate(buf) {
+  let i = 0;
+  if (buf.length > 10 && buf.toString('ascii', 0, 3) === 'ID3') {
+    const sz = ((buf[6] & 0x7f) << 21) | ((buf[7] & 0x7f) << 14) | ((buf[8] & 0x7f) << 7) | (buf[9] & 0x7f);
+    i = 10 + sz;
+  }
+  const V1_L3 = [0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320];
+  const V2_L3 = [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160];
+  for (; i < buf.length - 4; i++) {
+    if (buf[i] !== 0xff || (buf[i + 1] & 0xe0) !== 0xe0) continue;
+    const ver = (buf[i + 1] >> 3) & 0x03; // 3=MPEG1, 2=MPEG2, 0=MPEG2.5
+    const layer = (buf[i + 1] >> 1) & 0x03; // 1=Layer III
+    const brIdx = (buf[i + 2] >> 4) & 0x0f;
+    if (layer !== 1 || brIdx === 0 || brIdx === 15) continue;
+    const kbps = ver === 3 ? V1_L3[brIdx] : V2_L3[brIdx];
+    if (!kbps) continue;
+    return (kbps * 1000) / 8; // bytes per second
+  }
+  return 20000; // sensible default (160 kbps)
+}
+
+const station = {
+  queue: [],
+  idx: 0,
+  blockKey: null,
+  // Recompute the queue from the schedule; never leave the venue silent.
+  refresh(force) {
+    const now = new Date();
+    const key = dayKey(now) + '/' + currentBlockId(now);
+    if (!force && key === this.blockKey && this.queue.length) return;
+    this.blockKey = key;
+    const [dk, bk] = key.split('/');
+    let tracks = [];
+    const name = data.schedule[dk] && data.schedule[dk][bk];
+    if (name && data.playlists[name] && data.playlists[name].length) tracks = data.playlists[name].slice();
+    if (!tracks.length) {
+      const pn = Object.keys(data.playlists).find((n) => (data.playlists[n] || []).length);
+      if (pn) tracks = data.playlists[pn].slice();
+    }
+    if (!tracks.length) tracks = scanLibrary().map((t) => t.file); // fall back to whole library
+    this.queue = tracks.filter((f) => fs.existsSync(path.join(MUSIC_DIR, f)));
+    if (this.idx >= this.queue.length) this.idx = 0;
+  },
+  current() {
+    return this.queue[this.idx];
+  },
+  advance() {
+    this.idx += 1;
+    if (this.idx >= this.queue.length) {
+      this.idx = 0;
+      this.refresh(true);
+    }
+  },
+};
+
+const streamClients = new Set();
+
+function startBroadcast() {
+  station.refresh(true);
+  (function playNext() {
+    const file = station.current();
+    if (!file) {
+      setTimeout(() => { station.refresh(true); playNext(); }, 1000);
+      return;
+    }
+    let audio;
+    try {
+      audio = fs.readFileSync(path.join(MUSIC_DIR, file));
+    } catch {
+      station.advance();
+      return playNext();
+    }
+    const byteRate = mp3ByteRate(audio);
+    const CHUNK = 4096;
+    const interval = (CHUNK / byteRate) * 1000; // pace at real-time
+    let off = 0;
+    (function pump() {
+      if (off >= audio.length) {
+        station.advance();
+        return playNext();
+      }
+      const slice = audio.subarray(off, Math.min(off + CHUNK, audio.length));
+      for (const res of streamClients) {
+        try { res.write(slice); } catch { /* client gone */ }
+      }
+      off += CHUNK;
+      setTimeout(pump, interval);
+    })();
+  })();
+}
+
+// The continuous stream endpoint. Q-SYS (or VLC/a browser, to test) connects
+// here and receives whatever is scheduled right now.
+app.get('/stream', (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'audio/mpeg',
+    'Cache-Control': 'no-cache, no-store',
+    'Connection': 'close',
+    'icy-name': 'Venue Music',
+  });
+  streamClients.add(res);
+  req.on('close', () => streamClients.delete(res));
+});
+
+// LAN URLs to hand to whoever programs the Q-SYS Core.
+function lanStreamUrls() {
+  const urls = [];
+  const ifaces = os.networkInterfaces();
+  for (const name of Object.keys(ifaces)) {
+    for (const ni of ifaces[name] || []) {
+      if (ni.family === 'IPv4' && !ni.internal) urls.push(`http://${ni.address}:${PORT}/stream`);
+    }
+  }
+  return urls;
+}
+
+app.get('/api/stream-info', (_req, res) => {
+  res.json({ urls: lanStreamUrls(), path: '/stream', now: station.current() || null });
+});
+
 app.listen(PORT, HOST, () => {
-  console.log(`Venue Music running at http://${HOST}:${PORT}`);
+  console.log(`Venue Music running at http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT}`);
+  const urls = lanStreamUrls();
+  if (urls.length) {
+    console.log('Venue stream (point your Q-SYS streaming input here):');
+    for (const u of urls) console.log('   ' + u);
+  }
+  startBroadcast();
 });
