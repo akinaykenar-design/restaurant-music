@@ -677,37 +677,48 @@ function refreshAhPlaylists() {
   const names = Object.keys(state.playlists);
   sel.innerHTML = names.map((n) => `<option${/after|staff/i.test(n) ? ' selected' : ''}>${n}</option>`).join('');
 }
-function setupAfterHours() {
-  $('lock').addEventListener('click', () => {
-    document.querySelector('.tab[data-tab="admin"]').click(); // after-hours lives in Admin
-    const card = $('ah-card');
-    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    if (!$('ah-locked').hidden) setTimeout(() => $('ah-pass').focus(), 60);
-  });
-  $('ah-unlock').addEventListener('click', () => {
-    const password = $('ah-pass').value;
+// The whole Admin tab is password-gated (session-only; relocks on reload).
+let adminUnlocked = false;
+let adminPass = '';
+function setupAdmin() {
+  const showLocked = () => {
+    adminUnlocked = false; adminPass = '';
+    $('admin-content').hidden = true; $('admin-lock').hidden = false;
+    $('admin-pass').value = ''; $('lock').classList.remove('on');
+  };
+  const showUnlocked = () => {
+    adminUnlocked = true;
+    $('admin-lock').hidden = true; $('admin-content').hidden = false;
+    $('lock').classList.add('on'); refreshAhPlaylists();
+  };
+  const tryUnlock = () => {
+    const password = $('admin-pass').value;
     fetch('/api/afterhours/unlock', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) })
-      .then((r) => r.json()).then((d) => {
-        if (d.ok) { $('ah-locked').hidden = true; $('ah-unlocked').hidden = false; $('lock').classList.add('on'); refreshAhPlaylists(); }
-        else alert('Wrong password.');
-      });
+      .then((r) => r.json()).then((d) => { if (d.ok) { adminPass = password; showUnlocked(); } else alert('Wrong password.'); });
+  };
+
+  $('lock').addEventListener('click', () => {
+    document.querySelector('.tab[data-tab="admin"]').click();
+    if (!adminUnlocked) setTimeout(() => $('admin-pass').focus(), 60);
   });
+  $('admin-unlock').addEventListener('click', tryUnlock);
+  $('admin-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUnlock(); });
+  $('admin-relock').addEventListener('click', showLocked);
+
   $('ah-play').addEventListener('click', () => {
     const name = $('ah-playlist').value;
     if (!name || !state.playlists[name] || !state.playlists[name].length) return alert('That playlist is empty.');
     $('follow').checked = false; saveSettings({ followSchedule: false });
     $('now-block').textContent = 'After hours'; $('now-sub').textContent = 'Staff: ' + name;
     loadQueue(state.playlists[name], true);
+    toast('Playing (after hours): ' + name);
   });
-  $('ah-relock').addEventListener('click', () => {
-    $('ah-unlocked').hidden = true; $('ah-locked').hidden = false; $('ah-pass').value = '';
-    $('lock').classList.remove('on'); $('ah-card').hidden = true;
-  });
-  $('ah-setpass').addEventListener('click', () => {
-    const current = $('ah-pass').value, next = $('ah-newpass').value;
+
+  $('admin-setpass').addEventListener('click', () => {
+    const next = $('admin-newpass').value;
     if (!next) return alert('Enter a new password.');
-    fetch('/api/afterhours/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ current, next }) })
-      .then((r) => r.json()).then((d) => { if (d.ok) { alert('Staff password updated.'); $('ah-pass').value = next; $('ah-newpass').value = ''; } else alert('Could not change password.'); });
+    fetch('/api/afterhours/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ current: adminPass, next }) })
+      .then((r) => r.json()).then((d) => { if (d.ok) { adminPass = next; $('admin-newpass').value = ''; toast('Admin password changed'); } else alert('Could not change password.'); });
   });
 }
 
@@ -756,7 +767,7 @@ async function boot() {
   loadStreamInfo();
   setupUpload();
   setupVenuePlayer();
-  setupAfterHours();
+  setupAdmin();
   refreshAhPlaylists();
 }
 boot();

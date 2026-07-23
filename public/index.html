@@ -173,68 +173,75 @@
         </div>
       </section>
 
-      <!-- ===== ADMIN ===== -->
+      <!-- ===== ADMIN (password-gated) ===== -->
       <section id="tab-admin" class="tab-panel">
-        <p class="hint">Technical settings for connecting to the venue sound system and the box.</p>
+        <div id="admin-lock" class="card admin-lock">
+          <h3>🔒 Admin — password required</h3>
+          <p class="hint">Enter the admin password to view technical settings and staff controls.</p>
+          <div class="ah-row">
+            <input type="password" id="admin-pass" placeholder="Admin password" />
+            <button id="admin-unlock" class="warnbtn">Unlock</button>
+          </div>
+        </div>
 
-        <div class="card share-card" id="share-card" hidden>
-          <h3>Open on staff phones &amp; iPads</h3>
-          <p class="hint">On the <b>same WiFi</b>, scan this code (or type the address) in a browser, then tap <b>Add to Home Screen</b> for an app icon.</p>
-          <div class="share-row">
-            <div class="qr-box"><img id="qr-img" alt="Scan to open the app" /></div>
-            <div class="share-addr">
-              <div class="addr-label">Address</div>
-              <div class="big-addr" id="big-addr">—</div>
-              <div class="share-btns">
-                <button id="copy-addr" class="ghost">Copy address</button>
-                <button id="print-poster" class="ghost">🖨 Print poster</button>
+        <div id="admin-content" hidden>
+          <p class="hint">Technical settings for connecting to the venue sound system and the box.</p>
+
+          <div class="card share-card" id="share-card" hidden>
+            <h3>Open on staff phones &amp; iPads</h3>
+            <p class="hint">On the <b>same WiFi</b>, scan this code (or type the address) in a browser, then tap <b>Add to Home Screen</b> for an app icon.</p>
+            <div class="share-row">
+              <div class="qr-box"><img id="qr-img" alt="Scan to open the app" /></div>
+              <div class="share-addr">
+                <div class="addr-label">Address</div>
+                <div class="big-addr" id="big-addr">—</div>
+                <div class="share-btns">
+                  <button id="copy-addr" class="ghost">Copy address</button>
+                  <button id="print-poster" class="ghost">🖨 Print poster</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="card accent-card" id="stream-card" hidden>
-          <h3>Venue stream (for Q-SYS)</h3>
-          <p class="hint">Give this address to whoever programs your Q-SYS Core, or test it in VLC:</p>
-          <div id="stream-urls"></div>
-        </div>
-
-        <div class="card accent-card" id="player-card" hidden>
-          <h3>Venue output (this box)</h3>
-          <p class="hint">Playing the scheduled music out this device into your sound system.</p>
-          <div class="player-row">
-            <span id="player-now">—</span>
-            <button id="player-pause" class="ghost">Pause</button>
-            <button id="player-skip" class="ghost">Skip</button>
+          <div class="card accent-card" id="stream-card" hidden>
+            <h3>Venue stream (for Q-SYS)</h3>
+            <p class="hint">Give this address to whoever programs your Q-SYS Core, or test it in VLC:</p>
+            <div id="stream-urls"></div>
           </div>
-        </div>
 
-        <div class="card ah-card" id="ah-card">
-          <h3>🔒 After-hours staff mode</h3>
-          <div id="ah-locked">
-            <p class="hint">Enter the staff password to play the after-hours playlist (off-schedule).</p>
-            <div class="ah-row">
-              <input type="password" id="ah-pass" placeholder="Staff password" />
-              <button id="ah-unlock" class="warnbtn">Unlock</button>
+          <div class="card accent-card" id="player-card" hidden>
+            <h3>Venue output (this box)</h3>
+            <p class="hint">Playing the scheduled music out this device into your sound system.</p>
+            <div class="player-row">
+              <span id="player-now">—</span>
+              <button id="player-pause" class="ghost">Pause</button>
+              <button id="player-skip" class="ghost">Skip</button>
             </div>
           </div>
-          <div id="ah-unlocked" hidden>
+
+          <div class="card ah-card" id="ah-card">
+            <h3>After-hours staff music</h3>
+            <p class="hint">Play a playlist off-schedule (e.g. after close). Turns off Follow-schedule.</p>
             <div class="ah-row">
               <select id="ah-playlist"></select>
               <button id="ah-play" class="warnbtn">Play (after hours)</button>
-              <button id="ah-relock" class="ghost">Lock</button>
-            </div>
-            <p class="hint" style="margin-top:12px">Change staff password:</p>
-            <div class="ah-row">
-              <input type="password" id="ah-newpass" placeholder="New password" />
-              <button id="ah-setpass" class="ghost">Save</button>
             </div>
           </div>
-        </div>
 
-        <div class="card" id="device-card">
-          <h3>This device</h3>
-          <div id="device-info" class="device-info"></div>
+          <div class="card" id="device-card">
+            <h3>This device</h3>
+            <div id="device-info" class="device-info"></div>
+          </div>
+
+          <div class="card" id="security-card">
+            <h3>Security</h3>
+            <p class="hint">Change the admin password:</p>
+            <div class="ah-row">
+              <input type="password" id="admin-newpass" placeholder="New admin password" />
+              <button id="admin-setpass" class="ghost">Change password</button>
+            </div>
+            <button id="admin-relock" class="ghost" style="margin-top:12px">Lock admin</button>
+          </div>
         </div>
       </section>
     </main>
