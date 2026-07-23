@@ -9,6 +9,7 @@ let queue = [];          // filenames in play order
 let queueIndex = 0;
 let history = [];         // recently played (newest first)
 let currentBlockKey = null;
+let libFilter = '';       // library search term
 
 // dual-deck crossfade player
 const decks = [new Audio(), new Audio()];
@@ -197,6 +198,20 @@ $('shuffle').addEventListener('change', (e) => { state.settings.shuffle = e.targ
 $('crossfade').addEventListener('input', (e) => { state.settings.crossfade = Number(e.target.value); $('cf-val').textContent = e.target.value + 's'; });
 $('crossfade').addEventListener('change', (e) => saveSettings({ crossfade: Number(e.target.value) }));
 
+// library search
+$('lib-search').addEventListener('input', (e) => { libFilter = e.target.value.trim().toLowerCase(); renderEditor(); });
+
+// keyboard shortcuts (ignored while typing in a field)
+document.addEventListener('keydown', (e) => {
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'input' || tag === 'select' || tag === 'textarea') return;
+  if (e.code === 'Space') { e.preventDefault(); $('playpause').click(); }
+  else if (e.code === 'ArrowRight') skip(1);
+  else if (e.code === 'ArrowLeft') skip(-1);
+  else if (e.key === 'l' || e.key === 'L') rate('like');
+  else if (e.key === 'd' || e.key === 'D') rate('dislike');
+});
+
 function rateFile(file, kind) {
   const next = ratingOf(file) === kind ? 'none' : kind;
   return fetch('/api/rate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file, rating: next }) })
@@ -365,7 +380,9 @@ function renderPlaylistNames() {
     const li = document.createElement('li');
     li.className = name === editing ? 'active' : '';
     const span = document.createElement('span');
-    span.textContent = name;
+    span.textContent = name + '  ';
+    const cnt = document.createElement('span'); cnt.className = 'count'; cnt.textContent = (state.playlists[name] || []).length;
+    span.appendChild(cnt);
     span.addEventListener('click', () => { editing = name; renderPlaylistNames(); renderEditor(); });
     const del = document.createElement('button');
     del.textContent = '✕'; del.className = 'del'; del.title = 'Delete playlist';
@@ -407,7 +424,9 @@ function renderEditor() {
   }
 
   if (!library.length) { libUl.appendChild(emptyRow('No music yet — drop files above.')); return; }
-  library.forEach((t) => {
+  const shown = library.filter((t) => !libFilter || t.title.toLowerCase().includes(libFilter));
+  if (!shown.length) { libUl.appendChild(emptyRow('No matches for "' + libFilter + '".')); return; }
+  shown.forEach((t) => {
     const li = document.createElement('li');
     const name = document.createElement('span');
     name.className = 'name'; name.textContent = t.title; name.title = 'Click to preview';
@@ -422,7 +441,7 @@ function renderEditor() {
     dislike.addEventListener('click', () => rateFile(t.file, 'dislike'));
     const add = document.createElement('button');
     add.textContent = '+'; add.disabled = !editing; add.title = editing ? 'Add to ' + editing : 'Select a playlist first';
-    add.addEventListener('click', () => { if (!editing) return; state.playlists[editing].push(t.file); savePlaylists(); });
+    add.addEventListener('click', () => { if (!editing) return; if (!state.playlists[editing].includes(t.file)) state.playlists[editing].push(t.file); savePlaylists(); });
     const del = document.createElement('button');
     del.textContent = '🗑'; del.className = 'del'; del.title = 'Delete from library';
     del.addEventListener('click', () => {
