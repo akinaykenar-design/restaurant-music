@@ -587,6 +587,13 @@ function loadStreamInfo() {
       row.append(code, copy); box.appendChild(row);
     });
     $('stream-card').hidden = false;
+    const dev = $('device-info');
+    if (dev) {
+      dev.innerHTML = info.urls.map((u) => {
+        const base = u.replace(/\/stream$/, '');
+        return `<div class="dev-row"><span>App address</span><code>${base}</code></div>`;
+      }).join('') + `<div class="dev-row"><span>Venue stream</span><code>${info.urls[0]}</code></div>`;
+    }
   }).catch(() => {});
 }
 function setupVenuePlayer() {
@@ -610,9 +617,10 @@ function refreshAhPlaylists() {
 }
 function setupAfterHours() {
   $('lock').addEventListener('click', () => {
+    document.querySelector('.tab[data-tab="admin"]').click(); // after-hours lives in Admin
     const card = $('ah-card');
-    card.hidden = !card.hidden;
-    if (!card.hidden) { card.scrollIntoView({ behavior: 'smooth', block: 'center' }); $('ah-pass').focus(); }
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (!$('ah-locked').hidden) setTimeout(() => $('ah-pass').focus(), 60);
   });
   $('ah-unlock').addEventListener('click', () => {
     const password = $('ah-pass').value;

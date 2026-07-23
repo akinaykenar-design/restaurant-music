@@ -31,6 +31,7 @@
         <button class="tab active" data-tab="now">Now Playing</button>
         <button class="tab" data-tab="playlists">Library</button>
         <button class="tab" data-tab="schedule">Schedule</button>
+        <button class="tab" data-tab="admin">Admin</button>
       </nav>
       <button id="theme" class="lockbtn" title="Toggle dark / light" aria-label="Toggle dark or light mode">
         <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18V3z"/></svg>
@@ -114,44 +115,6 @@
           </div>
         </div>
 
-        <div class="card accent-card" id="player-card" hidden>
-          <h3>Venue output (this box)</h3>
-          <p class="hint">Playing the scheduled music out this device into your sound system.</p>
-          <div class="player-row">
-            <span id="player-now">—</span>
-            <button id="player-pause" class="ghost">Pause</button>
-            <button id="player-skip" class="ghost">Skip</button>
-          </div>
-        </div>
-
-        <div class="card ah-card" id="ah-card" hidden>
-          <h3>🔒 After-hours staff mode</h3>
-          <div id="ah-locked">
-            <p class="hint">Enter the staff password to play the after-hours playlist (off-schedule).</p>
-            <div class="ah-row">
-              <input type="password" id="ah-pass" placeholder="Staff password" />
-              <button id="ah-unlock" class="warnbtn">Unlock</button>
-            </div>
-          </div>
-          <div id="ah-unlocked" hidden>
-            <div class="ah-row">
-              <select id="ah-playlist"></select>
-              <button id="ah-play" class="warnbtn">Play (after hours)</button>
-              <button id="ah-relock" class="ghost">Lock</button>
-            </div>
-            <p class="hint" style="margin-top:12px">Change staff password:</p>
-            <div class="ah-row">
-              <input type="password" id="ah-newpass" placeholder="New password" />
-              <button id="ah-setpass" class="ghost">Save</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card accent-card" id="stream-card" hidden>
-          <h3>Venue stream</h3>
-          <p class="hint">Give this address to whoever programs your Q-SYS Core (or test it in VLC):</p>
-          <div id="stream-urls"></div>
-        </div>
       </section>
 
       <!-- ===== LIBRARY / PLAYLISTS ===== -->
@@ -198,6 +161,55 @@
         <p class="hint">Now pick a playlist for each block × day. The music switches automatically when a block begins.</p>
         <div class="card table-wrap">
           <table id="schedule-table"></table>
+        </div>
+      </section>
+
+      <!-- ===== ADMIN ===== -->
+      <section id="tab-admin" class="tab-panel">
+        <p class="hint">Technical settings for connecting to the venue sound system and the box.</p>
+
+        <div class="card accent-card" id="stream-card" hidden>
+          <h3>Venue stream (for Q-SYS)</h3>
+          <p class="hint">Give this address to whoever programs your Q-SYS Core, or test it in VLC:</p>
+          <div id="stream-urls"></div>
+        </div>
+
+        <div class="card accent-card" id="player-card" hidden>
+          <h3>Venue output (this box)</h3>
+          <p class="hint">Playing the scheduled music out this device into your sound system.</p>
+          <div class="player-row">
+            <span id="player-now">—</span>
+            <button id="player-pause" class="ghost">Pause</button>
+            <button id="player-skip" class="ghost">Skip</button>
+          </div>
+        </div>
+
+        <div class="card ah-card" id="ah-card">
+          <h3>🔒 After-hours staff mode</h3>
+          <div id="ah-locked">
+            <p class="hint">Enter the staff password to play the after-hours playlist (off-schedule).</p>
+            <div class="ah-row">
+              <input type="password" id="ah-pass" placeholder="Staff password" />
+              <button id="ah-unlock" class="warnbtn">Unlock</button>
+            </div>
+          </div>
+          <div id="ah-unlocked" hidden>
+            <div class="ah-row">
+              <select id="ah-playlist"></select>
+              <button id="ah-play" class="warnbtn">Play (after hours)</button>
+              <button id="ah-relock" class="ghost">Lock</button>
+            </div>
+            <p class="hint" style="margin-top:12px">Change staff password:</p>
+            <div class="ah-row">
+              <input type="password" id="ah-newpass" placeholder="New password" />
+              <button id="ah-setpass" class="ghost">Save</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="device-card">
+          <h3>This device</h3>
+          <div id="device-info" class="device-info"></div>
         </div>
       </section>
     </main>
