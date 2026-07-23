@@ -4,6 +4,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { spawn } = require('child_process');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -67,6 +68,20 @@ let data = loadData();
 
 // ---- library scan ----------------------------------------------------------
 
+// Turn a filename into a friendly display title:
+// "cafe-01-sunrise.mp3" -> "Sunrise", "chill_organic_house.mp3" -> "Chill Organic House"
+function prettyTitle(file) {
+  let base = path.basename(file, path.extname(file));
+  let tokens = base.split(/[-_\s]+/).filter(Boolean);
+  // Drop a leading "cafe" tag and any leading pure-number tokens (track numbers).
+  while (tokens.length > 1 && (/^\d+$/.test(tokens[0]) || tokens[0].toLowerCase() === 'cafe')) {
+    tokens.shift();
+  }
+  return tokens
+    .map((t) => (t.length ? t[0].toUpperCase() + t.slice(1) : t))
+    .join(' ');
+}
+
 function scanLibrary() {
   try {
     fs.mkdirSync(MUSIC_DIR, { recursive: true });
@@ -74,7 +89,7 @@ function scanLibrary() {
       .readdirSync(MUSIC_DIR)
       .filter((f) => AUDIO_EXT.has(path.extname(f).toLowerCase()))
       .sort((a, b) => a.localeCompare(b))
-      .map((f) => ({ file: f, title: path.basename(f, path.extname(f)) }));
+      .map((f) => ({ file: f, title: prettyTitle(f) }));
   } catch {
     return [];
   }
@@ -83,6 +98,41 @@ function scanLibrary() {
 // ---- api -------------------------------------------------------------------
 
 app.get('/api/library', (_req, res) => res.json({ tracks: scanLibrary() }));
+
+// Upload an audio file (raw body; the browser posts the file bytes directly).
+app.post('/api/upload', express.raw({ type: '*/*', limit: '300mb' }), (req, res) => {
+  const name = path.basename(String(req.query.name || ''));
+  if (!name || !AUDIO_EXT.has(path.extname(name).toLowerCase())) {
+    return res.status(400).json({ error: 'audio file (mp3, m4a, ogg, wav, flac...) required' });
+  }
+  if (!req.body || !req.body.length) return res.status(400).json({ error: 'empty upload' });
+  try {
+    fs.mkdirSync(MUSIC_DIR, { recursive: true });
+    fs.writeFileSync(path.join(MUSIC_DIR, name), req.body);
+    res.json({ ok: true, file: name, title: prettyTitle(name) });
+  } catch (e) {
+    res.status(500).json({ error: 'could not save file' });
+  }
+});
+
+// Delete a track from the library (and from any playlist that referenced it).
+app.delete('/api/track', (req, res) => {
+  const name = path.basename(String(req.query.name || ''));
+  const full = path.join(MUSIC_DIR, name);
+  if (!name || !AUDIO_EXT.has(path.extname(name).toLowerCase()) || !fs.existsSync(full)) {
+    return res.status(404).json({ error: 'not found' });
+  }
+  try {
+    fs.unlinkSync(full);
+    for (const pl of Object.keys(data.playlists)) {
+      data.playlists[pl] = data.playlists[pl].filter((f) => f !== name);
+    }
+    saveData(data);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'could not delete' });
+  }
+});
 
 app.get('/api/state', (_req, res) => {
   res.json({
@@ -306,6 +356,68 @@ app.get('/api/stream-info', (_req, res) => {
   res.json({ urls: lanStreamUrls(), path: '/stream', now: station.current() || null });
 });
 
+// ---- headless player: play scheduled music out this device's audio ---------
+//
+// On the venue "music box" (a Pi/mini-PC) there's no browser open, so the
+// server itself plays the scheduled music out the local audio output (into
+// the Q-SYS input). Enabled with PLAYER=1 so it never double-plays on a
+// laptop used only for management. Requires `mpg123` (sudo apt install mpg123).
+
+const HEADLESS_PLAYER = process.env.PLAYER === '1';
+let playerProc = null;
+let playerPaused = false;
+let playerBroken = false;
+
+function playerPlayCurrent() {
+  if (!HEADLESS_PLAYER || playerPaused || playerBroken || playerProc) return;
+  const file = station.current();
+  if (!file) {
+    setTimeout(() => { station.refresh(true); playerPlayCurrent(); }, 1000);
+    return;
+  }
+  const full = path.join(MUSIC_DIR, file);
+  playerProc = spawn('mpg123', ['-q', full]);
+  playerProc.on('error', (e) => {
+    playerBroken = true;
+    playerProc = null;
+    console.warn(`Headless player: could not start mpg123 (${e.message}).`);
+    console.warn('Install it on the box with:  sudo apt install -y mpg123');
+  });
+  playerProc.on('exit', () => {
+    playerProc = null;
+    if (!HEADLESS_PLAYER || playerPaused || playerBroken) return;
+    station.advance();
+    playerPlayCurrent();
+  });
+}
+
+app.get('/api/player/state', (_req, res) => {
+  const track = station.current() || null;
+  res.json({
+    enabled: HEADLESS_PLAYER,
+    broken: playerBroken,
+    paused: playerPaused,
+    playing: !!playerProc && !playerPaused,
+    track,
+    title: track ? prettyTitle(track) : null,
+  });
+});
+
+app.post('/api/player/skip', (_req, res) => {
+  if (HEADLESS_PLAYER && !playerBroken) {
+    if (playerProc) playerProc.kill('SIGTERM'); // exit handler advances + plays next
+    else { station.advance(); playerPlayCurrent(); }
+  }
+  res.json({ ok: true, track: station.current() || null });
+});
+
+app.post('/api/player/pause', (_req, res) => {
+  playerPaused = !playerPaused;
+  if (playerPaused) { if (playerProc) playerProc.kill('SIGTERM'); }
+  else playerPlayCurrent();
+  res.json({ ok: true, paused: playerPaused });
+});
+
 app.listen(PORT, HOST, () => {
   console.log(`Venue Music running at http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT}`);
   const urls = lanStreamUrls();
@@ -314,4 +426,9 @@ app.listen(PORT, HOST, () => {
     for (const u of urls) console.log('   ' + u);
   }
   startBroadcast();
+  if (HEADLESS_PLAYER) {
+    console.log('Headless player ON — playing scheduled music out this device.');
+    station.refresh(true);
+    playerPlayCurrent();
+  }
 });

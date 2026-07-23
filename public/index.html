@@ -3,12 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Venue Music</title>
+    <title>Watermans Music</title>
+    <meta name="theme-color" content="#0e1116" />
+    <link rel="icon" href="icon.svg" />
+    <link rel="apple-touch-icon" href="icon.svg" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="Watermans Music" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <header>
-      <h1>Venue Music</h1>
+      <h1>Watermans Music</h1>
       <nav>
         <button class="tab active" data-tab="now">Now Playing</button>
         <button class="tab" data-tab="schedule">Schedule</button>
@@ -44,6 +51,16 @@
         <div class="queue">
           <h3>Up next</h3>
           <ol id="queue-list"></ol>
+        </div>
+
+        <div class="stream-card" id="player-card" hidden>
+          <h3>Venue output (this box)</h3>
+          <p class="hint">Playing the scheduled music out this device into your sound system.</p>
+          <div class="player-row">
+            <span id="player-now">—</span>
+            <button id="player-pause">Pause</button>
+            <button id="player-skip">Skip</button>
+          </div>
         </div>
 
         <div class="stream-card" id="stream-card" hidden>
@@ -84,6 +101,11 @@
               </div>
               <div>
                 <h4>Library (<span id="lib-count">0</span>)</h4>
+                <div id="dropzone" class="dropzone">
+                  <p>Drag &amp; drop music here, or <label for="file-input" class="link">browse</label></p>
+                  <input type="file" id="file-input" accept="audio/*,.mp3,.m4a,.aac,.ogg,.wav,.flac" multiple hidden />
+                  <div id="upload-status" class="upload-status"></div>
+                </div>
                 <ul id="lib-tracks" class="track-list"></ul>
               </div>
             </div>

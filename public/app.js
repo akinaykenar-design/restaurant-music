@@ -286,17 +286,85 @@ function renderEditor() {
     name.className = 'clickable';
     name.title = 'Click to preview';
     name.addEventListener('click', () => preview(t.file));
-    const btn = document.createElement('button');
-    btn.textContent = '+';
-    btn.title = editing ? 'Add to ' + editing : 'Select a playlist first';
-    btn.disabled = !editing;
-    btn.addEventListener('click', () => {
+    const add = document.createElement('button');
+    add.textContent = '+';
+    add.title = editing ? 'Add to ' + editing : 'Select a playlist first';
+    add.disabled = !editing;
+    add.addEventListener('click', () => {
       if (!editing) return;
       state.playlists[editing].push(t.file);
       savePlaylists();
     });
-    li.append(name, btn);
+    const del = document.createElement('button');
+    del.textContent = '🗑';
+    del.className = 'del';
+    del.title = 'Delete from library';
+    del.addEventListener('click', () => {
+      if (!confirm('Delete "' + t.title + '" from the music library? This removes the file.')) return;
+      fetch('/api/track?name=' + encodeURIComponent(t.file), { method: 'DELETE' })
+        .then((r) => r.json())
+        .then(() => reloadLibrary());
+    });
+    li.append(name, add, del);
     libUl.appendChild(li);
+  });
+}
+
+// Re-scan the library from the server and refresh everything that shows tracks.
+function reloadLibrary() {
+  return api('/api/library').then((lib) => {
+    library = lib.tracks;
+    renderEditor();
+    renderQueue();
+  });
+}
+
+// ---- upload (drag & drop / browse) -----------------------------------------
+
+function setupUpload() {
+  const zone = $('dropzone');
+  const input = $('file-input');
+  const status = $('upload-status');
+  if (!zone) return;
+
+  async function uploadFiles(files) {
+    const list = [...files].filter((f) => /\.(mp3|m4a|aac|ogg|oga|wav|flac|webm)$/i.test(f.name));
+    if (!list.length) {
+      status.textContent = 'Please choose audio files (mp3, m4a, ogg, wav, flac).';
+      return;
+    }
+    let done = 0;
+    for (const f of list) {
+      status.textContent = `Uploading ${f.name} (${done + 1}/${list.length})…`;
+      try {
+        const res = await fetch('/api/upload?name=' + encodeURIComponent(f.name), { method: 'POST', body: f });
+        if (!res.ok) throw new Error((await res.json()).error || 'failed');
+        done += 1;
+      } catch (e) {
+        status.textContent = `Couldn't upload ${f.name}: ${e.message}`;
+        return;
+      }
+    }
+    status.textContent = `Added ${done} track${done === 1 ? '' : 's'}.`;
+    await reloadLibrary();
+    setTimeout(() => (status.textContent = ''), 4000);
+  }
+
+  input.addEventListener('change', () => uploadFiles(input.files));
+  ['dragenter', 'dragover'].forEach((ev) =>
+    zone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      zone.classList.add('drag');
+    })
+  );
+  ['dragleave', 'drop'].forEach((ev) =>
+    zone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      zone.classList.remove('drag');
+    })
+  );
+  zone.addEventListener('drop', (e) => {
+    if (e.dataTransfer && e.dataTransfer.files) uploadFiles(e.dataTransfer.files);
   });
 }
 
@@ -348,6 +416,34 @@ async function boot() {
   renderEditor();
   applySchedule(true);
   loadStreamInfo();
+  setupUpload();
+  setupVenuePlayer();
+}
+
+// If this device is the venue "box" (headless player on), show live output
+// controls that manage the server's playback, not this browser's.
+function setupVenuePlayer() {
+  const card = $('player-card');
+  if (!card) return;
+  const refresh = () =>
+    api('/api/player/state')
+      .then((s) => {
+        if (!s || !s.enabled) return;
+        card.hidden = false;
+        $('player-now').textContent = s.broken
+          ? 'Audio player not installed (run: sudo apt install mpg123)'
+          : (s.title || '—') + (s.paused ? '  (paused)' : '');
+        $('player-pause').textContent = s.paused ? 'Play' : 'Pause';
+      })
+      .catch(() => {});
+  $('player-pause').addEventListener('click', () =>
+    fetch('/api/player/pause', { method: 'POST' }).then(refresh)
+  );
+  $('player-skip').addEventListener('click', () =>
+    fetch('/api/player/skip', { method: 'POST' }).then(() => setTimeout(refresh, 300))
+  );
+  refresh();
+  setInterval(refresh, 5000);
 }
 
 // Show the venue stream URL(s) so they can be handed to the Q-SYS programmer.
