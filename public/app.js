@@ -88,7 +88,19 @@ player.addEventListener('play', () => ($('playpause').textContent = '⏸'));
 player.addEventListener('pause', () => ($('playpause').textContent = '▶'));
 
 $('playpause').addEventListener('click', () => {
-  if (!player.src) return;
+  // If nothing is loaded, start the first non-empty playlist so Play always
+  // does something, even before a schedule has been set up.
+  if (!player.src || !queue.length) {
+    const first = Object.keys(state.playlists).find((n) => (state.playlists[n] || []).length);
+    if (first) {
+      $('now-block').textContent = 'Playing now';
+      $('now-sub').textContent = 'Playlist: ' + first;
+      loadQueue(state.playlists[first], true);
+    } else {
+      $('now-sub').textContent = 'No music yet — open the Playlists tab to add some.';
+    }
+    return;
+  }
   if (player.paused) player.play().catch(() => {});
   else player.pause();
 });
@@ -139,7 +151,10 @@ function applySchedule(force) {
     loadQueue(state.playlists[plName], true);
   } else {
     currentBlockKey = key;
-    $('now-sub').textContent = 'No playlist scheduled for this block';
+    const anyPlaylists = Object.keys(state.playlists).some((n) => (state.playlists[n] || []).length);
+    $('now-sub').textContent = anyPlaylists
+      ? 'Nothing scheduled now — press Play to start a playlist, or set one on the Schedule tab.'
+      : 'No music yet — open the Playlists tab to add some, then press Play.';
   }
 }
 
@@ -209,40 +224,78 @@ function renderPlaylistNames() {
   });
 }
 
+function emptyRow(text) {
+  const li = document.createElement('li');
+  li.className = 'empty';
+  li.textContent = text;
+  return li;
+}
+
+// Preview a single track immediately (click-to-play from any list).
+function preview(file) {
+  queue = [file];
+  queueIndex = 0;
+  $('now-block').textContent = 'Preview';
+  $('now-sub').textContent = 'Previewing: ' + titleOf(file);
+  playIndex(0, true);
+}
+
 function renderEditor() {
-  $('editing-name').textContent = editing ? editing : 'Select a playlist';
+  $('editing-name').textContent = editing ? editing : 'Select or create a playlist';
   const plUl = $('pl-tracks');
   const libUl = $('lib-tracks');
   $('lib-count').textContent = library.length;
   plUl.innerHTML = '';
   libUl.innerHTML = '';
-  if (!editing) return;
 
-  const tracks = state.playlists[editing] || [];
-  tracks.forEach((file, i) => {
-    const li = document.createElement('li');
-    li.textContent = titleOf(file);
-    const btn = document.createElement('button');
-    btn.textContent = '−';
-    btn.className = 'del';
-    btn.addEventListener('click', () => {
-      tracks.splice(i, 1);
-      savePlaylists();
+  // --- "In playlist" side (needs a selected playlist) ---
+  if (!editing) {
+    plUl.appendChild(emptyRow('Create a playlist, then add tracks from the library.'));
+  } else {
+    const tracks = state.playlists[editing] || [];
+    if (!tracks.length) plUl.appendChild(emptyRow('Empty — add tracks from the library on the right.'));
+    tracks.forEach((file, i) => {
+      const li = document.createElement('li');
+      const name = document.createElement('span');
+      name.textContent = titleOf(file);
+      name.className = 'clickable';
+      name.title = 'Click to preview';
+      name.addEventListener('click', () => preview(file));
+      const btn = document.createElement('button');
+      btn.textContent = '−';
+      btn.className = 'del';
+      btn.title = 'Remove from playlist';
+      btn.addEventListener('click', () => {
+        tracks.splice(i, 1);
+        savePlaylists();
+      });
+      li.append(name, btn);
+      plUl.appendChild(li);
     });
-    li.appendChild(btn);
-    plUl.appendChild(li);
-  });
+  }
 
+  // --- Library side (always shown; click a name to preview) ---
+  if (!library.length) {
+    libUl.appendChild(emptyRow('No audio found. Add files to the music folder (or run the tones).'));
+    return;
+  }
   library.forEach((t) => {
     const li = document.createElement('li');
-    li.textContent = t.title;
+    const name = document.createElement('span');
+    name.textContent = t.title;
+    name.className = 'clickable';
+    name.title = 'Click to preview';
+    name.addEventListener('click', () => preview(t.file));
     const btn = document.createElement('button');
     btn.textContent = '+';
+    btn.title = editing ? 'Add to ' + editing : 'Select a playlist first';
+    btn.disabled = !editing;
     btn.addEventListener('click', () => {
+      if (!editing) return;
       state.playlists[editing].push(t.file);
       savePlaylists();
     });
-    li.appendChild(btn);
+    li.append(name, btn);
     libUl.appendChild(li);
   });
 }

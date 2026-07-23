@@ -104,6 +104,10 @@ button { cursor: pointer; }
 .track-list { list-style: none; padding: 0; margin: 0; max-height: 420px; overflow-y: auto; }
 .track-list li { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 6px; background: var(--panel); font-size: 14px; }
 .track-list button { background: var(--panel-2); border: 1px solid var(--line); color: var(--text); border-radius: 6px; width: 26px; height: 26px; }
+.track-list button:disabled { opacity: 0.35; cursor: not-allowed; }
+.track-list .clickable { cursor: pointer; flex: 1; }
+.track-list .clickable:hover { color: var(--accent); }
+.track-list li.empty { color: var(--muted); font-style: italic; justify-content: flex-start; background: transparent; border-style: dashed; }
 .del { color: #ff7b72 !important; }
 
 @media (max-width: 720px) {
