@@ -25,6 +25,9 @@ const titleOf = (file) => {
   return t ? t.title : file.replace(/\.[^.]+$/, '');
 };
 const ratingOf = (file) => (state.ratings || {})[file];
+const durOf = (file) => { const t = library.find((x) => x.file === file); return t ? (t.duration || 0) : 0; };
+function fmtDur(s) { return s ? Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') : ''; }
+function fmtTotal(sec) { if (!sec) return ''; const m = Math.round(sec / 60); return m < 60 ? m + ' min' : Math.floor(m / 60) + 'h ' + (m % 60) + 'm'; }
 const activeDeck = () => decks[active];
 const otherDeck = () => decks[1 - active];
 
@@ -526,7 +529,11 @@ function renderPlaylistNames() {
 }
 
 function renderEditor() {
-  $('editing-name').textContent = editing || 'Select a playlist';
+  if (editing) {
+    const tks = state.playlists[editing] || [];
+    const total = tks.reduce((a, f) => a + durOf(f), 0);
+    $('editing-name').textContent = editing + ' · ' + tks.length + ' track' + (tks.length === 1 ? '' : 's') + (total ? ' · ' + fmtTotal(total) : '');
+  } else $('editing-name').textContent = 'Select a playlist';
   const plUl = $('pl-tracks');
   const libUl = $('lib-tracks');
   $('lib-count').textContent = library.length;
@@ -553,7 +560,8 @@ function renderEditor() {
       const rm = document.createElement('button');
       rm.textContent = '−'; rm.className = 'del'; rm.title = 'Remove';
       rm.addEventListener('click', () => { tracks.splice(i, 1); savePlaylists(); });
-      li.append(name, up, down, rm);
+      const dur = document.createElement('span'); dur.className = 'dur'; dur.textContent = fmtDur(durOf(file));
+      li.append(name, dur, up, down, rm);
       plUl.appendChild(li);
     });
   }
@@ -583,7 +591,8 @@ function renderEditor() {
       if (!confirm('Delete "' + t.title + '" from the library?')) return;
       fetch('/api/track?name=' + encodeURIComponent(t.file), { method: 'DELETE' }).then((r) => r.json()).then(() => reloadLibrary());
     });
-    li.append(name, like, dislike, add, del);
+    const dur = document.createElement('span'); dur.className = 'dur'; dur.textContent = fmtDur(t.duration);
+    li.append(name, dur, like, dislike, add, del);
     libUl.appendChild(li);
   });
 }

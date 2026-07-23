@@ -99,6 +99,23 @@ function prettyTitle(file) {
     .join(' ');
 }
 
+// Approximate track length in seconds (CBR MP3 from file size / bitrate; 0 if unknown).
+function trackDuration(file) {
+  try {
+    const full = path.join(MUSIC_DIR, file);
+    const stat = fs.statSync(full);
+    if (path.extname(file).toLowerCase() === '.mp3') {
+      const fd = fs.openSync(full, 'r');
+      const buf = Buffer.alloc(16384);
+      const n = fs.readSync(fd, buf, 0, 16384, 0);
+      fs.closeSync(fd);
+      const br = mp3ByteRate(buf.subarray(0, n)); // bytes/sec
+      if (br > 0) return Math.round(stat.size / br);
+    }
+  } catch { /* ignore */ }
+  return 0;
+}
+
 function scanLibrary() {
   try {
     fs.mkdirSync(MUSIC_DIR, { recursive: true });
@@ -106,7 +123,7 @@ function scanLibrary() {
       .readdirSync(MUSIC_DIR)
       .filter((f) => AUDIO_EXT.has(path.extname(f).toLowerCase()))
       .sort((a, b) => a.localeCompare(b))
-      .map((f) => ({ file: f, title: prettyTitle(f) }));
+      .map((f) => ({ file: f, title: prettyTitle(f), duration: trackDuration(f) }));
   } catch {
     return [];
   }
