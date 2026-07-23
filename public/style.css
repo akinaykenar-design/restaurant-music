@@ -92,22 +92,47 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
 .hint { color: var(--muted); font-size: 0.9rem; }
 
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease; }
+.list-card:hover, .accent-card:hover, .ah-card:hover { transform: translateY(-2px); box-shadow: var(--shadow), 0 0 0 1px var(--accent-tint); }
+.tracklist li, .tbtn, .rate, .chip, #playlist-names li, .ghost { transition: all 0.14s ease; }
+.tracklist li:hover { border-color: var(--border-strong); }
 
 /* ---------- player hero ---------- */
 .player {
-  display: grid; grid-template-columns: 168px 1fr; gap: 24px; align-items: center;
+  position: relative; overflow: hidden;
+  display: grid; grid-template-columns: 176px 1fr; gap: 26px; align-items: center;
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-  box-shadow: var(--shadow); padding: 24px;
+  box-shadow: var(--shadow); padding: 26px;
 }
+.player::before {
+  content: ''; position: absolute; top: -70%; right: -10%; width: 60%; height: 200%;
+  background: radial-gradient(closest-side, var(--accent-tint), transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+.player > * { position: relative; z-index: 1; }
 .art {
-  width: 168px; height: 168px; border-radius: var(--radius-sm);
-  background: var(--accent-tint); border: 1px solid var(--border);
+  width: 176px; height: 176px; border-radius: var(--radius-sm);
+  background: linear-gradient(150deg, var(--accent), color-mix(in srgb, var(--accent) 45%, #04140f));
   display: flex; align-items: flex-end; justify-content: center;
+  position: relative; overflow: hidden;
+  box-shadow: 0 14px 34px -10px color-mix(in srgb, var(--accent) 60%, transparent), inset 0 1px 0 rgba(255,255,255,0.14);
 }
-.viz { display: flex; gap: 7px; align-items: flex-end; height: 66px; padding-bottom: 30px; }
-.viz span { width: 8px; height: 22%; border-radius: 5px; background: var(--accent); opacity: 0.85; }
+.art::before {
+  content: ''; position: absolute; inset: -45%;
+  background: conic-gradient(from 0deg, transparent 0deg, color-mix(in srgb, var(--warn) 55%, transparent) 40deg, transparent 120deg);
+  opacity: 0.35; animation: spin 9s linear infinite;
+}
+.player.playing .art::before { opacity: 0.6; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.viz { display: flex; gap: 7px; align-items: flex-end; height: 70px; padding-bottom: 32px; position: relative; }
+.viz span { width: 8px; height: 22%; border-radius: 6px; background: linear-gradient(#fff, color-mix(in srgb, var(--warn) 80%, #fff)); box-shadow: 0 0 14px color-mix(in srgb, var(--warn) 70%, transparent); opacity: 0.95; }
 .player.playing .viz span { animation: bounce 1s ease-in-out infinite; }
+
+/* progress / seek */
+.progress { margin: 14px 0 4px; }
+.pbar { height: 6px; border-radius: 999px; background: var(--border-strong); cursor: pointer; overflow: hidden; }
+.pfill { height: 100%; width: 0%; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--warn)); transition: width 0.2s linear; }
+.ptime { display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.72rem; color: var(--faint); font-variant-numeric: tabular-nums; }
 .viz span:nth-child(2) { animation-delay: 0.2s; }
 .viz span:nth-child(3) { animation-delay: 0.4s; }
 .viz span:nth-child(4) { animation-delay: 0.15s; }
@@ -124,9 +149,14 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 .transport svg { width: 20px; height: 20px; fill: currentColor; }
 .tbtn { width: 44px; height: 44px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); color: var(--text); }
 .tbtn:hover { border-color: var(--accent); color: var(--accent); }
-.play { width: 60px; height: 60px; border-radius: 50%; background: var(--accent); color: #fff; box-shadow: var(--shadow-sm); }
+.play { width: 62px; height: 62px; border-radius: 50%; background: var(--accent); color: #fff; box-shadow: 0 10px 26px -8px var(--accent); }
 .play svg { width: 26px; height: 26px; }
-.play:hover { background: var(--accent-press); }
+.play:hover { background: var(--accent-press); transform: scale(1.05); }
+.player.playing .play { animation: pulse 2.6s ease-in-out infinite; }
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 10px 26px -8px var(--accent), 0 0 0 0 var(--accent-tint); }
+  50% { box-shadow: 0 10px 26px -8px var(--accent), 0 0 0 12px transparent; }
+}
 .ic-pause { display: none; }
 .player.playing .ic-play { display: none; }
 .player.playing .ic-pause { display: inline; }

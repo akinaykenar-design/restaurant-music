@@ -71,6 +71,21 @@ function setPlayingUI(on) {
   if (p) p.classList.toggle('playing', on); // CSS swaps play/pause icon
 }
 
+const fmt = (s) => (!s || isNaN(s)) ? '0:00' : Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+function updateProgress(d) {
+  const dur = d.duration;
+  const pct = dur ? (d.currentTime / dur) * 100 : 0;
+  $('pfill').style.width = pct + '%';
+  $('t-cur').textContent = fmt(d.currentTime);
+  $('t-dur').textContent = fmt(dur);
+}
+$('pbar').addEventListener('click', (e) => {
+  const d = activeDeck();
+  if (!d.duration || crossing) return;
+  const r = $('pbar').getBoundingClientRect();
+  d.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * d.duration;
+});
+
 function onTrackChanged(file) {
   $('now-title').textContent = titleOf(file);
   updateRateButtons(file);
@@ -143,7 +158,9 @@ function skip(dir) {
 // deck events (wired once)
 decks.forEach((d, idx) => {
   d.addEventListener('timeupdate', () => {
-    if (idx !== active || crossing) return;
+    if (idx !== active) return;
+    updateProgress(d);
+    if (crossing) return;
     const cf = Number(state.settings.crossfade ?? 4);
     if (cf <= 0 || !d.duration || isNaN(d.duration)) return;
     if (d.duration - d.currentTime <= cf && queue.length > 1) beginCrossfade(cf);
