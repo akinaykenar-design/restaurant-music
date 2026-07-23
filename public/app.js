@@ -142,16 +142,49 @@ function loadQueue(files, autoplay) {
   }
 }
 
+// Ramp a deck's volume to a target over ms (skips if a crossfade takes over).
+function fadeVol(deck, to, ms) {
+  const from = deck.volume;
+  const t0 = performance.now();
+  (function step(now) {
+    if (crossing) return;
+    const t = Math.min(1, (now - t0) / ms);
+    deck.volume = from + (to - from) * t;
+    if (t < 1) requestAnimationFrame(step);
+  })(t0);
+}
+
 function startTrack(i, autoplay) {
   if (i < 0 || i >= queue.length) return;
   queueIndex = i;
   crossing = false;
   const d = activeDeck();
   d.src = '/audio/' + encodeURIComponent(queue[i]);
-  d.volume = userVolume;
-  if (autoplay !== false) d.play().catch(() => {});
+  if (autoplay !== false) {
+    d.volume = 0;
+    d.play().catch(() => {});
+    fadeVol(d, userVolume, 700); // gentle fade-in
+  } else {
+    d.volume = userVolume;
+  }
   onTrackChanged(queue[i]);
 }
+
+// ---- auto-stop (sleep) timer ----
+let sleepTimer = null;
+function fadeOutStop() {
+  const d = activeDeck();
+  fadeVol(d, 0, 1500);
+  setTimeout(() => { d.pause(); setPlayingUI(false); }, 1600);
+}
+$('sleep').addEventListener('change', (e) => {
+  const min = Number(e.target.value);
+  if (sleepTimer) { clearTimeout(sleepTimer); sleepTimer = null; }
+  if (min > 0) {
+    sleepTimer = setTimeout(() => { fadeOutStop(); $('sleep').value = '0'; toast('Auto-stopped'); }, min * 60000);
+    toast('Music will stop in ' + (min < 60 ? min + ' min' : (min / 60) + ' h'));
+  }
+});
 
 function beginCrossfade(cf) {
   if (crossing || queue.length < 2) return;
@@ -469,10 +502,16 @@ function renderEditor() {
       const name = document.createElement('span');
       name.className = 'name'; name.textContent = titleOf(file);
       name.addEventListener('click', () => preview(file));
+      const up = document.createElement('button');
+      up.textContent = '↑'; up.className = 'mini'; up.title = 'Move up'; up.disabled = i === 0;
+      up.addEventListener('click', () => { [tracks[i - 1], tracks[i]] = [tracks[i], tracks[i - 1]]; savePlaylists(); });
+      const down = document.createElement('button');
+      down.textContent = '↓'; down.className = 'mini'; down.title = 'Move down'; down.disabled = i === tracks.length - 1;
+      down.addEventListener('click', () => { [tracks[i + 1], tracks[i]] = [tracks[i], tracks[i + 1]]; savePlaylists(); });
       const rm = document.createElement('button');
       rm.textContent = '−'; rm.className = 'del'; rm.title = 'Remove';
       rm.addEventListener('click', () => { tracks.splice(i, 1); savePlaylists(); });
-      li.append(name, rm);
+      li.append(name, up, down, rm);
       plUl.appendChild(li);
     });
   }

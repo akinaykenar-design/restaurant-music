@@ -175,6 +175,8 @@ input[type='range']::-moz-range-thumb { width: 15px; height: 15px; border: none;
 .chip { display: inline-flex; align-items: center; gap: 7px; background: var(--surface-2); border: 1px solid var(--border); padding: 7px 12px; border-radius: 999px; font-size: 0.82rem; color: var(--muted); cursor: pointer; }
 .chip input { accent-color: var(--accent); }
 .chip.range input[type=range] { width: 84px; }
+.chip select { background: transparent; border: none; color: var(--text); font: inherit; font-size: 0.82rem; cursor: pointer; padding: 0; }
+.chip select:focus { outline: none; }
 .chip.range b { color: var(--text); min-width: 22px; text-align: right; }
 
 /* ---------- lists ---------- */
