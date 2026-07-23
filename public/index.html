@@ -4,117 +4,178 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Watermans Music</title>
-    <meta name="theme-color" content="#0e1116" />
+    <meta name="theme-color" content="#0d1210" />
     <link rel="icon" href="icon.svg" />
     <link rel="apple-touch-icon" href="icon.svg" />
     <link rel="manifest" href="manifest.json" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Watermans Music" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <header>
-      <h1>Watermans Music</h1>
-      <nav>
+    <header class="topbar">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 100 100" aria-hidden="true">
+          <rect width="100" height="100" rx="23" fill="#10917b" />
+          <rect x="21" y="30" width="8" height="40" rx="4" fill="#fff" />
+          <rect x="71" y="30" width="8" height="40" rx="4" fill="#fff" />
+          <circle cx="50" cy="50" r="15.5" fill="none" stroke="#ff8a34" stroke-width="8" />
+        </svg>
+        <div class="brand-text">
+          <span class="brand-name">Watermans</span>
+          <span class="brand-sub">MUSIC</span>
+        </div>
+      </div>
+      <nav class="tabs">
         <button class="tab active" data-tab="now">Now Playing</button>
+        <button class="tab" data-tab="playlists">Library</button>
         <button class="tab" data-tab="schedule">Schedule</button>
-        <button class="tab" data-tab="playlists">Playlists</button>
       </nav>
+      <button id="lock" class="lockbtn" title="After-hours staff mode">
+        <svg viewBox="0 0 24 24"><path d="M6 10V8a6 6 0 0 1 12 0v2h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1zm2 0h8V8a4 4 0 0 0-8 0v2z"/></svg>
+      </button>
     </header>
 
     <main>
-      <!-- Now Playing -->
+      <!-- ===== NOW PLAYING ===== -->
       <section id="tab-now" class="tab-panel active">
-        <div class="now-card">
-          <div class="now-block" id="now-block">—</div>
-          <div class="now-title" id="now-title">Nothing playing</div>
-          <div class="now-sub" id="now-sub">Add music to the <code>music/</code> folder to begin</div>
-
-          <div class="controls">
-            <button id="prev" title="Previous">⏮</button>
-            <button id="playpause" title="Play/Pause">▶</button>
-            <button id="next" title="Next">⏭</button>
+        <div class="player">
+          <div class="art" id="art">
+            <div class="viz"><span></span><span></span><span></span><span></span><span></span></div>
           </div>
+          <div class="np-meta">
+            <div class="np-block" id="now-block">—</div>
+            <h2 class="np-title" id="now-title">Nothing playing</h2>
+            <div class="np-sub" id="now-sub">Add music on the Library tab to begin</div>
 
-          <div class="vol-row">
-            <span>🔈</span>
-            <input type="range" id="volume" min="0" max="1" step="0.01" />
+            <div class="transport">
+              <button id="dislike" class="rate" title="Dislike — never play again">
+                <svg viewBox="0 0 24 24"><path d="M10 15V5H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h5zm2-10 3.5 8.3c.1.2.1.5.1.7v4a2 2 0 0 1-4 0v-3h-.5"/></svg>
+              </button>
+              <button id="prev" class="tbtn" title="Previous">
+                <svg viewBox="0 0 24 24"><path d="M7 6v12M19 6l-9 6 9 6z"/></svg>
+              </button>
+              <button id="playpause" class="play" title="Play / Pause">
+                <svg class="ic-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg class="ic-pause" viewBox="0 0 24 24" hidden><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+              </button>
+              <button id="next" class="tbtn" title="Skip">
+                <svg viewBox="0 0 24 24"><path d="M17 6v12M5 6l9 6-9 6z"/></svg>
+              </button>
+              <button id="like" class="rate" title="Like — play more often">
+                <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.35-9.5-8.5C.8 9.6 2 6 5.2 6c1.9 0 3 .9 3.8 2 .8-1.1 1.9-2 3.8-2 3.2 0 4.4 3.6 2.7 6.5C19 16.65 12 21 12 21z"/></svg>
+              </button>
+            </div>
+
+            <div class="vol-row">
+              <svg class="vic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 5V4L8 9H4z"/></svg>
+              <input type="range" id="volume" min="0" max="1" step="0.01" />
+            </div>
+
+            <div class="toggles">
+              <label class="chip"><input type="checkbox" id="follow" /> <span>Follow schedule</span></label>
+              <label class="chip"><input type="checkbox" id="shuffle" /> <span>Shuffle</span></label>
+              <label class="chip range"><span>Crossfade</span>
+                <input type="range" id="crossfade" min="0" max="12" step="1" />
+                <b id="cf-val">4s</b>
+              </label>
+            </div>
           </div>
-
-          <label class="follow">
-            <input type="checkbox" id="follow" />
-            Follow schedule (auto-switch playlist by time)
-          </label>
         </div>
 
-        <div class="queue">
-          <h3>Up next</h3>
-          <ol id="queue-list"></ol>
+        <div class="cols">
+          <div class="card list-card">
+            <h3>Up next</h3>
+            <ol id="queue-list" class="tracklist"></ol>
+          </div>
+          <div class="card list-card">
+            <h3>Recently played</h3>
+            <ol id="history-list" class="tracklist muted-list"></ol>
+          </div>
         </div>
 
-        <div class="stream-card" id="player-card" hidden>
+        <div class="card accent-card" id="player-card" hidden>
           <h3>Venue output (this box)</h3>
           <p class="hint">Playing the scheduled music out this device into your sound system.</p>
           <div class="player-row">
             <span id="player-now">—</span>
-            <button id="player-pause">Pause</button>
-            <button id="player-skip">Skip</button>
+            <button id="player-pause" class="ghost">Pause</button>
+            <button id="player-skip" class="ghost">Skip</button>
           </div>
         </div>
 
-        <div class="stream-card" id="stream-card" hidden>
+        <div class="card ah-card" id="ah-card" hidden>
+          <h3>🔒 After-hours staff mode</h3>
+          <div id="ah-locked">
+            <p class="hint">Enter the staff password to play the after-hours playlist (off-schedule).</p>
+            <div class="ah-row">
+              <input type="password" id="ah-pass" placeholder="Staff password" />
+              <button id="ah-unlock" class="warnbtn">Unlock</button>
+            </div>
+          </div>
+          <div id="ah-unlocked" hidden>
+            <div class="ah-row">
+              <select id="ah-playlist"></select>
+              <button id="ah-play" class="warnbtn">Play (after hours)</button>
+              <button id="ah-relock" class="ghost">Lock</button>
+            </div>
+            <p class="hint" style="margin-top:12px">Change staff password:</p>
+            <div class="ah-row">
+              <input type="password" id="ah-newpass" placeholder="New password" />
+              <button id="ah-setpass" class="ghost">Save</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card accent-card" id="stream-card" hidden>
           <h3>Venue stream</h3>
-          <p class="hint">
-            This is the live stream your sound system pulls. Give this address to
-            whoever programs your Q-SYS Core (or open it in VLC to test):
-          </p>
+          <p class="hint">Give this address to whoever programs your Q-SYS Core (or test it in VLC):</p>
           <div id="stream-urls"></div>
         </div>
       </section>
 
-      <!-- Schedule -->
-      <section id="tab-schedule" class="tab-panel">
-        <p class="hint">Pick a playlist for each time block. Music switches automatically when a block begins.</p>
-        <div class="table-wrap">
-          <table id="schedule-table"></table>
-        </div>
-      </section>
-
-      <!-- Playlists -->
+      <!-- ===== LIBRARY / PLAYLISTS ===== -->
       <section id="tab-playlists" class="tab-panel">
         <div class="pl-layout">
-          <div class="pl-side">
+          <aside class="pl-side card">
             <h3>Playlists</h3>
             <ul id="playlist-names"></ul>
             <div class="pl-new">
               <input id="new-playlist" placeholder="New playlist name" />
               <button id="add-playlist">Add</button>
             </div>
-          </div>
+          </aside>
           <div class="pl-main">
-            <h3 id="editing-name">Select a playlist</h3>
             <div class="pl-cols">
-              <div>
-                <h4>In playlist</h4>
-                <ul id="pl-tracks" class="track-list"></ul>
+              <div class="card">
+                <h4 id="editing-name">Select a playlist</h4>
+                <ul id="pl-tracks" class="tracklist"></ul>
               </div>
-              <div>
-                <h4>Library (<span id="lib-count">0</span>)</h4>
+              <div class="card">
+                <h4>Library <span class="count" id="lib-count">0</span></h4>
                 <div id="dropzone" class="dropzone">
-                  <p>Drag &amp; drop music here, or <label for="file-input" class="link">browse</label></p>
+                  <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0 4 4m-4-4-4 4M4 20h16"/></svg>
+                  <p>Drop music here, or <label for="file-input" class="link">browse</label></p>
                   <input type="file" id="file-input" accept="audio/*,.mp3,.m4a,.aac,.ogg,.wav,.flac" multiple hidden />
                   <div id="upload-status" class="upload-status"></div>
                 </div>
-                <ul id="lib-tracks" class="track-list"></ul>
+                <ul id="lib-tracks" class="tracklist"></ul>
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      <!-- ===== SCHEDULE ===== -->
+      <section id="tab-schedule" class="tab-panel">
+        <p class="hint">Pick a playlist for each part of the day. The music switches automatically when a block begins.</p>
+        <div class="card table-wrap">
+          <table id="schedule-table"></table>
+        </div>
+      </section>
     </main>
 
-    <audio id="player" preload="auto"></audio>
     <script src="app.js"></script>
   </body>
 </html>

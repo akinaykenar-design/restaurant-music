@@ -49,7 +49,21 @@ function defaultData() {
     schedule[d] = {};
     for (const b of blocks) schedule[d][b.id] = '';
   }
-  return { blocks, days, schedule, playlists: {}, settings: { volume: 0.8, followSchedule: true } };
+  return {
+    blocks, days, schedule, playlists: {}, ratings: {},
+    settings: {
+      volume: 0.8, followSchedule: true, shuffle: true, crossfade: 4,
+      afterHoursPassword: 'staff', // change it in the unlocked panel
+    },
+  };
+}
+
+// Settings safe to send to the browser (never leak the after-hours password).
+function publicSettings() {
+  const s = Object.assign({}, data.settings);
+  delete s.afterHoursPassword;
+  s.afterHoursSet = !!data.settings.afterHoursPassword;
+  return s;
 }
 
 function loadData() {
@@ -142,8 +156,21 @@ app.get('/api/state', (_req, res) => {
     days: data.days,
     schedule: data.schedule,
     playlists: data.playlists,
-    settings: data.settings,
+    ratings: data.ratings || {},
+    settings: publicSettings(),
   });
+});
+
+// Like / dislike / clear a track. Likes play more often, dislikes never play.
+app.post('/api/rate', (req, res) => {
+  const file = req.body && req.body.file;
+  const rating = req.body && req.body.rating;
+  if (!file) return res.status(400).json({ error: 'file required' });
+  data.ratings = data.ratings || {};
+  if (rating === 'like' || rating === 'dislike') data.ratings[file] = rating;
+  else delete data.ratings[file];
+  saveData(data);
+  res.json({ ok: true, ratings: data.ratings });
 });
 
 app.put('/api/playlists', (req, res) => {
@@ -174,9 +201,29 @@ app.put('/api/schedule', (req, res) => {
 });
 
 app.put('/api/settings', (req, res) => {
-  data.settings = Object.assign({}, data.settings, req.body || {});
+  const patch = Object.assign({}, req.body || {});
+  delete patch.afterHoursPassword; // never set the secret via the public settings route
+  data.settings = Object.assign({}, data.settings, patch);
   saveData(data);
-  res.json({ ok: true, settings: data.settings });
+  res.json({ ok: true, settings: publicSettings() });
+});
+
+// ---- after-hours staff mode ------------------------------------------------
+app.post('/api/afterhours/unlock', (req, res) => {
+  const password = req.body && req.body.password;
+  res.json({ ok: password === data.settings.afterHoursPassword });
+});
+
+app.post('/api/afterhours/password', (req, res) => {
+  const current = req.body && req.body.current;
+  const next = req.body && req.body.next;
+  if (current !== data.settings.afterHoursPassword) {
+    return res.status(403).json({ error: 'wrong current password' });
+  }
+  if (!next || typeof next !== 'string') return res.status(400).json({ error: 'new password required' });
+  data.settings.afterHoursPassword = next;
+  saveData(data);
+  res.json({ ok: true });
 });
 
 // ---- audio streaming (HTTP range) -----------------------------------------
@@ -278,7 +325,21 @@ const station = {
       if (pn) tracks = data.playlists[pn].slice();
     }
     if (!tracks.length) tracks = scanLibrary().map((t) => t.file); // fall back to whole library
-    this.queue = tracks.filter((f) => fs.existsSync(path.join(MUSIC_DIR, f)));
+    tracks = tracks.filter((f) => fs.existsSync(path.join(MUSIC_DIR, f)));
+
+    // Smart rotation: drop dislikes, play likes more, shuffle.
+    const ratings = data.ratings || {};
+    let pool = tracks.filter((f) => ratings[f] !== 'dislike');
+    if (!pool.length) pool = tracks.slice();
+    const weighted = [];
+    for (const f of pool) { weighted.push(f); if (ratings[f] === 'like') weighted.push(f); }
+    if (data.settings.shuffle !== false) {
+      for (let i = weighted.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [weighted[i], weighted[j]] = [weighted[j], weighted[i]];
+      }
+    }
+    this.queue = weighted;
     if (this.idx >= this.queue.length) this.idx = 0;
   },
   current() {
