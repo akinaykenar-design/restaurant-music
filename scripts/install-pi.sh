@@ -41,7 +41,7 @@ Wants=network-online.target
 Type=simple
 User=$APP_USER
 WorkingDirectory=$APP_DIR
-Environment=PORT=3000
+Environment=PORT=3100
 Environment=HOST=0.0.0.0
 Environment=PLAYER=1
 ExecStart=$(command -v node) $APP_DIR/server.js
@@ -59,7 +59,7 @@ sudo systemctl restart watermans-music
 echo
 echo "==> Done. The app is running and will start automatically on boot."
 echo "    Manage it from any phone/computer on the network at:"
-for ip in $(hostname -I 2>/dev/null); do echo "        http://$ip:3000"; done
+for ip in $(hostname -I 2>/dev/null); do echo "        http://$ip:3100"; done
 echo
 echo "    Set the Pi's audio output (HDMI vs headphone jack vs USB) with:"
 echo "        sudo raspi-config   ->  System Options  ->  Audio"

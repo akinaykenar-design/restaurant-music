@@ -37,8 +37,8 @@ if not defined HASMUSIC (
 )
 
 echo.
-echo   Venue Music is starting at http://127.0.0.1:3000
+echo   Venue Music is starting at http://127.0.0.1:3100
 echo   Keep this window open while you use it. Close it to stop the music.
 echo.
-start "" http://127.0.0.1:3000
+start "" http://127.0.0.1:3100
 node server.js

@@ -7,7 +7,9 @@ const os = require('os');
 const { spawn } = require('child_process');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+// Port 3100 (not the very common 3000) so it doesn't clash with other local
+// dev servers such as a POS. Override with the PORT env var if needed.
+const PORT = process.env.PORT || 3100;
 // Bind to all interfaces so the venue's Q-SYS Core can pull /stream over the
 // LAN. Set HOST=127.0.0.1 to restrict to this machine only.
 const HOST = process.env.HOST || '0.0.0.0';

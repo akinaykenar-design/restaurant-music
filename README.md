@@ -29,7 +29,7 @@ it in your browser. (Needs [Node.js LTS](https://nodejs.org) installed once.)
 
 ```bash
 npm install
-npm start         # http://127.0.0.1:3000
+npm start         # http://127.0.0.1:3100
 ```
 
 The app ships with **six original background tracks** in `music/` (soft café
@@ -52,7 +52,7 @@ system that pulls a **network stream** (e.g. a Q-SYS Core, like Mustard Live),
 the app also broadcasts a continuous MP3 stream that follows your schedule:
 
 ```
-http://<this-computer's-LAN-IP>:3000/stream
+http://<this-computer's-LAN-IP>:3100/stream
 ```
 
 The exact address is shown on the **Now Playing** tab (with a Copy button) and
@@ -79,7 +79,7 @@ Set `HOST=127.0.0.1` to restrict the app to the local machine only.
 
 ## Configuration
 
-- `PORT` — HTTP port (default `3000`).
+- `PORT` — HTTP port (default `3100`).
 - `HOST` — bind address (default `127.0.0.1`, loopback only). Set to `0.0.0.0`
   to reach it from other devices on your LAN.
 

@@ -39,8 +39,8 @@ bash scripts/install-pi.sh
 
 This installs everything and sets the app to **start automatically on boot**
 and play the scheduled music out the Pi. When it finishes it prints the address
-to open from your phone, e.g. `http://watermans.local:3000` or
-`http://192.168.x.x:3000`.
+to open from your phone, e.g. `http://watermans.local:3100` or
+`http://192.168.x.x:3100`.
 
 ## Step 4 — Choose the audio output
 ```bash
@@ -58,7 +58,7 @@ Move the audio cable **from the Mustard box into the Pi's headphone jack**
 is now feeding that input instead of Mustard.
 
 ## Everyday use
-- Open `http://watermans.local:3000` on any phone/computer on the venue network.
+- Open `http://watermans.local:3100` on any phone/computer on the venue network.
 - **Playlists** tab → drag & drop your MP3s to upload, build playlists.
 - **Schedule** tab → set which playlist plays at each time of day.
 - **Now Playing** → the "Venue output" panel shows what the box is playing, with
