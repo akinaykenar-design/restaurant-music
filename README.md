@@ -1,23 +1,31 @@
-# Venue Music
+# Watermans Music
 
 Scheduled background music for restaurants and venues, using **royalty-free
-tracks you supply** — so you avoid public-performance licensing fees and keep
-your audio files on your own machine.
+tracks you supply** — no public-performance licensing fees (APRA/PPCA), no
+subscription, and your audio stays on your own machine. A free, self-hosted
+alternative to services like Mustard Live, styled to match the HOT toolkit.
 
-Music switches automatically by time of day and day of week: a calm morning
-playlist, a brighter lunch set, a mellow evening vibe, and so on.
+Control it from any phone, tablet, or computer on the venue network — it's a
+web app (nothing to install).
 
-## Features (v0.1)
+## Features
 
-- **Now Playing** — auto-plays the playlist scheduled for the current time
-  block, with play/pause/skip, volume, an up-next queue, and a
-  *Follow schedule* toggle.
-- **Schedule** — a weekly grid of time blocks × days; assign a playlist to each
-  cell. Music switches automatically when a block begins (and wraps past
-  midnight).
-- **Playlists** — build named playlists from the files in your `music/` folder.
-- Runs locally (loopback only by default), offline, settings saved to
-  `data.json`.
+- **Now Playing** — dual-deck player with **crossfade** (adjustable) for
+  seamless, gap-free background music; play/pause/skip, a seekable progress
+  bar, volume, **up-next** queue and **recently-played** history.
+- **Like / Dislike** — like a track so it plays *more often*; dislike to *ban*
+  it. Works from Now Playing or inline in the Library.
+- **Shuffle** with weighted rotation (likes surface more, dislikes never).
+- **Schedule** — fully **editable time blocks** (add / rename / delete / re-time)
+  × days; assign a playlist per cell; switches automatically through the day.
+- **Library** — drag-and-drop upload, search, delete; friendly track titles.
+- **After-hours staff mode** — hidden, password-gated; play a staff playlist
+  off-schedule. Password stays server-side.
+- **Venue stream** — a continuous MP3 stream (`/stream`) a Q-SYS Core (or VLC)
+  can pull; plus a headless player mode for a Raspberry Pi "music box".
+- **Design** — HOT teal/orange brand, **light + dark** (auto or manual toggle),
+  Add-to-Home-Screen. **Keyboard**: space = play/pause, ←/→ = skip, L/D = rate.
+- Runs offline from local files; settings saved to `data.json`.
 
 ## Quick start
 

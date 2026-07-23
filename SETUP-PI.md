@@ -74,3 +74,22 @@ sudo systemctl restart watermans-music    # restart it
 
 The box plays on its own from boot — you only open the app when you want to
 change the music or schedule.
+
+## After-hours: play Spotify from a phone (optional Bluetooth)
+
+For after-close staff music, the easiest way to let anyone play Spotify off
+their phone is a small **Bluetooth audio receiver** wired into a spare input:
+
+1. Buy a **Bluetooth 5.x audio receiver** with a 3.5mm/RCA output (~$20–35,
+   e.g. Amazon AU "Bluetooth receiver 3.5mm/RCA"). Plug its output into a spare
+   Q-SYS input (ask your Q-SYS programmer to wire it to **BGM 2**, say).
+2. **Connect:** on the phone open **Settings → Bluetooth**, and pair with the
+   receiver (it shows a name like "BT-Receiver"/"BTR"; some need a pairing
+   button held for a few seconds). Once paired, open Spotify and play — audio
+   goes out the venue speakers.
+3. On the Q-SYS iPad, select **BGM 2** as the source when using it, and back to
+   **BGM 1** (this music box) for normal hours.
+
+> Licensing: personal Spotify is fine for **staff-only, venue-closed** use, but
+> it is **not** licensed to play to customers during trading — use your own
+> royalty-free library (this app) for that.
