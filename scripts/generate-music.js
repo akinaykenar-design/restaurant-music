@@ -1,14 +1,13 @@
 'use strict';
 
-// Generative background-music composer.
+// Generative background-music composer — "organic house / Mediterranean chill"
+// style (downtempo groove, hand percussion, warm modal chords, plucky Four-Tet-
+// ish arps). Everything is synthesised from scratch, so it's 100% original and
+// copyright-free (no APRA/PPCA). Run with:  npm run music
 //
-// Everything here is synthesised from scratch in code, so the output is 100%
-// original and copyright-free — safe to play in a venue with no licensing
-// (no APRA/PPCA/PRS/ASCAP fees). Run with:  npm run music
-//
-// It writes a handful of gentle, restaurant-appropriate ambient tracks (soft
-// chord pads, arpeggios, bass, and the occasional melody) as WAV files into
-// music/. No external dependencies — pure Node.
+// These are a stylistic sketch of the vibe — for a full professionally-produced
+// catalogue, curate real tracks from Pixabay (see MUSIC-LIBRARY.md). Pure Node,
+// no dependencies; writes WAV files into music/.
 
 const fs = require('fs');
 const path = require('path');
@@ -16,33 +15,23 @@ const path = require('path');
 const MUSIC_DIR = path.join(__dirname, '..', 'music');
 fs.mkdirSync(MUSIC_DIR, { recursive: true });
 
-const SR = 32000; // sample rate — plenty for background music, smaller files
+const SR = 32000;
 
-// ---- tiny deterministic PRNG (so re-runs produce identical tracks) ---------
+const mfreq = (m) => 440 * Math.pow(2, (m - 69) / 12);
+const sine = (p) => Math.sin(p);
+const tri = (p) => (2 / Math.PI) * Math.asin(Math.sin(p));
+const saw = (p) => (sine(p) + 0.5 * sine(2 * p) + 0.33 * sine(3 * p) + 0.25 * sine(4 * p)) / 2.08;
+
+// deterministic PRNG so re-runs are identical
 function mulberry32(seed) {
   return function () {
-    seed |= 0;
-    seed = (seed + 0x6d2b79f5) | 0;
+    seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
     let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
 
-const mfreq = (m) => 440 * Math.pow(2, (m - 69) / 12);
-
-// ---- oscillators -----------------------------------------------------------
-function sine(ph) { return Math.sin(ph); }
-function triangle(ph) { return (2 / Math.PI) * Math.asin(Math.sin(ph)); }
-function softSaw(ph) {
-  // band-limited-ish saw: a few harmonics, gentle
-  return (
-    Math.sin(ph) + 0.5 * Math.sin(2 * ph) + 0.33 * Math.sin(3 * ph) + 0.25 * Math.sin(4 * ph)
-  ) / 2.08;
-}
-
-// ADSR envelope (times in seconds), returns gain at time t within a note of
-// total length dur.
 function adsr(t, dur, a, d, s, r) {
   if (t < 0 || t > dur) return 0;
   if (t < a) return t / a;
@@ -51,13 +40,12 @@ function adsr(t, dur, a, d, s, r) {
   return s * Math.max(0, (dur - t) / r);
 }
 
-// Add a note into a mono float buffer.
-function addNote(buf, startT, dur, midi, gain, osc, env, detune = 0) {
-  const f = mfreq(midi);
+// --- tonal voice into a mono buffer ---
+function note(buf, startT, dur, midi, gain, osc, env, detune = 0) {
   const i0 = Math.floor(startT * SR);
   const i1 = Math.min(buf.length, Math.floor((startT + dur) * SR));
-  const w = 2 * Math.PI * f / SR;
-  const wd = 2 * Math.PI * (f * Math.pow(2, detune / 1200)) / SR;
+  const w = (2 * Math.PI * mfreq(midi)) / SR;
+  const wd = (2 * Math.PI * mfreq(midi) * Math.pow(2, detune / 1200)) / SR;
   for (let i = i0; i < i1; i++) {
     const t = (i - i0) / SR;
     const e = env(t, dur);
@@ -68,181 +56,213 @@ function addNote(buf, startT, dur, midi, gain, osc, env, detune = 0) {
   }
 }
 
-// ---- Schroeder reverb (mono in, stereo out) --------------------------------
-function reverb(dry, wetAmt) {
-  const combTune = [1116, 1188, 1277, 1356, 1422, 1491];
-  const apTune = [556, 441, 341, 225];
-  const scale = SR / 44100;
-  const combs = combTune.map((d) => ({
-    buf: new Float32Array(Math.round(d * scale)),
-    idx: 0,
-    fb: 0.8,
-    damp: 0.25,
-    store: 0,
-  }));
-  const aps = apTune.map((d) => ({ buf: new Float32Array(Math.round(d * scale)), idx: 0, g: 0.5 }));
+// --- percussion (synthesised, no samples) ---
+function kick(buf, startT, gain) {
+  const i0 = Math.floor(startT * SR);
+  const dur = 0.28;
+  const i1 = Math.min(buf.length, i0 + Math.floor(dur * SR));
+  for (let i = i0; i < i1; i++) {
+    const t = (i - i0) / SR;
+    const f = 110 * Math.pow(0.5, t / 0.04) + 42; // pitch drop -> thump
+    const e = Math.pow(1 - t / dur, 2.2);
+    buf[i] += Math.sin(2 * Math.PI * f * t) * e * gain;
+  }
+}
+function shaker(buf, startT, gain, dur = 0.05) {
+  const i0 = Math.floor(startT * SR);
+  const i1 = Math.min(buf.length, i0 + Math.floor(dur * SR));
+  let last = 0;
+  for (let i = i0; i < i1; i++) {
+    const t = (i - i0) / SR;
+    const n = Math.random() * 2 - 1;
+    const hp = n - last; last = n; // crude high-pass -> "tsss"
+    buf[i] += hp * Math.pow(1 - t / dur, 1.5) * gain;
+  }
+}
+function conga(buf, startT, midi, gain) {
+  const i0 = Math.floor(startT * SR);
+  const dur = 0.18;
+  const i1 = Math.min(buf.length, i0 + Math.floor(dur * SR));
+  const w = (2 * Math.PI * mfreq(midi)) / SR;
+  for (let i = i0; i < i1; i++) {
+    const t = (i - i0) / SR;
+    const e = Math.pow(1 - t / dur, 2.5);
+    buf[i] += (Math.sin((i - i0) * w) * 0.8 + (Math.random() * 2 - 1) * 0.2) * e * gain;
+  }
+}
 
-  const wetL = new Float32Array(dry.length);
-  const wetR = new Float32Array(dry.length);
+// --- simple stereo feedback delay for the "wet" buss ---
+function stereoDelay(mono, timeL, timeR, fb, mix) {
+  const L = new Float32Array(mono.length);
+  const R = new Float32Array(mono.length);
+  const dL = Math.floor(timeL * SR), dR = Math.floor(timeR * SR);
+  for (let i = 0; i < mono.length; i++) {
+    const eL = i >= dL ? L[i - dL] : 0;
+    const eR = i >= dR ? R[i - dR] : 0;
+    L[i] = mono[i] + eL * fb;
+    R[i] = mono[i] + eR * fb;
+  }
+  const outL = new Float32Array(mono.length);
+  const outR = new Float32Array(mono.length);
+  for (let i = 0; i < mono.length; i++) {
+    outL[i] = mono[i] * (1 - mix) + L[i] * mix;
+    outR[i] = mono[i] * (1 - mix) + R[i] * mix;
+  }
+  return [outL, outR];
+}
+
+// --- Schroeder reverb (mono -> stereo) ---
+function reverb(dry, wetAmt) {
+  const comb = [1116, 1188, 1277, 1356, 1422, 1491].map((d) => ({
+    buf: new Float32Array(Math.round((d * SR) / 44100)), idx: 0, fb: 0.82, damp: 0.28, store: 0,
+  }));
+  const ap = [556, 441, 341, 225].map((d) => ({ buf: new Float32Array(Math.round((d * SR) / 44100)), idx: 0, g: 0.5 }));
+  const L = new Float32Array(dry.length), R = new Float32Array(dry.length);
   for (let i = 0; i < dry.length; i++) {
-    const input = dry[i] * 0.35;
+    const input = dry[i] * 0.3;
     let out = 0;
-    for (const c of combs) {
+    for (const c of comb) {
       const y = c.buf[c.idx];
       c.store = y * (1 - c.damp) + c.store * c.damp;
       c.buf[c.idx] = input + c.store * c.fb;
       if (++c.idx >= c.buf.length) c.idx = 0;
       out += y;
     }
-    for (const a of aps) {
-      const bufOut = a.buf[a.idx];
-      const y = -out * a.g + bufOut;
-      a.buf[a.idx] = out + bufOut * a.g;
+    for (const a of ap) {
+      const bo = a.buf[a.idx];
+      const y = -out * a.g + bo;
+      a.buf[a.idx] = out + bo * a.g;
       if (++a.idx >= a.buf.length) a.idx = 0;
       out = y;
     }
-    // slight stereo decorrelation
-    wetL[i] = dry[i] * (1 - wetAmt) + out * wetAmt;
-    wetR[i] = dry[i] * (1 - wetAmt) + out * wetAmt * 0.92;
+    L[i] = dry[i] * (1 - wetAmt) + out * wetAmt;
+    R[i] = dry[i] * (1 - wetAmt) + out * wetAmt * 0.9;
   }
-  return [wetL, wetR];
+  return [L, R];
 }
 
-// ---- WAV writer (16-bit stereo) --------------------------------------------
 function writeWav(file, left, right) {
-  const n = left.length;
-  const dataSize = n * 4; // 2 ch * 2 bytes
+  const n = left.length, dataSize = n * 4;
   const buf = Buffer.alloc(44 + dataSize);
-  buf.write('RIFF', 0);
-  buf.writeUInt32LE(36 + dataSize, 4);
-  buf.write('WAVE', 8);
-  buf.write('fmt ', 12);
-  buf.writeUInt32LE(16, 16);
-  buf.writeUInt16LE(1, 20);
-  buf.writeUInt16LE(2, 22); // stereo
-  buf.writeUInt32LE(SR, 24);
-  buf.writeUInt32LE(SR * 4, 28);
-  buf.writeUInt16LE(4, 32);
-  buf.writeUInt16LE(16, 34);
-  buf.write('data', 36);
-  buf.writeUInt32LE(dataSize, 40);
+  buf.write('RIFF', 0); buf.writeUInt32LE(36 + dataSize, 4); buf.write('WAVE', 8);
+  buf.write('fmt ', 12); buf.writeUInt32LE(16, 16); buf.writeUInt16LE(1, 20); buf.writeUInt16LE(2, 22);
+  buf.writeUInt32LE(SR, 24); buf.writeUInt32LE(SR * 4, 28); buf.writeUInt16LE(4, 32); buf.writeUInt16LE(16, 34);
+  buf.write('data', 36); buf.writeUInt32LE(dataSize, 40);
   let o = 44;
   for (let i = 0; i < n; i++) {
-    const l = Math.max(-1, Math.min(1, left[i]));
-    const r = Math.max(-1, Math.min(1, right[i]));
-    buf.writeInt16LE((l * 32767) | 0, o);
-    buf.writeInt16LE((r * 32767) | 0, o + 2);
+    buf.writeInt16LE((Math.max(-1, Math.min(1, left[i])) * 32767) | 0, o);
+    buf.writeInt16LE((Math.max(-1, Math.min(1, right[i])) * 32767) | 0, o + 2);
     o += 4;
   }
   fs.writeFileSync(path.join(MUSIC_DIR, file), buf);
 }
 
-// ---- composition -----------------------------------------------------------
-// Chords are arrays of semitone offsets from the track's tonic (midi root).
+// Chords are semitone sets over a minor/modal root (that Mediterranean colour).
 const SONGS = [
-  {
-    file: 'cafe-01-sunrise.wav', title: 'Sunrise', seed: 101, bpm: 70, root: 60,
-    prog: [[0, 4, 7, 11], [-3, 0, 4, 9], [-5, -1, 2, 7], [-7, -3, 0, 4]], lead: true,
-  },
-  {
-    file: 'cafe-02-first-light.wav', title: 'First Light', seed: 202, bpm: 76, root: 62,
-    prog: [[0, 4, 7, 11], [5, 9, 12, 16], [-3, 0, 4, 7], [-5, -1, 2, 5]], lead: true,
-  },
-  {
-    file: 'cafe-03-slow-lunch.wav', title: 'Slow Lunch', seed: 303, bpm: 82, root: 57,
-    prog: [[0, 3, 7, 10], [5, 8, 12, 15], [-2, 2, 5, 9], [-4, 0, 3, 7]], lead: false,
-  },
-  {
-    file: 'cafe-04-golden-hour.wav', title: 'Golden Hour', seed: 404, bpm: 68, root: 55,
-    prog: [[0, 4, 7, 11], [-3, 0, 5, 9], [2, 5, 9, 12], [-5, -1, 2, 7]], lead: true,
-  },
-  {
-    file: 'cafe-05-evening-glow.wav', title: 'Evening Glow', seed: 505, bpm: 64, root: 53,
-    prog: [[0, 3, 7, 10], [-2, 2, 5, 8], [-4, 0, 3, 7], [5, 8, 12, 15]], lead: false,
-  },
-  {
-    file: 'cafe-06-night-hush.wav', title: 'Night Hush', seed: 606, bpm: 60, root: 50,
-    prog: [[0, 3, 7, 10], [-5, -1, 2, 7], [-7, -3, 0, 5], [-2, 2, 5, 9]], lead: true,
-  },
+  { file: 'cafe-01-olive-grove.wav', title: 'Olive Grove', seed: 11, bpm: 102, root: 57,
+    prog: [[0, 3, 7, 10, 14], [-2, 3, 5, 10], [-4, 3, 8, 12], [-5, 2, 7, 10]] },
+  { file: 'cafe-02-harbour-lights.wav', title: 'Harbour Lights', seed: 22, bpm: 100, root: 52,
+    prog: [[0, 3, 7, 14], [5, 8, 12, 17], [-3, 0, 7, 10], [3, 7, 10, 14]] },
+  { file: 'cafe-03-terracotta.wav', title: 'Terracotta', seed: 33, bpm: 104, root: 50,
+    prog: [[0, 3, 7, 10], [1, 5, 8, 12], [0, 3, 7, 10], [-2, 3, 5, 9]] }, // Phrygian b2 colour
+  { file: 'cafe-04-slow-tide.wav', title: 'Slow Tide', seed: 44, bpm: 98, root: 55,
+    prog: [[0, 3, 7, 10, 14], [-5, 0, 3, 7], [-3, 2, 5, 9], [-7, -2, 3, 7]] },
+  { file: 'cafe-05-sundowner.wav', title: 'Sundowner', seed: 55, bpm: 100, root: 59,
+    prog: [[0, 3, 7, 10], [3, 7, 10, 14], [-2, 3, 5, 10], [-4, 0, 3, 8]] },
 ];
 
-const PENT = [0, 2, 4, 7, 9]; // major pentatonic for safe melodies
+const SCALE = [0, 2, 3, 5, 7, 9, 10]; // Dorian-ish for melodic runs
 
 function compose(song) {
   const rnd = mulberry32(song.seed);
   const beat = 60 / song.bpm;
   const bar = beat * 4;
-  const bars = 32; // ~ length depends on bpm; ~80-120s
+  const bars = 40;
   const dur = bars * bar + 2;
   const N = Math.floor(dur * SR);
-  const dry = new Float32Array(N);
+  const dry = new Float32Array(N); // kick, bass, pads, perc
+  const wet = new Float32Array(N); // arp + lead (get delay)
 
   for (let b = 0; b < bars; b++) {
     const t0 = b * bar;
     const chord = song.prog[b % song.prog.length].map((iv) => song.root + iv);
-    const rootNote = chord[0];
+    const rootN = chord[0];
+    const groovedIn = b >= 2; // let it breathe for 2 bars, then groove
 
-    // Pad — sustained chord across the bar, soft attack/release.
+    // Warm pad — chord held across the bar
     for (const m of chord) {
-      addNote(dry, t0, bar * 1.02, m, 0.16, (p) => (sine(p) + 0.4 * triangle(p)) / 1.4,
-        (t, d) => adsr(t, d, 0.6, 0.3, 0.85, 0.9), 6);
+      note(dry, t0, bar * 1.02, m, 0.11, (p) => (sine(p) + 0.35 * tri(p)) / 1.35,
+        (t, d) => adsr(t, d, 0.5, 0.3, 0.85, 0.8), 7);
     }
 
-    // Bass — root, one/two octaves down, gentle.
-    addNote(dry, t0, beat * 2, rootNote - 24, 0.28, (p) => sine(p) + 0.25 * sine(2 * p) * 0,
-      (t, d) => adsr(t, d, 0.02, 0.2, 0.7, 0.4));
-    addNote(dry, t0 + beat * 2, beat * 2, rootNote - 12, 0.2, sine,
-      (t, d) => adsr(t, d, 0.02, 0.2, 0.7, 0.4));
+    // Bass — root with a little syncopated movement
+    note(dry, t0, beat * 1.5, rootN - 24, 0.30, (p) => sine(p) + 0.15 * tri(p),
+      (t, d) => adsr(t, d, 0.01, 0.15, 0.6, 0.3));
+    note(dry, t0 + beat * 2.5, beat * 1.0, rootN - 12, 0.18, sine,
+      (t, d) => adsr(t, d, 0.01, 0.1, 0.5, 0.3));
 
-    // Arpeggio — eighth notes cycling chord tones, plucky.
-    const arpNotes = [chord[0] + 12, chord[1] + 12, chord[2] + 12, chord[3] + 12, chord[2] + 12, chord[1] + 12];
+    if (groovedIn) {
+      // Soft four-on-the-floor kick + off-beat shaker + syncopated congas
+      for (let bt = 0; bt < 4; bt++) {
+        kick(dry, t0 + bt * beat, 0.5);
+        shaker(dry, t0 + bt * beat + beat / 2, 0.10); // off-beats
+        if (bt % 2 === 1) shaker(dry, t0 + bt * beat + beat * 0.25, 0.05);
+      }
+      // congas on a light syncopation
+      const congaHits = [0.75, 1.5, 2.75, 3.5];
+      for (const h of congaHits) conga(dry, t0 + h * beat, rootN + 12 + (rnd() < 0.5 ? 0 : 3), 0.16);
+    }
+
+    // Plucky arp (the organic / Four-Tet feel) -> wet buss (delay)
+    const arp = [chord[0] + 12, chord[2] + 12, chord[1] + 12, (chord[3] || chord[0]) + 12,
+                 chord[2] + 12, chord[0] + 12, chord[1] + 12, chord[2] + 12];
     for (let e = 0; e < 8; e++) {
-      const m = arpNotes[e % arpNotes.length];
-      const g = 0.09 + 0.02 * (e % 2);
-      addNote(dry, t0 + e * (beat / 2), beat * 0.7, m, g, softSaw,
-        (t, d) => adsr(t, d, 0.005, 0.15, 0.0, 0.2), 4);
+      if (!groovedIn && e % 2) continue;
+      note(wet, t0 + e * (beat / 2), beat * 0.45, arp[e % arp.length], 0.075, saw,
+        (t, d) => adsr(t, d, 0.004, 0.12, 0.0, 0.15), 5);
     }
 
-    // Lead — sparse pentatonic melody on some bars.
-    if (song.lead && b % 2 === 1) {
+    // Sparse modal lead on some bars -> wet buss
+    if (groovedIn && b % 2 === 1) {
       let steps = 2 + Math.floor(rnd() * 3);
-      let pos = t0 + beat * (rnd() < 0.5 ? 0 : 1);
+      let pos = t0 + beat * (rnd() < 0.5 ? 0 : 1.5);
       for (let s = 0; s < steps && pos < t0 + bar - beat * 0.5; s++) {
-        const deg = PENT[Math.floor(rnd() * PENT.length)] + (rnd() < 0.35 ? 12 : 0);
-        const m = song.root + 12 + deg;
+        const deg = SCALE[Math.floor(rnd() * SCALE.length)] + (rnd() < 0.3 ? 12 : 0);
         const nd = beat * (rnd() < 0.5 ? 1 : 1.5);
-        addNote(dry, pos, nd, m, 0.13, (p) => sine(p + 0.02 * Math.sin(p * 0.02)),
-          (t, d) => adsr(t, d, 0.03, 0.2, 0.5, 0.35), 3);
+        note(wet, pos, nd, song.root + 12 + deg, 0.10, (p) => sine(p),
+          (t, d) => adsr(t, d, 0.02, 0.2, 0.5, 0.3), 4);
         pos += nd;
       }
     }
   }
 
-  // Reverb + master fade + soft limit.
-  const [L, R] = reverb(dry, 0.32);
-  const fade = Math.floor(1.2 * SR);
+  // wet buss: stereo delay synced to the eighth note, then blend + reverb everything
+  const [wL, wR] = stereoDelay(wet, beat / 2, beat * 0.75, 0.38, 0.5);
+  const mono = new Float32Array(N);
+  for (let i = 0; i < N; i++) mono[i] = dry[i] + (wL[i] + wR[i]) * 0.5;
+  const [L, R] = reverb(mono, 0.24);
+  // re-inject delay stereo width
+  for (let i = 0; i < N; i++) { L[i] += (wL[i] - wR[i]) * 0.15; R[i] += (wR[i] - wL[i]) * 0.15; }
+
+  // master: fade + soft limit + normalise
+  const fade = Math.floor(1.5 * SR);
   let peak = 0;
   for (let i = 0; i < N; i++) peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i]));
-  const norm = peak > 0 ? 0.85 / peak : 1;
+  const norm = peak > 0 ? 0.82 / peak : 1;
   for (let i = 0; i < N; i++) {
     let f = 1;
-    if (i < fade) f = i / fade;
-    else if (i > N - fade) f = (N - i) / fade;
-    L[i] = Math.tanh(L[i] * norm * f * 1.1);
-    R[i] = Math.tanh(R[i] * norm * f * 1.1);
+    if (i < fade) f = i / fade; else if (i > N - fade) f = (N - i) / fade;
+    L[i] = Math.tanh(L[i] * norm * f * 1.15);
+    R[i] = Math.tanh(R[i] * norm * f * 1.15);
   }
   writeWav(song.file, L, R);
   return dur;
 }
 
-console.log('Composing original, copyright-free background music...\n');
+console.log('Composing original organic-house / Mediterranean-chill tracks...\n');
 for (const song of SONGS) {
-  // Skip if an MP3 of this track already ships in music/ (avoids duplicates).
   const mp3 = path.join(MUSIC_DIR, song.file.replace(/\.wav$/, '.mp3'));
-  if (fs.existsSync(mp3)) {
-    console.log(`  (skip) ${song.title} — already present as ${path.basename(mp3)}`);
-    continue;
-  }
+  if (fs.existsSync(mp3)) { console.log(`  (skip) ${song.title} — already present`); continue; }
   const d = compose(song);
   console.log(`  ${song.file}  (${Math.round(d)}s)  "${song.title}"`);
 }
