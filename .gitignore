@@ -1,0 +1,6 @@
+node_modules/
+data.json
+
+# Audio stays local — you control licensing.
+music/*
+!music/README.md

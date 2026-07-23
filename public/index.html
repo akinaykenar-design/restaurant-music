@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Venue Music</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Venue Music</h1>
+      <nav>
+        <button class="tab active" data-tab="now">Now Playing</button>
+        <button class="tab" data-tab="schedule">Schedule</button>
+        <button class="tab" data-tab="playlists">Playlists</button>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Now Playing -->
+      <section id="tab-now" class="tab-panel active">
+        <div class="now-card">
+          <div class="now-block" id="now-block">—</div>
+          <div class="now-title" id="now-title">Nothing playing</div>
+          <div class="now-sub" id="now-sub">Add music to the <code>music/</code> folder to begin</div>
+
+          <div class="controls">
+            <button id="prev" title="Previous">⏮</button>
+            <button id="playpause" title="Play/Pause">▶</button>
+            <button id="next" title="Next">⏭</button>
+          </div>
+
+          <div class="vol-row">
+            <span>🔈</span>
+            <input type="range" id="volume" min="0" max="1" step="0.01" />
+          </div>
+
+          <label class="follow">
+            <input type="checkbox" id="follow" />
+            Follow schedule (auto-switch playlist by time)
+          </label>
+        </div>
+
+        <div class="queue">
+          <h3>Up next</h3>
+          <ol id="queue-list"></ol>
+        </div>
+      </section>
+
+      <!-- Schedule -->
+      <section id="tab-schedule" class="tab-panel">
+        <p class="hint">Pick a playlist for each time block. Music switches automatically when a block begins.</p>
+        <div class="table-wrap">
+          <table id="schedule-table"></table>
+        </div>
+      </section>
+
+      <!-- Playlists -->
+      <section id="tab-playlists" class="tab-panel">
+        <div class="pl-layout">
+          <div class="pl-side">
+            <h3>Playlists</h3>
+            <ul id="playlist-names"></ul>
+            <div class="pl-new">
+              <input id="new-playlist" placeholder="New playlist name" />
+              <button id="add-playlist">Add</button>
+            </div>
+          </div>
+          <div class="pl-main">
+            <h3 id="editing-name">Select a playlist</h3>
+            <div class="pl-cols">
+              <div>
+                <h4>In playlist</h4>
+                <ul id="pl-tracks" class="track-list"></ul>
+              </div>
+              <div>
+                <h4>Library (<span id="lib-count">0</span>)</h4>
+                <ul id="lib-tracks" class="track-list"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <audio id="player" preload="auto"></audio>
+    <script src="app.js"></script>
+  </body>
+</html>
