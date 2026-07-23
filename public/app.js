@@ -180,19 +180,21 @@ $('shuffle').addEventListener('change', (e) => { state.settings.shuffle = e.targ
 $('crossfade').addEventListener('input', (e) => { state.settings.crossfade = Number(e.target.value); $('cf-val').textContent = e.target.value + 's'; });
 $('crossfade').addEventListener('change', (e) => saveSettings({ crossfade: Number(e.target.value) }));
 
-function rate(kind) {
-  const file = queue[queueIndex];
-  if (!file) return;
+function rateFile(file, kind) {
   const next = ratingOf(file) === kind ? 'none' : kind;
-  fetch('/api/rate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file, rating: next }) })
+  return fetch('/api/rate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file, rating: next }) })
     .then((r) => r.json())
     .then((d) => {
       state.ratings = d.ratings || {};
-      updateRateButtons(file);
+      const cur = queue[queueIndex];
+      if (cur) updateRateButtons(cur);
       renderQueue();
-      if (next === 'dislike') skip(1);
+      renderEditor();
+      if (next === 'dislike' && file === cur) skip(1);
+      return next;
     });
 }
+function rate(kind) { const f = queue[queueIndex]; if (f) rateFile(f, kind); }
 function updateRateButtons(file) {
   const r = ratingOf(file);
   $('like').classList.toggle('on', r === 'like');
@@ -261,6 +263,39 @@ function applySchedule(force) {
   }
 }
 setInterval(applySchedule, 30 * 1000);
+
+// ---- schedule tab: editable time blocks ------------------------------------
+function renderBlocksEditor() {
+  const wrap = $('blocks-editor');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  state.blocks.forEach((b, i) => {
+    const row = document.createElement('div');
+    row.className = 'block-row';
+    const label = document.createElement('input');
+    label.type = 'text'; label.value = b.label; label.className = 'blk-label'; label.placeholder = 'Name (e.g. Lunch)';
+    label.addEventListener('change', () => { state.blocks[i].label = label.value; saveBlocks(); });
+    const time = document.createElement('input');
+    time.type = 'time'; time.value = b.start; time.className = 'blk-time';
+    time.addEventListener('change', () => { state.blocks[i].start = time.value; saveBlocks(); });
+    const del = document.createElement('button');
+    del.textContent = '✕'; del.className = 'del'; del.title = 'Delete block'; del.disabled = state.blocks.length <= 1;
+    del.addEventListener('click', () => { if (!confirm('Delete the "' + b.label + '" block?')) return; state.blocks.splice(i, 1); saveBlocks(); });
+    row.append(label, time, del);
+    wrap.appendChild(row);
+  });
+}
+function saveBlocks() {
+  api('/api/blocks', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ blocks: state.blocks }) })
+    .then((res) => {
+      if (res.blocks) { state.blocks = res.blocks; state.schedule = res.schedule; }
+      renderBlocksEditor(); renderSchedule(); applySchedule(true);
+    });
+}
+$('add-block').addEventListener('click', () => {
+  state.blocks.push({ id: '', label: 'New block', start: '12:00' });
+  saveBlocks();
+});
 
 // ---- schedule tab ----------------------------------------------------------
 function renderSchedule() {
@@ -360,6 +395,14 @@ function renderEditor() {
     const name = document.createElement('span');
     name.className = 'name'; name.textContent = t.title; name.title = 'Click to preview';
     name.addEventListener('click', () => preview(t.file));
+    const like = document.createElement('button');
+    like.textContent = '♥'; like.title = 'Like — play more often';
+    like.className = ratingOf(t.file) === 'like' ? 'liked' : '';
+    like.addEventListener('click', () => rateFile(t.file, 'like'));
+    const dislike = document.createElement('button');
+    dislike.textContent = '⊘'; dislike.title = 'Dislike — never play (ban)';
+    dislike.className = ratingOf(t.file) === 'dislike' ? 'disliked' : '';
+    dislike.addEventListener('click', () => rateFile(t.file, 'dislike'));
     const add = document.createElement('button');
     add.textContent = '+'; add.disabled = !editing; add.title = editing ? 'Add to ' + editing : 'Select a playlist first';
     add.addEventListener('click', () => { if (!editing) return; state.playlists[editing].push(t.file); savePlaylists(); });
@@ -369,7 +412,7 @@ function renderEditor() {
       if (!confirm('Delete "' + t.title + '" from the library?')) return;
       fetch('/api/track?name=' + encodeURIComponent(t.file), { method: 'DELETE' }).then((r) => r.json()).then(() => reloadLibrary());
     });
-    li.append(name, add, del);
+    li.append(name, like, dislike, add, del);
     libUl.appendChild(li);
   });
 }
@@ -507,6 +550,7 @@ async function boot() {
   const cf = state.settings.crossfade ?? 4;
   $('crossfade').value = cf; $('cf-val').textContent = cf + 's';
 
+  renderBlocksEditor();
   renderSchedule();
   renderPlaylistNames();
   renderEditor();

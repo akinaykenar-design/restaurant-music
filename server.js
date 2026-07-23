@@ -200,6 +200,35 @@ app.put('/api/schedule', (req, res) => {
   res.json({ ok: true, schedule: data.schedule });
 });
 
+// Add / remove / rename time blocks and edit their start times.
+app.put('/api/blocks', (req, res) => {
+  const blocks = req.body && req.body.blocks;
+  if (!Array.isArray(blocks) || !blocks.length) {
+    return res.status(400).json({ error: 'non-empty blocks array required' });
+  }
+  const seen = new Set();
+  const clean = blocks.map((b, i) => {
+    let id = String(b.id || '').replace(/[^a-z0-9_-]/gi, '').toLowerCase() || 'block' + i;
+    while (seen.has(id)) id = id + '-' + i;
+    seen.add(id);
+    const start = /^\d{1,2}:\d{2}$/.test(b.start || '') ? b.start : '00:00';
+    return { id, label: String(b.label || 'Block').slice(0, 40) || 'Block', start };
+  });
+  // sort by start time so the grid reads left-to-right through the day
+  clean.sort((a, b) => a.start.localeCompare(b.start));
+  data.blocks = clean;
+  // reconcile the schedule: every day keeps a slot for every (surviving) block
+  for (const d of data.days) {
+    const row = data.schedule[d] || {};
+    const next = {};
+    for (const b of clean) next[b.id] = row[b.id] || '';
+    data.schedule[d] = next;
+  }
+  saveData(data);
+  station.refresh(true);
+  res.json({ ok: true, blocks: data.blocks, schedule: data.schedule });
+});
+
 app.put('/api/settings', (req, res) => {
   const patch = Object.assign({}, req.body || {});
   delete patch.afterHoursPassword; // never set the secret via the public settings route

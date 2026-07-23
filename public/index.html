@@ -169,7 +169,13 @@
 
       <!-- ===== SCHEDULE ===== -->
       <section id="tab-schedule" class="tab-panel">
-        <p class="hint">Pick a playlist for each part of the day. The music switches automatically when a block begins.</p>
+        <div class="card" style="margin-bottom:16px">
+          <h3>Time blocks</h3>
+          <p class="hint">Add, rename, delete, or re-time the parts of your day. Sorted automatically.</p>
+          <div id="blocks-editor" class="blocks-editor"></div>
+          <button id="add-block" class="ghost" style="margin-top:10px">+ Add time block</button>
+        </div>
+        <p class="hint">Now pick a playlist for each block × day. The music switches automatically when a block begins.</p>
         <div class="card table-wrap">
           <table id="schedule-table"></table>
         </div>

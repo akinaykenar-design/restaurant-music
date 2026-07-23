@@ -193,6 +193,16 @@ h4 { margin: 0 0 12px; font-size: 0.98rem; display: flex; align-items: center; g
 .dropzone .link { color: var(--accent); cursor: pointer; text-decoration: underline; }
 .upload-status { margin-top: 6px; font-size: 0.78rem; color: var(--accent); min-height: 14px; }
 
+/* ---------- schedule: block editor ---------- */
+.blocks-editor { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.block-row { display: flex; gap: 8px; align-items: center; }
+.block-row input { background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; padding: 9px 10px; color: var(--text); font: inherit; }
+.block-row .blk-label { flex: 1; min-width: 0; }
+.block-row .blk-time { width: 130px; flex: none; }
+.block-row .del { width: 38px; height: 38px; border-radius: 9px; border: 1px solid var(--border); background: var(--surface); color: var(--faint); cursor: pointer; flex: none; }
+.block-row .del:hover:not(:disabled) { border-color: var(--bad); color: var(--bad); }
+.block-row .del:disabled { opacity: 0.3; cursor: not-allowed; }
+
 /* ---------- schedule ---------- */
 .table-wrap { overflow-x: auto; padding: 8px; }
 #schedule-table { border-collapse: separate; border-spacing: 6px; width: 100%; }
