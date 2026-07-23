@@ -51,7 +51,7 @@ function defaultData() {
     for (const b of blocks) schedule[d][b.id] = '';
   }
   return {
-    blocks, days, schedule, playlists: {}, ratings: {},
+    blocks, days, schedule, playlists: {}, ratings: {}, meta: {},
     settings: {
       volume: 0.8, followSchedule: true, shuffle: true, crossfade: 4,
       afterHoursPassword: 'staff', // change it in the unlocked panel
@@ -116,14 +116,177 @@ function trackDuration(file) {
   return 0;
 }
 
+// Standard ID3v1 genre names (index -> name). Used to resolve numeric genre
+// references like "(17)" that ID3v2 TCON frames sometimes carry.
+const ID3_GENRES = [
+  'Blues', 'Classic Rock', 'Country', 'Dance', 'Disco', 'Funk', 'Grunge', 'Hip-Hop', 'Jazz', 'Metal',
+  'New Age', 'Oldies', 'Other', 'Pop', 'R&B', 'Rap', 'Reggae', 'Rock', 'Techno', 'Industrial',
+  'Alternative', 'Ska', 'Death Metal', 'Pranks', 'Soundtrack', 'Euro-Techno', 'Ambient', 'Trip-Hop', 'Vocal', 'Jazz+Funk',
+  'Fusion', 'Trance', 'Classical', 'Instrumental', 'Acid', 'House', 'Game', 'Sound Clip', 'Gospel', 'Noise',
+  'Alt. Rock', 'Bass', 'Soul', 'Punk', 'Space', 'Meditative', 'Instrumental Pop', 'Instrumental Rock', 'Ethnic', 'Gothic',
+  'Darkwave', 'Techno-Industrial', 'Electronic', 'Pop-Folk', 'Eurodance', 'Dream', 'Southern Rock', 'Comedy', 'Cult', 'Gangsta',
+  'Top 40', 'Christian Rap', 'Pop/Funk', 'Jungle', 'Native American', 'Cabaret', 'New Wave', 'Psychadelic', 'Rave', 'Showtunes',
+  'Trailer', 'Lo-Fi', 'Tribal', 'Acid Punk', 'Acid Jazz', 'Polka', 'Retro', 'Musical', 'Rock & Roll', 'Hard Rock',
+  'Folk', 'Folk-Rock', 'National Folk', 'Swing', 'Fast Fusion', 'Bebob', 'Latin', 'Revival', 'Celtic', 'Bluegrass',
+  'Avantgarde', 'Gothic Rock', 'Progressive Rock', 'Psychedelic Rock', 'Symphonic Rock', 'Slow Rock', 'Big Band', 'Chorus', 'Easy Listening', 'Acoustic',
+  'Humour', 'Speech', 'Chanson', 'Opera', 'Chamber Music', 'Sonata', 'Symphony', 'Booty Bass', 'Primus', 'Porn Groove',
+  'Satire', 'Slow Jam', 'Club', 'Tango', 'Samba', 'Folklore', 'Ballad', 'Power Ballad', 'Rhythmic Soul', 'Freestyle',
+  'Duet', 'Punk Rock', 'Drum Solo', 'A capella', 'Euro-House', 'Dance Hall', 'Goa', 'Drum & Bass', 'Club-House', 'Hardcore',
+  'Terror', 'Indie', 'BritPop', 'Afro-Punk', 'Polsk Punk', 'Beat', 'Christian Gangsta Rap', 'Heavy Metal', 'Black Metal', 'Crossover',
+  'Contemporary Christian', 'Christian Rock', 'Merengue', 'Salsa', 'Thrash Metal', 'Anime', 'JPop', 'Synthpop',
+];
+
+// Resolve a raw TCON genre string: "(17)" -> "Rock", "(17)Rock" -> "Rock",
+// "Deep House" -> "Deep House". Returns '' when nothing usable is found.
+function cleanGenre(v) {
+  if (!v) return '';
+  v = String(v).trim();
+  const m = v.match(/^\((\d+)\)\s*(.*)$/);
+  if (m) return m[2].trim() || ID3_GENRES[+m[1]] || '';
+  if (/^\d+$/.test(v)) return ID3_GENRES[+v] || v;
+  return v;
+}
+
+// Decode an ID3v2 text-frame body honouring its encoding byte.
+function decodeTextFrame(b) {
+  if (!b || !b.length) return '';
+  const enc = b[0];
+  let body = b.subarray(1);
+  let s;
+  if (enc === 1) { // UTF-16 with BOM
+    if (body[0] === 0xff && body[1] === 0xfe) s = body.subarray(2).toString('utf16le');
+    else if (body[0] === 0xfe && body[1] === 0xff) s = Buffer.from(body.subarray(2)).swap16().toString('utf16le');
+    else s = body.toString('utf16le');
+  } else if (enc === 2) { // UTF-16BE, no BOM
+    s = Buffer.from(body).swap16().toString('utf16le');
+  } else if (enc === 3) { // UTF-8
+    s = body.toString('utf8');
+  } else { // ISO-8859-1
+    s = body.toString('latin1');
+  }
+  return s.replace(/\0+$/, '').replace(/\0/g, ' ').trim();
+}
+
+// Read genre / artist / title / BPM tags from an audio file (ID3v2 at the head,
+// ID3v1 at the tail as a fallback). Best-effort; returns {} on anything odd.
+function readId3(full) {
+  const out = { genre: '', artist: '', title: '', bpm: null };
+  let fd;
+  try {
+    fd = fs.openSync(full, 'r');
+    const stat = fs.fstatSync(fd);
+    const head = Buffer.alloc(10);
+    fs.readSync(fd, head, 0, 10, 0);
+    if (head.toString('latin1', 0, 3) === 'ID3') {
+      const ver = head[3];
+      const size = ((head[6] & 0x7f) << 21) | ((head[7] & 0x7f) << 14) | ((head[8] & 0x7f) << 7) | (head[9] & 0x7f);
+      const readLen = Math.min(size, 1 << 20); // cap tag read at 1MB (skips huge cover art)
+      const buf = Buffer.alloc(readLen);
+      fs.readSync(fd, buf, 0, readLen, 10);
+      const wanted = { TCON: 'genre', TPE1: 'artist', TIT2: 'title', TBPM: 'bpm' };
+      let i = 0;
+      while (i + 10 <= buf.length) {
+        const id = buf.toString('latin1', i, i + 4);
+        if (!/^[A-Z0-9]{4}$/.test(id)) break; // hit padding / end of frames
+        let fsz;
+        if (ver === 4) fsz = ((buf[i + 4] & 0x7f) << 21) | ((buf[i + 5] & 0x7f) << 14) | ((buf[i + 6] & 0x7f) << 7) | (buf[i + 7] & 0x7f);
+        else fsz = (buf[i + 4] << 24) | (buf[i + 5] << 16) | (buf[i + 6] << 8) | buf[i + 7];
+        if (fsz <= 0 || i + 10 + fsz > buf.length) break;
+        const key = wanted[id];
+        if (key) {
+          const val = decodeTextFrame(buf.subarray(i + 10, i + 10 + fsz));
+          if (key === 'genre') out.genre = cleanGenre(val);
+          else if (key === 'bpm') { const n = parseInt(val, 10); if (n > 0 && n < 300) out.bpm = n; }
+          else out[key] = val;
+        }
+        i += 10 + fsz;
+      }
+    }
+    if ((!out.genre || !out.artist) && stat.size > 128) { // ID3v1 fallback
+      const v1 = Buffer.alloc(128);
+      fs.readSync(fd, v1, 0, 128, stat.size - 128);
+      if (v1.toString('latin1', 0, 3) === 'TAG') {
+        if (!out.artist) out.artist = v1.toString('latin1', 33, 63).replace(/\0.*$/, '').trim();
+        if (!out.title) out.title = v1.toString('latin1', 3, 33).replace(/\0.*$/, '').trim();
+        if (!out.genre) { const g = v1[127]; if (g < ID3_GENRES.length) out.genre = ID3_GENRES[g]; }
+      }
+    }
+  } catch { /* ignore */ }
+  finally { if (fd !== undefined) try { fs.closeSync(fd); } catch { /* ignore */ } }
+  return out;
+}
+
+// Bucket a track into a serving "vibe" from its measured energy (RMS, ~0.02–0.30
+// for music) and tempo. Chill for quiet-lunch, Upbeat for busy-dinner. '' = not
+// analysed yet.
+function vibeFor(energy, bpm) {
+  if (energy == null || !isFinite(energy)) return '';
+  const e = Math.max(0, Math.min(1, (energy - 0.03) / 0.20));      // loudness/density
+  const b = bpm ? Math.max(0, Math.min(1, (bpm - 72) / (128 - 72))) : e; // tempo
+  const s = 0.6 * e + 0.4 * b;
+  if (s < 0.34) return 'Chill';
+  if (s < 0.62) return 'Warm';
+  return 'Upbeat';
+}
+
+let metaDirty = false;
+
+// Per-file metadata cache. ID3 tags + duration are read once per file and reused
+// until the file's size/mtime changes; audio analysis (energy/vibe) is preserved
+// across tag re-reads and only cleared when the underlying audio is replaced.
+function trackMeta(file) {
+  const full = path.join(MUSIC_DIR, file);
+  let sig = '';
+  try { const st = fs.statSync(full); sig = st.size + ':' + Math.round(st.mtimeMs); } catch { /* ignore */ }
+  data.meta = data.meta || {};
+  const prev = data.meta[file];
+  if (prev && prev.sig === sig) return prev;
+  const keep = prev && !prev.sig; // analyse-before-scan entry: keep its analysis
+  const id3 = readId3(full);
+  const m = {
+    sig,
+    genre: id3.genre || '',
+    artist: id3.artist || '',
+    title: id3.title || '',
+    bpm: id3.bpm || null,
+    duration: trackDuration(file),
+    energy: keep && prev.energy != null ? prev.energy : null,
+    analyzedBpm: keep ? (prev.analyzedBpm || null) : null,
+    vibe: keep ? (prev.vibe || '') : '',
+    analyzedAt: keep ? (prev.analyzedAt || null) : null,
+  };
+  data.meta[file] = m;
+  metaDirty = true;
+  return m;
+}
+
 function scanLibrary() {
   try {
     fs.mkdirSync(MUSIC_DIR, { recursive: true });
-    return fs
+    const files = fs
       .readdirSync(MUSIC_DIR)
       .filter((f) => AUDIO_EXT.has(path.extname(f).toLowerCase()))
-      .sort((a, b) => a.localeCompare(b))
-      .map((f) => ({ file: f, title: prettyTitle(f), duration: trackDuration(f) }));
+      .sort((a, b) => a.localeCompare(b));
+    const tracks = files.map((f) => {
+      const m = trackMeta(f);
+      return {
+        file: f,
+        title: (m.title && m.title.trim()) || prettyTitle(f),
+        duration: m.duration || 0,
+        genre: m.genre || '',
+        artist: m.artist || '',
+        bpm: m.analyzedBpm || m.bpm || null,
+        energy: m.energy != null ? m.energy : null,
+        vibe: m.vibe || '',
+      };
+    });
+    // Drop cache entries for files that no longer exist.
+    if (data.meta) {
+      const live = new Set(files);
+      for (const k of Object.keys(data.meta)) if (!live.has(k)) { delete data.meta[k]; metaDirty = true; }
+    }
+    if (metaDirty) { saveData(data); metaDirty = false; }
+    return tracks;
   } catch {
     return [];
   }
@@ -203,6 +366,26 @@ app.post('/api/rate', (req, res) => {
   else delete data.ratings[file];
   saveData(data);
   res.json({ ok: true, ratings: data.ratings });
+});
+
+// Store audio-analysis results (energy + tempo) for a track, computed in the
+// browser via the Web Audio API, and derive its serving "vibe".
+app.post('/api/analyze', (req, res) => {
+  const file = req.body && req.body.file;
+  if (!file) return res.status(400).json({ error: 'file required' });
+  const full = path.join(MUSIC_DIR, path.basename(file));
+  if (!fs.existsSync(full)) return res.status(404).json({ error: 'not found' });
+  const energy = Number(req.body.energy);
+  const bpm = req.body.bpm ? Math.round(Number(req.body.bpm)) : null;
+  data.meta = data.meta || {};
+  const m = data.meta[file] || {};
+  if (isFinite(energy)) m.energy = energy;
+  if (bpm && bpm > 0 && bpm < 300) m.analyzedBpm = bpm;
+  m.vibe = vibeFor(m.energy, m.analyzedBpm || m.bpm);
+  m.analyzedAt = Date.now();
+  data.meta[file] = m;
+  saveData(data);
+  res.json({ ok: true, file, genre: m.genre || '', vibe: m.vibe, bpm: m.analyzedBpm || m.bpm || null, energy: m.energy });
 });
 
 app.put('/api/playlists', (req, res) => {

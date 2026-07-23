@@ -19,6 +19,10 @@ web app (nothing to install).
 - **Schedule** — fully **editable time blocks** (add / rename / delete / re-time)
   × days; assign a playlist per cell; switches automatically through the day.
 - **Library** — drag-and-drop upload, search, delete; friendly track titles.
+- **Auto-tag by genre & vibe** — reads each track's embedded **genre** tag and
+  analyses the audio for tempo + energy to bucket it **Chill / Warm / Upbeat**.
+  Filter and sort the library by genre or vibe, and **build vibe playlists** in
+  one click (great for chill lunch → upbeat dinner).
 - **After-hours staff mode** — hidden, password-gated; play a staff playlist
   off-schedule. Password stays server-side.
 - **Venue stream** — a continuous MP3 stream (`/stream`) a Q-SYS Core (or VLC)

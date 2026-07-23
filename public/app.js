@@ -10,6 +10,9 @@ let queueIndex = 0;
 let history = [];         // recently played (newest first)
 let currentBlockKey = null;
 let libFilter = '';       // library search term
+let libGenre = '';        // library genre filter
+let libVibe = '';         // library vibe filter (Chill/Warm/Upbeat)
+let libSort = 'title';    // library sort key
 
 // dual-deck crossfade player
 const decks = [new Audio(), new Audio()];
@@ -306,8 +309,11 @@ $('shuffle').addEventListener('change', (e) => { state.settings.shuffle = e.targ
 $('crossfade').addEventListener('input', (e) => { state.settings.crossfade = Number(e.target.value); $('cf-val').textContent = e.target.value + 's'; });
 $('crossfade').addEventListener('change', (e) => saveSettings({ crossfade: Number(e.target.value) }));
 
-// library search
+// library search + filters + sort
 $('lib-search').addEventListener('input', (e) => { libFilter = e.target.value.trim().toLowerCase(); renderEditor(); });
+$('lib-genre').addEventListener('change', (e) => { libGenre = e.target.value; renderEditor(); });
+$('lib-vibe').addEventListener('change', (e) => { libVibe = e.target.value; renderEditor(); });
+$('lib-sort').addEventListener('change', (e) => { libSort = e.target.value; renderEditor(); });
 
 // keyboard shortcuts (ignored while typing in a field)
 document.addEventListener('keydown', (e) => {
@@ -566,14 +572,36 @@ function renderEditor() {
     });
   }
 
+  syncGenreOptions();
+  const analysedCount = library.filter((t) => t.vibe).length;
+  $('auto-vibe').disabled = !analysedCount;
+
   if (!library.length) { libUl.appendChild(emptyRow('No music yet — drop files above.')); return; }
-  const shown = library.filter((t) => !libFilter || t.title.toLowerCase().includes(libFilter));
-  if (!shown.length) { libUl.appendChild(emptyRow('No matches for "' + libFilter + '".')); return; }
+  const vibeRank = { Chill: 0, Warm: 1, Upbeat: 2 };
+  let shown = library.filter((t) =>
+    (!libFilter || t.title.toLowerCase().includes(libFilter) || (t.genre || '').toLowerCase().includes(libFilter) || (t.artist || '').toLowerCase().includes(libFilter)) &&
+    (!libGenre || t.genre === libGenre) &&
+    (!libVibe || t.vibe === libVibe));
+  shown = shown.slice().sort((a, b) => {
+    if (libSort === 'vibe') return (vibeRank[a.vibe] ?? 9) - (vibeRank[b.vibe] ?? 9) || a.title.localeCompare(b.title);
+    if (libSort === 'bpm') return (a.bpm || 999) - (b.bpm || 999) || a.title.localeCompare(b.title);
+    if (libSort === 'genre') return (a.genre || '~').localeCompare(b.genre || '~') || a.title.localeCompare(b.title);
+    if (libSort === 'duration') return (a.duration || 0) - (b.duration || 0) || a.title.localeCompare(b.title);
+    return a.title.localeCompare(b.title);
+  });
+  if (!shown.length) { libUl.appendChild(emptyRow('No tracks match those filters.')); return; }
   shown.forEach((t) => {
     const li = document.createElement('li');
     const name = document.createElement('span');
-    name.className = 'name'; name.textContent = t.title; name.title = 'Click to preview';
+    name.className = 'name'; name.textContent = t.title; name.title = t.artist ? t.artist + ' — click to preview' : 'Click to preview';
     name.addEventListener('click', () => preview(t.file));
+    if (t.genre || t.vibe) {
+      const tags = document.createElement('span');
+      tags.className = 'tags';
+      if (t.vibe) { const v = document.createElement('span'); v.className = 'tag vibe-' + t.vibe.toLowerCase(); v.textContent = t.vibe; tags.appendChild(v); }
+      if (t.genre) { const g = document.createElement('span'); g.className = 'tag tag-genre'; g.textContent = t.genre; tags.appendChild(g); }
+      name.appendChild(tags);
+    }
     const like = document.createElement('button');
     like.textContent = '♥'; like.title = 'Like — play more often';
     like.className = ratingOf(t.file) === 'like' ? 'liked' : '';
@@ -599,6 +627,104 @@ function renderEditor() {
 
 function reloadLibrary() {
   return api('/api/library').then((lib) => { library = lib.tracks; renderEditor(); renderQueue(); renderHistory(); updateOnboard(); });
+}
+
+// Keep the genre filter dropdown in sync with the genres present in the library,
+// preserving the current selection.
+function syncGenreOptions() {
+  const sel = $('lib-genre');
+  const genres = [...new Set(library.map((t) => t.genre).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  const want = ['', ...genres].join('|');
+  if (sel.dataset.sig === want) return;
+  sel.dataset.sig = want;
+  const cur = libGenre;
+  sel.innerHTML = '<option value="">All genres</option>' + genres.map((g) => `<option value="${g.replace(/"/g, '&quot;')}">${g}</option>`).join('');
+  if (genres.includes(cur)) sel.value = cur; else { sel.value = ''; libGenre = ''; }
+}
+
+// ---- audio analysis (genre is read server-side; tempo + energy here) --------
+// Decode each track in the browser and measure loudness (RMS) and tempo, then
+// POST the result so the server can bucket it into a Chill / Warm / Upbeat vibe.
+async function analyzeLibrary() {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) { toast('This browser can’t analyse audio'); return; }
+  const todo = library.filter((t) => !t.vibe);
+  const btn = $('analyze-btn'); const status = $('analyze-status');
+  if (!todo.length) { status.textContent = 'Every track is already analysed.'; setTimeout(() => (status.textContent = ''), 4000); return; }
+  btn.disabled = true;
+  let done = 0; let failed = 0;
+  for (const t of todo) {
+    status.textContent = `Analysing ${done + failed + 1}/${todo.length}: ${t.title}…`;
+    try {
+      const r = await analyzeTrack(t.file, AC);
+      await api('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file: t.file, energy: r.energy, bpm: r.bpm }) });
+      done++;
+    } catch (e) { failed++; }
+  }
+  status.textContent = `Tagged ${done} track${done === 1 ? '' : 's'}${failed ? `, ${failed} skipped` : ''}.`;
+  btn.disabled = false;
+  await reloadLibrary();
+  toast(`Analysed ${done} track${done === 1 ? '' : 's'}`);
+  setTimeout(() => (status.textContent = ''), 6000);
+}
+
+async function analyzeTrack(file, AC) {
+  const resp = await fetch('/audio/' + encodeURIComponent(file));
+  if (!resp.ok) throw new Error('fetch failed');
+  const buf = await resp.arrayBuffer();
+  const ctx = new AC();
+  try {
+    const audio = await ctx.decodeAudioData(buf);
+    const ch = audio.getChannelData(0);
+    const sr = audio.sampleRate;
+    // RMS loudness over the whole track (sampled to cap work on long files).
+    const step = Math.max(1, Math.floor(ch.length / 2000000));
+    let sum = 0; let cnt = 0;
+    for (let i = 0; i < ch.length; i += step) { const v = ch[i]; sum += v * v; cnt++; }
+    const energy = Math.sqrt(sum / Math.max(1, cnt));
+    const bpm = estimateBpm(ch, sr);
+    return { energy, bpm };
+  } finally { if (ctx.close) ctx.close(); }
+}
+
+// Rough tempo estimate: build a ~100 Hz energy envelope, take positive onsets,
+// and autocorrelate to find the strongest beat period in 70–160 BPM.
+function estimateBpm(ch, sr) {
+  const hop = Math.floor(sr / 100) || 441;
+  const env = [];
+  for (let i = 0; i + hop < ch.length; i += hop) {
+    let s = 0; for (let j = 0; j < hop; j++) { const v = ch[i + j]; s += v * v; }
+    env.push(Math.sqrt(s / hop));
+  }
+  if (env.length < 64) return null;
+  const on = [];
+  for (let i = 1; i < env.length; i++) { const d = env[i] - env[i - 1]; on.push(d > 0 ? d : 0); }
+  const mean = on.reduce((a, b) => a + b, 0) / on.length;
+  for (let i = 0; i < on.length; i++) on[i] -= mean;
+  const fps = sr / hop;
+  const minLag = Math.floor((fps * 60) / 160); const maxLag = Math.floor((fps * 60) / 70);
+  let best = 0; let bestLag = 0;
+  for (let lag = minLag; lag <= maxLag; lag++) {
+    let s = 0; for (let i = 0; i + lag < on.length; i++) s += on[i] * on[i + lag];
+    if (s > best) { best = s; bestLag = lag; }
+  }
+  if (!bestLag) return null;
+  let bpm = (fps * 60) / bestLag;
+  while (bpm < 70) bpm *= 2; while (bpm > 160) bpm /= 2;
+  return Math.round(bpm);
+}
+
+// Group every analysed track into Chill / Warm / Upbeat playlists in one click.
+function buildVibePlaylists() {
+  const analysed = library.filter((t) => t.vibe);
+  if (!analysed.length) { toast('Run “✨ Analyse audio” first'); return; }
+  const buckets = { Chill: [], Warm: [], Upbeat: [] };
+  analysed.forEach((t) => { if (buckets[t.vibe]) buckets[t.vibe].push(t.file); });
+  let made = 0;
+  for (const v of ['Chill', 'Warm', 'Upbeat']) { if (buckets[v].length) { state.playlists[v] = buckets[v]; made++; } }
+  if (!made) { toast('Nothing to group yet'); return; }
+  savePlaylists();
+  toast(`Built ${made} vibe playlist${made === 1 ? '' : 's'}`);
 }
 
 $('add-playlist').addEventListener('click', () => {
@@ -827,6 +953,8 @@ async function boot() {
   applySchedule(true);
   loadStreamInfo();
   setupUpload();
+  $('analyze-btn').addEventListener('click', analyzeLibrary);
+  $('auto-vibe').addEventListener('click', buildVibePlaylists);
   setupVenuePlayer();
   setupAdmin();
   refreshAhPlaylists();

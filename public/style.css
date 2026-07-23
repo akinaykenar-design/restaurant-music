@@ -250,8 +250,24 @@ input:not([type]), input[type='text'], .pl-new input { flex: 1; min-width: 0; ba
 h4 { margin: 0 0 12px; font-size: 0.98rem; display: flex; align-items: center; gap: 8px; }
 .count { background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; color: var(--muted); font-weight: 400; }
 
-.lib-search { width: 100%; margin-bottom: 12px; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 9px; padding: 9px 12px; font: inherit; font-size: 0.88rem; }
+.lib-search { width: 100%; margin-bottom: 10px; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 9px; padding: 9px 12px; font: inherit; font-size: 0.88rem; }
 .lib-search:focus { outline: none; border-color: var(--accent); }
+.lib-tools { display: flex; gap: 8px; margin-bottom: 10px; }
+.lib-filter { flex: 1; min-width: 0; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 9px; padding: 7px 9px; font: inherit; font-size: 0.8rem; cursor: pointer; }
+.lib-filter:focus { outline: none; border-color: var(--accent); }
+.lib-analyze { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.lib-analyze .ghost { flex: none; }
+.lib-analyze .upload-status { margin-top: 0; }
+.auto-vibe { width: 100%; margin-top: 10px; font-size: 0.82rem; }
+.auto-vibe:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* genre + vibe tags on library rows */
+.tags { display: inline-flex; gap: 5px; margin-left: 8px; vertical-align: middle; flex-wrap: wrap; }
+.tag { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.02em; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); background: var(--surface); white-space: nowrap; }
+.tag-genre { text-transform: capitalize; }
+.tag.vibe-chill { color: #3a8fb0; border-color: #3a8fb055; background: #3a8fb016; }
+.tag.vibe-warm { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); background: var(--warn-tint); }
+.tag.vibe-upbeat { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); background: var(--accent-tint); }
 .dropzone { border: 2px dashed var(--border-strong); border-radius: var(--radius-sm); padding: 16px; text-align: center; color: var(--muted); font-size: 0.86rem; margin-bottom: 12px; transition: all 0.15s; }
 .dropzone svg { width: 24px; height: 24px; fill: none; stroke: var(--faint); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 2px; }
 .dropzone.drag { border-color: var(--accent); background: var(--accent-tint); color: var(--text); }
