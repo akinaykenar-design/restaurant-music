@@ -68,10 +68,7 @@ function buildQueue(files) {
 // ---- playback --------------------------------------------------------------
 function setPlayingUI(on) {
   const p = document.querySelector('.player');
-  if (p) p.classList.toggle('playing', on);
-  const b = $('playpause');
-  b.querySelector('.ic-play').hidden = on;
-  b.querySelector('.ic-pause').hidden = !on;
+  if (p) p.classList.toggle('playing', on); // CSS swaps play/pause icon
 }
 
 function onTrackChanged(file) {

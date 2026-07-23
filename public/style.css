@@ -116,6 +116,9 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 .play { width: 60px; height: 60px; border-radius: 50%; background: var(--accent); color: #fff; box-shadow: var(--shadow-sm); }
 .play svg { width: 26px; height: 26px; }
 .play:hover { background: var(--accent-press); }
+.ic-pause { display: none; }
+.player.playing .ic-play { display: none; }
+.player.playing .ic-pause { display: inline; }
 .rate { width: 42px; height: 42px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); color: var(--faint); }
 .rate:hover { color: var(--text); border-color: var(--border-strong); }
 #like.on { color: var(--accent); border-color: var(--accent); background: var(--accent-tint); }
