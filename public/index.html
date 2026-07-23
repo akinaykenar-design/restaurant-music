@@ -238,13 +238,18 @@
           </div>
 
           <div class="card" id="security-card">
-            <h3>Security</h3>
+            <h3>Security &amp; backup</h3>
             <p class="hint">Change the admin password:</p>
             <div class="ah-row">
               <input type="password" id="admin-newpass" placeholder="New admin password" />
               <button id="admin-setpass" class="ghost">Change password</button>
             </div>
-            <button id="admin-relock" class="ghost" style="margin-top:12px">Lock admin</button>
+            <p class="hint" style="margin-top:14px">Back up or restore everything (playlists, schedule, ratings, time blocks):</p>
+            <div class="ah-row">
+              <button id="backup-dl" class="ghost">⬇ Download backup</button>
+              <label class="ghost restore-label">↩ Restore from file<input type="file" id="restore-file" accept="application/json,.json" hidden /></label>
+            </div>
+            <button id="admin-relock" class="ghost" style="margin-top:14px">Lock admin</button>
           </div>
         </div>
       </section>

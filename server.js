@@ -275,6 +275,24 @@ app.post('/api/afterhours/unlock', (req, res) => {
   res.json({ ok: password === data.settings.afterHoursPassword });
 });
 
+// Download / restore a full backup of the app's data (playlists, schedule, etc.)
+app.get('/api/backup', (_req, res) => {
+  res.set('Content-Disposition', 'attachment; filename="watermans-music-backup.json"');
+  res.set('Content-Type', 'application/json');
+  res.send(JSON.stringify(data, null, 2));
+});
+
+app.post('/api/restore', (req, res) => {
+  const b = req.body;
+  if (!b || typeof b !== 'object' || typeof b.playlists !== 'object' || typeof b.schedule !== 'object') {
+    return res.status(400).json({ error: 'not a valid backup file' });
+  }
+  data = Object.assign(defaultData(), b);
+  saveData(data);
+  station.refresh(true);
+  res.json({ ok: true });
+});
+
 app.post('/api/afterhours/password', (req, res) => {
   const current = req.body && req.body.current;
   const next = req.body && req.body.next;

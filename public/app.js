@@ -765,6 +765,21 @@ function setupAdmin() {
     fetch('/api/afterhours/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ current: adminPass, next }) })
       .then((r) => r.json()).then((d) => { if (d.ok) { adminPass = next; $('admin-newpass').value = ''; toast('Admin password changed'); } else alert('Could not change password.'); });
   });
+
+  $('backup-dl').addEventListener('click', () => { window.location.href = '/api/backup'; });
+  $('restore-file').addEventListener('change', (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      let obj;
+      try { obj = JSON.parse(rd.result); } catch { return alert('That is not a valid backup file.'); }
+      if (!confirm('Restore this backup? It replaces your current playlists, schedule and settings.')) return;
+      fetch('/api/restore', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(obj) })
+        .then((r) => r.json()).then((d) => { if (d.ok) { toast('Restored — reloading…'); setTimeout(() => location.reload(), 800); } else alert('Restore failed: ' + (d.error || 'invalid file')); });
+    };
+    rd.readAsText(f);
+  });
 }
 
 // ---- theme (manual light/dark override, remembered on this device) ---------
