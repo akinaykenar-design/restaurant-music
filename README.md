@@ -21,6 +21,12 @@ playlist, a brighter lunch set, a mellow evening vibe, and so on.
 
 ## Quick start
 
+**Windows:** just double-click **`run.bat`**. It installs everything on first
+run, generates test tones if you have no music yet, starts the app, and opens
+it in your browser. (Needs [Node.js LTS](https://nodejs.org) installed once.)
+
+**Mac / Linux / manual:**
+
 ```bash
 npm install
 npm run tones     # optional: generate CC0 test tones so it's playable now
