@@ -32,8 +32,8 @@ for %%E in (mp3 m4a aac ogg wav flac webm) do (
   if exist "music\*.%%E" set "HASMUSIC=1"
 )
 if not defined HASMUSIC (
-  echo Generating test tones so there is something to play...
-  call npm run tones
+  echo No music found - generating original background tracks ^(takes a moment^)...
+  call npm run music
 )
 
 echo.

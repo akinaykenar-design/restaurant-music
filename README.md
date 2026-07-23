@@ -29,9 +29,14 @@ it in your browser. (Needs [Node.js LTS](https://nodejs.org) installed once.)
 
 ```bash
 npm install
-npm run tones     # optional: generate CC0 test tones so it's playable now
 npm start         # http://127.0.0.1:3000
 ```
+
+The app ships with **six original background tracks** in `music/` (soft café
+ambience — pads, arpeggios, gentle melodies). They're generated from scratch in
+code (`scripts/generate-music.js`), so they're **copyright-free** and safe to
+play in a venue with no licensing fees. Run `npm run music` to regenerate them,
+or just drop your own royalty-free files into `music/`.
 
 Then open the app, create a playlist on the **Playlists** tab, assign it to
 time blocks on the **Schedule** tab, and it plays automatically on

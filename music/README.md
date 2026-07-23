@@ -4,13 +4,19 @@ Drop your audio files here (`.mp3`, `.m4a`, `.aac`, `.ogg`, `.wav`, `.flac`,
 `.webm`). Each file shows up in the app's **Library**, ready to add to
 playlists. The filename (without extension) becomes the track title.
 
-Audio files are **not** committed to git — they stay on your machine, so you
-control licensing.
+Your own audio files are **not** committed to git — they stay on your machine,
+so you control licensing.
 
-## Test tones
+## Included music (copyright-free)
 
-Run `npm run tones` to generate a few short CC0 sine-pad tones here, so the app
-is playable before you add real music.
+This folder ships with six original background tracks (`cafe-01-sunrise.mp3` …
+`cafe-06-night-hush.mp3`). They were **generated from scratch in code**
+(`scripts/generate-music.js`), so they're 100% original and copyright-free —
+safe to play in a venue with no licensing fees. Use them as-is, or delete them
+and drop in your own.
+
+- `npm run music` — regenerate the originals (only creates any that are missing).
+- `npm run tones` — generate a few short CC0 test tones instead.
 
 ## Where to get license-free music
 

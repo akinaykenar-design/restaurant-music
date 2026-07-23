@@ -2,5 +2,7 @@ node_modules/
 data.json
 
 # Audio stays local — you control licensing.
+# (The bundled cafe-* tracks are original & copyright-free, so they're kept.)
 music/*
 !music/README.md
+!music/cafe-*.mp3
