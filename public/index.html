@@ -168,6 +168,19 @@
       <section id="tab-admin" class="tab-panel">
         <p class="hint">Technical settings for connecting to the venue sound system and the box.</p>
 
+        <div class="card share-card" id="share-card" hidden>
+          <h3>Open on staff phones &amp; iPads</h3>
+          <p class="hint">On the <b>same WiFi</b>, scan this code (or type the address) in a browser, then tap <b>Add to Home Screen</b> for an app icon.</p>
+          <div class="share-row">
+            <div class="qr-box"><img id="qr-img" alt="Scan to open the app" /></div>
+            <div class="share-addr">
+              <div class="addr-label">Address</div>
+              <div class="big-addr" id="big-addr">—</div>
+              <button id="copy-addr" class="ghost">Copy address</button>
+            </div>
+          </div>
+        </div>
+
         <div class="card accent-card" id="stream-card" hidden>
           <h3>Venue stream (for Q-SYS)</h3>
           <p class="hint">Give this address to whoever programs your Q-SYS Core, or test it in VLC:</p>

@@ -594,6 +594,19 @@ function loadStreamInfo() {
         return `<div class="dev-row"><span>App address</span><code>${base}</code></div>`;
       }).join('') + `<div class="dev-row"><span>Venue stream</span><code>${info.urls[0]}</code></div>`;
     }
+    // "Open on your devices" share card: address + scannable QR
+    const appUrl = info.urls[0].replace(/\/stream$/, '');
+    const big = $('big-addr');
+    if (big) {
+      big.textContent = appUrl;
+      $('qr-img').src = '/api/qr?text=' + encodeURIComponent(appUrl);
+      $('copy-addr').onclick = () => {
+        navigator.clipboard && navigator.clipboard.writeText(appUrl);
+        $('copy-addr').textContent = 'Copied ✓';
+        setTimeout(() => ($('copy-addr').textContent = 'Copy address'), 1500);
+      };
+      $('share-card').hidden = false;
+    }
   }).catch(() => {});
 }
 function setupVenuePlayer() {

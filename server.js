@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { spawn } = require('child_process');
+const qrcode = require('qrcode-generator');
 
 const app = express();
 // Port 3100 (not the very common 3000) so it doesn't clash with other local
@@ -114,6 +115,20 @@ function scanLibrary() {
 // ---- api -------------------------------------------------------------------
 
 app.get('/api/library', (_req, res) => res.json({ tracks: scanLibrary() }));
+
+// QR code (SVG) for a URL — used to open the app on phones/iPads by scanning.
+app.get('/api/qr', (req, res) => {
+  const text = String(req.query.text || '').slice(0, 512);
+  if (!text) return res.sendStatus(400);
+  try {
+    const qr = qrcode(0, 'M');
+    qr.addData(text);
+    qr.make();
+    res.set('Content-Type', 'image/svg+xml').set('Cache-Control', 'no-cache').send(qr.createSvgTag(6, 4));
+  } catch (e) {
+    res.sendStatus(500);
+  }
+});
 
 // Upload an audio file (raw body; the browser posts the file bytes directly).
 app.post('/api/upload', express.raw({ type: '*/*', limit: '300mb' }), (req, res) => {
