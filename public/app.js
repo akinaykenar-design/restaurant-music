@@ -87,8 +87,40 @@ $('pbar').addEventListener('click', (e) => {
   d.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * d.duration;
 });
 
+// toast notifications
+let toastTimer;
+function toast(msg) {
+  const t = $('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// mute / unmute (remembers previous level)
+let preMuteVol = 0.8;
+function updateMuteIcon() {
+  const m = userVolume === 0;
+  $('mute').classList.toggle('on', m);
+  $('mute').title = m ? 'Unmute' : 'Mute';
+  $('mute').setAttribute('aria-label', m ? 'Unmute' : 'Mute');
+}
+$('mute').addEventListener('click', () => {
+  if (userVolume > 0) { preMuteVol = userVolume; userVolume = 0; }
+  else userVolume = preMuteVol || 0.8;
+  if (!crossing) activeDeck().volume = userVolume;
+  $('volume').value = userVolume;
+  updateMuteIcon();
+  saveSettings({ volume: userVolume });
+});
+
+// show the get-started card only when the library is empty
+function updateOnboard() { const o = $('onboard'); if (o) o.hidden = library.length > 0; }
+
 function onTrackChanged(file) {
   $('now-title').textContent = titleOf(file);
+  document.title = (file ? titleOf(file) + ' · ' : '') + 'Watermans Music';
   updateRateButtons(file);
   pushHistory(file);
   renderQueue();
@@ -190,7 +222,7 @@ $('prev').addEventListener('click', () => skip(-1));
 $('like').addEventListener('click', () => rate('like'));
 $('dislike').addEventListener('click', () => rate('dislike'));
 
-$('volume').addEventListener('input', (e) => { userVolume = Number(e.target.value); if (!crossing) activeDeck().volume = userVolume; });
+$('volume').addEventListener('input', (e) => { userVolume = Number(e.target.value); if (!crossing) activeDeck().volume = userVolume; updateMuteIcon(); });
 $('volume').addEventListener('change', () => saveSettings({ volume: userVolume }));
 
 $('follow').addEventListener('change', (e) => { saveSettings({ followSchedule: e.target.checked }); if (e.target.checked) applySchedule(true); });
@@ -222,6 +254,7 @@ function rateFile(file, kind) {
       if (cur) updateRateButtons(cur);
       renderQueue();
       renderEditor();
+      toast(next === 'like' ? '♥ Liked — plays more often' : next === 'dislike' ? '⊘ Disliked — won\'t play again' : 'Rating cleared');
       if (next === 'dislike' && file === cur) skip(1);
       return next;
     });
@@ -337,7 +370,7 @@ function renderSchedule() {
   for (const b of state.blocks) html += `<th>${b.label}<br><small>${b.start}</small></th>`;
   html += '</tr></thead><tbody>';
   for (const d of state.days) {
-    html += `<tr><th>${d}</th>`;
+    html += `<tr><th><span class="d-name">${d}</span> <button class="copy-row" data-day="${d}" title="Copy ${d} to every day" aria-label="Copy ${d} to every day">⎘</button></th>`;
     for (const b of state.blocks) {
       const sel = state.schedule[d][b.id] || '';
       let opts = `<option value="">—</option>`;
@@ -347,11 +380,19 @@ function renderSchedule() {
     html += '</tr>';
   }
   table.innerHTML = html + '</tbody>';
+  const putSchedule = () => api('/api/schedule', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ schedule: state.schedule }) });
   table.querySelectorAll('select').forEach((sel) => {
     sel.addEventListener('change', () => {
       state.schedule[sel.dataset.day][sel.dataset.block] = sel.value;
-      api('/api/schedule', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ schedule: state.schedule }) })
-        .then(() => applySchedule(true));
+      putSchedule().then(() => applySchedule(true));
+    });
+  });
+  table.querySelectorAll('.copy-row').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const src = btn.dataset.day;
+      for (const d of state.days) if (d !== src) state.schedule[d] = Object.assign({}, state.schedule[src]);
+      putSchedule().then(() => { renderSchedule(); applySchedule(true); });
+      toast('Copied ' + src + ' to all days');
     });
   });
 }
@@ -384,6 +425,19 @@ function renderPlaylistNames() {
     const cnt = document.createElement('span'); cnt.className = 'count'; cnt.textContent = (state.playlists[name] || []).length;
     span.appendChild(cnt);
     span.addEventListener('click', () => { editing = name; renderPlaylistNames(); renderEditor(); });
+    const ren = document.createElement('button');
+    ren.textContent = '✎'; ren.className = 'mini'; ren.title = 'Rename';
+    ren.addEventListener('click', (e) => { e.stopPropagation(); renamePlaylist(name); });
+    const dup = document.createElement('button');
+    dup.textContent = '⧉'; dup.className = 'mini'; dup.title = 'Duplicate';
+    dup.addEventListener('click', (e) => {
+      e.stopPropagation();
+      let base = name + ' copy', n = base, i = 2;
+      while (state.playlists[n]) n = base + ' ' + i++;
+      state.playlists[n] = (state.playlists[name] || []).slice();
+      savePlaylists();
+      toast('Duplicated to "' + n + '"');
+    });
     const del = document.createElement('button');
     del.textContent = '✕'; del.className = 'del'; del.title = 'Delete playlist';
     del.addEventListener('click', (e) => {
@@ -393,7 +447,7 @@ function renderPlaylistNames() {
       if (editing === name) editing = null;
       savePlaylists();
     });
-    li.append(span, del);
+    li.append(span, ren, dup, del);
     ul.appendChild(li);
   });
 }
@@ -454,7 +508,7 @@ function renderEditor() {
 }
 
 function reloadLibrary() {
-  return api('/api/library').then((lib) => { library = lib.tracks; renderEditor(); renderQueue(); renderHistory(); });
+  return api('/api/library').then((lib) => { library = lib.tracks; renderEditor(); renderQueue(); renderHistory(); updateOnboard(); });
 }
 
 $('add-playlist').addEventListener('click', () => {
@@ -466,6 +520,20 @@ $('add-playlist').addEventListener('click', () => {
   $('new-playlist').value = '';
   savePlaylists();
 });
+
+function renamePlaylist(name) {
+  const nn = (prompt('Rename playlist', name) || '').trim();
+  if (!nn || nn === name) return;
+  if (state.playlists[nn]) return alert('A playlist with that name already exists.');
+  state.playlists[nn] = state.playlists[name];
+  delete state.playlists[name];
+  // keep schedule assignments pointing at the renamed playlist
+  for (const d of state.days) for (const b of state.blocks) if (state.schedule[d][b.id] === name) state.schedule[d][b.id] = nn;
+  if (editing === name) editing = nn;
+  api('/api/schedule', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ schedule: state.schedule }) })
+    .then(() => savePlaylists());
+  toast('Renamed to "' + nn + '"');
+}
 
 function savePlaylists() {
   api('/api/playlists', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ playlists: state.playlists }) })
@@ -496,6 +564,7 @@ function setupUpload() {
       } catch (e) { status.textContent = `Couldn't upload ${f.name}: ${e.message}`; return; }
     }
     status.textContent = `Added ${done} track${done === 1 ? '' : 's'}.`;
+    toast(`Added ${done} track${done === 1 ? '' : 's'} to the library`);
     await reloadLibrary();
     setTimeout(() => (status.textContent = ''), 4000);
   }
@@ -597,8 +666,10 @@ async function boot() {
   state.settings = state.settings || {};
 
   userVolume = state.settings.volume ?? 0.8;
+  if (userVolume > 0) preMuteVol = userVolume;
   decks.forEach((d) => { d.volume = userVolume; });
   $('volume').value = userVolume;
+  updateMuteIcon();
   $('follow').checked = !!state.settings.followSchedule;
   $('shuffle').checked = state.settings.shuffle !== false;
   const cf = state.settings.crossfade ?? 4;
@@ -608,6 +679,7 @@ async function boot() {
   renderSchedule();
   renderPlaylistNames();
   renderEditor();
+  updateOnboard();
   renderQueue();
   renderHistory();
   applySchedule(true);

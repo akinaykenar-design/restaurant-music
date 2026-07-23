@@ -32,10 +32,10 @@
         <button class="tab" data-tab="playlists">Library</button>
         <button class="tab" data-tab="schedule">Schedule</button>
       </nav>
-      <button id="theme" class="lockbtn" title="Toggle dark / light">
+      <button id="theme" class="lockbtn" title="Toggle dark / light" aria-label="Toggle dark or light mode">
         <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18V3z"/></svg>
       </button>
-      <button id="lock" class="lockbtn" title="After-hours staff mode">
+      <button id="lock" class="lockbtn" title="After-hours staff mode" aria-label="After-hours staff mode">
         <svg viewBox="0 0 24 24"><path d="M6 10V8a6 6 0 0 1 12 0v2h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1zm2 0h8V8a4 4 0 0 0-8 0v2z"/></svg>
       </button>
     </header>
@@ -58,27 +58,29 @@
             </div>
 
             <div class="transport">
-              <button id="dislike" class="rate" title="Dislike — never play again">
+              <button id="dislike" class="rate" title="Dislike — never play again" aria-label="Dislike track">
                 <svg viewBox="0 0 24 24"><path d="M10 15V5H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h5zm2-10 3.5 8.3c.1.2.1.5.1.7v4a2 2 0 0 1-4 0v-3h-.5"/></svg>
               </button>
-              <button id="prev" class="tbtn" title="Previous">
+              <button id="prev" class="tbtn" title="Previous" aria-label="Previous track">
                 <svg viewBox="0 0 24 24"><path d="M7 6v12M19 6l-9 6 9 6z"/></svg>
               </button>
-              <button id="playpause" class="play" title="Play / Pause">
+              <button id="playpause" class="play" title="Play / Pause" aria-label="Play or pause">
                 <svg class="ic-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                 <svg class="ic-pause" viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
               </button>
-              <button id="next" class="tbtn" title="Skip">
+              <button id="next" class="tbtn" title="Skip" aria-label="Skip track">
                 <svg viewBox="0 0 24 24"><path d="M17 6v12M5 6l9 6-9 6z"/></svg>
               </button>
-              <button id="like" class="rate" title="Like — play more often">
+              <button id="like" class="rate" title="Like — play more often" aria-label="Like track">
                 <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.35-9.5-8.5C.8 9.6 2 6 5.2 6c1.9 0 3 .9 3.8 2 .8-1.1 1.9-2 3.8-2 3.2 0 4.4 3.6 2.7 6.5C19 16.65 12 21 12 21z"/></svg>
               </button>
             </div>
 
             <div class="vol-row">
-              <svg class="vic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 5V4L8 9H4z"/></svg>
-              <input type="range" id="volume" min="0" max="1" step="0.01" />
+              <button id="mute" class="mutebtn" title="Mute" aria-label="Mute">
+                <svg class="vic" id="vic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 5V4L8 9H4z"/></svg>
+              </button>
+              <input type="range" id="volume" min="0" max="1" step="0.01" aria-label="Volume" />
             </div>
 
             <div class="toggles">
@@ -90,6 +92,15 @@
               </label>
             </div>
           </div>
+        </div>
+
+        <div class="card onboard" id="onboard" hidden>
+          <h3>Get started</h3>
+          <ol class="steps">
+            <li>Open the <b>Library</b> tab and drop in some MP3s — see <code>MUSIC-LIBRARY.md</code> for free, venue-safe tracks.</li>
+            <li>Create a <b>Lunch</b> and a <b>Dinner</b> playlist, add tracks with <b>+</b>.</li>
+            <li>Set them on the <b>Schedule</b> tab — the music switches automatically through the day.</li>
+          </ol>
         </div>
 
         <div class="cols">
@@ -191,6 +202,7 @@
       </section>
     </main>
 
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <script src="app.js"></script>
   </body>
 </html>
