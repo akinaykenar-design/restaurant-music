@@ -185,7 +185,10 @@
             <div class="share-addr">
               <div class="addr-label">Address</div>
               <div class="big-addr" id="big-addr">—</div>
-              <button id="copy-addr" class="ghost">Copy address</button>
+              <div class="share-btns">
+                <button id="copy-addr" class="ghost">Copy address</button>
+                <button id="print-poster" class="ghost">🖨 Print poster</button>
+              </div>
             </div>
           </div>
         </div>
@@ -235,6 +238,28 @@
         </div>
       </section>
     </main>
+
+    <!-- sticky mini-player (phones only) -->
+    <div class="miniplayer" id="miniplayer" hidden>
+      <div class="mini-info"><span class="mini-title" id="mini-title">Nothing playing</span></div>
+      <button id="mini-play" class="mini-btn" aria-label="Play or pause">
+        <svg class="ic-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg class="ic-pause" viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+      </button>
+      <button id="mini-next" class="mini-btn" aria-label="Skip">
+        <svg viewBox="0 0 24 24"><path d="M17 6v12M5 6l9 6-9 6z"/></svg>
+      </button>
+    </div>
+
+    <!-- print-only poster -->
+    <div id="poster" aria-hidden="true">
+      <svg class="poster-logo" viewBox="0 0 100 100"><rect width="100" height="100" rx="23" fill="#10917b"/><rect x="21" y="30" width="8" height="40" rx="4" fill="#fff"/><rect x="71" y="30" width="8" height="40" rx="4" fill="#fff"/><circle cx="50" cy="50" r="15.5" fill="none" stroke="#ff8a34" stroke-width="8"/></svg>
+      <h1>Scan to control the music</h1>
+      <p>Connect to the venue WiFi, then scan with your phone camera.</p>
+      <img id="poster-qr" alt="Scan to open Watermans Music" />
+      <div class="poster-addr" id="poster-addr">—</div>
+      <p class="poster-foot">Watermans Music · Add to Home Screen for an app icon</p>
+    </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <script src="app.js"></script>

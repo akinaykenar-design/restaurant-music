@@ -70,6 +70,8 @@ function buildQueue(files) {
 function setPlayingUI(on) {
   const p = document.querySelector('.player');
   if (p) p.classList.toggle('playing', on); // CSS swaps play/pause icon
+  const mp = $('miniplayer');
+  if (mp) mp.classList.toggle('playing', on);
 }
 
 const fmt = (s) => (!s || isNaN(s)) ? '0:00' : Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
@@ -120,12 +122,16 @@ function updateOnboard() { const o = $('onboard'); if (o) o.hidden = library.len
 
 function onTrackChanged(file) {
   $('now-title').textContent = titleOf(file);
+  $('mini-title').textContent = titleOf(file);
+  $('miniplayer').hidden = false;
   document.title = (file ? titleOf(file) + ' · ' : '') + 'Watermans Music';
   updateRateButtons(file);
   pushHistory(file);
   renderQueue();
   setPlayingUI(!activeDeck().paused);
 }
+$('mini-play').addEventListener('click', () => $('playpause').click());
+$('mini-next').addEventListener('click', () => skip(1));
 
 function loadQueue(files, autoplay) {
   queue = buildQueue(files);
@@ -644,6 +650,10 @@ function loadStreamInfo() {
         $('copy-addr').textContent = 'Copied ✓';
         setTimeout(() => ($('copy-addr').textContent = 'Copy address'), 1500);
       };
+      // printable poster
+      $('poster-qr').src = '/api/qr?text=' + encodeURIComponent(appUrl);
+      $('poster-addr').textContent = appUrl;
+      $('print-poster').onclick = () => window.print();
       $('share-card').hidden = false;
     }
   }).catch(() => {});
