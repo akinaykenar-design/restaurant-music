@@ -536,6 +536,24 @@ function setupAfterHours() {
   });
 }
 
+// ---- theme (manual light/dark override, remembered on this device) ---------
+function setupTheme() {
+  const saved = localStorage.getItem('wm-theme');
+  if (saved === 'dark' || saved === 'light') document.documentElement.dataset.theme = saved;
+  const btn = $('theme');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const effective = document.documentElement.dataset.theme
+      || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const next = effective === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem('wm-theme', next);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', next === 'dark' ? '#0f1113' : '#10917b');
+  });
+}
+setupTheme();
+
 // ---- boot ------------------------------------------------------------------
 async function boot() {
   const [st, lib] = await Promise.all([api('/api/state'), api('/api/library')]);

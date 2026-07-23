@@ -23,8 +23,10 @@
   --radius-sm: 11px;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
+/* dark tokens — applied when the OS is dark (and the user hasn't forced light),
+   or when the user manually picks dark via the toggle. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --bg: #0f1113; --surface: #191b1e; --surface-2: #1f2226;
     --text: #edeef0; --muted: #9ba0a6; --faint: #71767c;
     --border: #2a2d31; --border-strong: #3a3e44;
@@ -33,6 +35,15 @@
     --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
     --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 14px 32px -18px rgba(0,0,0,0.6);
   }
+}
+:root[data-theme='dark'] {
+  --bg: #0f1113; --surface: #191b1e; --surface-2: #1f2226;
+  --text: #edeef0; --muted: #9ba0a6; --faint: #71767c;
+  --border: #2a2d31; --border-strong: #3a3e44;
+  --accent: #2bb89c; --accent-press: #45c7ad; --accent-tint: #2bb89c1f;
+  --warn: #e0a752; --warn-tint: #e0a75218; --bad: #ef8377; --bad-tint: #ef83771f;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 14px 32px -18px rgba(0,0,0,0.6);
 }
 
 * { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
