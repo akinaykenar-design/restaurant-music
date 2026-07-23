@@ -192,6 +192,40 @@ $('sleep').addEventListener('change', (e) => {
   }
 });
 
+// "Stop at" a clock time (recurring daily, e.g. close). Fires once per occurrence.
+const pad2 = (n) => String(n).padStart(2, '0');
+function fmtClock(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number);
+  return (((h + 11) % 12) + 1) + ':' + pad2(m) + (h < 12 ? ' am' : ' pm');
+}
+$('stop-at').addEventListener('change', (e) => {
+  state.settings.stopAt = e.target.value || '';
+  saveSettings({ stopAt: state.settings.stopAt });
+  toast(state.settings.stopAt ? 'Will stop daily at ' + fmtClock(state.settings.stopAt) : 'Stop-at cleared');
+});
+let lastStopFired = '';
+setInterval(() => {
+  const sa = state.settings && state.settings.stopAt;
+  if (!sa) return;
+  const now = new Date();
+  const cur = pad2(now.getHours()) + ':' + pad2(now.getMinutes());
+  if (cur === sa && lastStopFired !== cur && !activeDeck().paused) {
+    lastStopFired = cur;
+    fadeOutStop();
+    toast('Auto-stopped (close time)');
+  }
+}, 15000);
+
+// Add all shown library tracks to the current playlist
+$('add-all').addEventListener('click', () => {
+  if (!editing) return;
+  const shown = library.filter((t) => !libFilter || t.title.toLowerCase().includes(libFilter));
+  let added = 0;
+  for (const t of shown) if (!state.playlists[editing].includes(t.file)) { state.playlists[editing].push(t.file); added++; }
+  savePlaylists();
+  toast('Added ' + added + ' track' + (added === 1 ? '' : 's') + ' to ' + editing);
+});
+
 function beginCrossfade(cf) {
   if (crossing || queue.length < 2) return;
   crossing = true;
@@ -496,6 +530,8 @@ function renderEditor() {
   const plUl = $('pl-tracks');
   const libUl = $('lib-tracks');
   $('lib-count').textContent = library.length;
+  $('add-all').disabled = !editing || !library.length;
+  $('add-all').textContent = editing ? '+ Add all shown to ' + editing : '+ Add all shown to playlist';
   plUl.innerHTML = '';
   libUl.innerHTML = '';
 
@@ -755,6 +791,7 @@ async function boot() {
   $('shuffle').checked = state.settings.shuffle !== false;
   const cf = state.settings.crossfade ?? 4;
   $('crossfade').value = cf; $('cf-val').textContent = cf + 's';
+  $('stop-at').value = state.settings.stopAt || '';
 
   renderBlocksEditor();
   renderSchedule();
