@@ -32,11 +32,10 @@ npm install
 npm start         # http://127.0.0.1:3100
 ```
 
-The app ships with **six original background tracks** in `music/` (soft café
-ambience — pads, arpeggios, gentle melodies). They're generated from scratch in
-code (`scripts/generate-music.js`), so they're **copyright-free** and safe to
-play in a venue with no licensing fees. Run `npm run music` to regenerate them,
-or just drop your own royalty-free files into `music/`.
+The library starts empty. Add music on the **Playlists** tab by dragging your
+MP3s into the page (or drop files into the `music/` folder). Use license-free
+tracks so there are no venue fees — see `MUSIC-LIBRARY.md` for a curated list of
+free, restaurant-safe sources (Pixabay Organic House, etc.).
 
 Then open the app, create a playlist on the **Playlists** tab, assign it to
 time blocks on the **Schedule** tab, and it plays automatically on

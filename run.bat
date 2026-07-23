@@ -26,18 +26,9 @@ if not exist "node_modules\" (
   )
 )
 
-REM If the music folder has no audio yet, generate CC0 test tones so it plays.
-set "HASMUSIC="
-for %%E in (mp3 m4a aac ogg wav flac webm) do (
-  if exist "music\*.%%E" set "HASMUSIC=1"
-)
-if not defined HASMUSIC (
-  echo No music found - generating original background tracks ^(takes a moment^)...
-  call npm run music
-)
-
 echo.
-echo   Venue Music is starting at http://127.0.0.1:3100
+echo   Watermans Music is starting at http://127.0.0.1:3100
+echo   Add your music on the Playlists tab (drag ^& drop your MP3s).
 echo   Keep this window open while you use it. Close it to stop the music.
 echo.
 start "" http://127.0.0.1:3100
