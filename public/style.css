@@ -287,6 +287,8 @@ h4 { margin: 0 0 12px; font-size: 0.98rem; display: flex; align-items: center; g
 .block-row .del:disabled { opacity: 0.3; cursor: not-allowed; }
 
 /* ---------- schedule ---------- */
+.sched-auto { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 4px 0 14px; }
+.sched-auto .hint { margin: 0; }
 .table-wrap { overflow-x: auto; padding: 8px; }
 #schedule-table { border-collapse: separate; border-spacing: 6px; width: 100%; }
 #schedule-table th, #schedule-table td { text-align: center; }

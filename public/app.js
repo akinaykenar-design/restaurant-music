@@ -727,6 +727,44 @@ function buildVibePlaylists() {
   toast(`Built ${made} vibe playlist${made === 1 ? '' : 's'}`);
 }
 
+// Fill the whole schedule from analysed music: builds Chill/Warm/Upbeat lists,
+// then assigns each block a vibe by its start time — chill through the day,
+// warmer in the afternoon, upbeat into dinner. Falls back to the nearest
+// available vibe if a bucket is empty.
+function autoScheduleByVibe() {
+  const analysed = library.filter((t) => t.vibe);
+  if (!analysed.length) { toast('Run “✨ Analyse audio” in the Library first'); return; }
+  const buckets = { Chill: [], Warm: [], Upbeat: [] };
+  analysed.forEach((t) => { if (buckets[t.vibe]) buckets[t.vibe].push(t.file); });
+  for (const v of ['Chill', 'Warm', 'Upbeat']) if (buckets[v].length) state.playlists[v] = buckets[v];
+
+  const avail = (v) => state.playlists[v] && state.playlists[v].length;
+  const pref = { Chill: ['Chill', 'Warm', 'Upbeat'], Warm: ['Warm', 'Chill', 'Upbeat'], Upbeat: ['Upbeat', 'Warm', 'Chill'] };
+  const pick = (want) => { for (const v of pref[want]) if (avail(v)) return v; return ''; };
+  const wantFor = (h) => (h < 11 ? 'Chill' : h < 15 ? 'Chill' : h < 18 ? 'Warm' : 'Upbeat');
+
+  // Save the new vibe playlists first (schedule refs must point at real lists),
+  // then assign every block × day and save the schedule.
+  api('/api/playlists', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ playlists: state.playlists }) })
+    .then((res) => {
+      if (res.schedule) state.schedule = res.schedule;
+      let filled = 0;
+      for (const d of state.days) {
+        for (const b of state.blocks) {
+          const h = parseInt((b.start || '0:0').split(':')[0], 10) || 0;
+          const pl = pick(wantFor(h));
+          if (pl) { state.schedule[d][b.id] = pl; filled++; }
+        }
+      }
+      return api('/api/schedule', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ schedule: state.schedule }) })
+        .then(() => {
+          renderPlaylistNames(); renderEditor(); renderSchedule(); refreshAhPlaylists();
+          applySchedule(true);
+          toast(filled ? 'Schedule filled by vibe' : 'No blocks to fill');
+        });
+    });
+}
+
 $('add-playlist').addEventListener('click', () => {
   const name = $('new-playlist').value.trim();
   if (!name) return;
@@ -955,6 +993,7 @@ async function boot() {
   setupUpload();
   $('analyze-btn').addEventListener('click', analyzeLibrary);
   $('auto-vibe').addEventListener('click', buildVibePlaylists);
+  $('auto-schedule').addEventListener('click', autoScheduleByVibe);
   setupVenuePlayer();
   setupAdmin();
   refreshAhPlaylists();
