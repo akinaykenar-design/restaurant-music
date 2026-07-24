@@ -58,18 +58,20 @@ document.querySelectorAll('.tab').forEach((btn) => {
   });
 });
 
-// ---- queue building (smart rotation: likes more, dislikes less) ------------
+// ---- queue building (smart rotation: like more, less fewer, ban never) -----
 function shuffle(a) {
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
   return a;
 }
-// Weight each track by rating: liked plays more, disliked less (but still
-// reappears), neutral in between.
-const weightOf = (r) => (r === 'like' ? 3 : r === 'dislike' ? 1 : 2);
+// Weight each track by rating: liked plays more, "less" plays less (but still
+// reappears), neutral in between. Banned (dislike) tracks are excluded.
+const weightOf = (r) => (r === 'like' ? 3 : r === 'less' ? 1 : 2);
 function buildQueue(files) {
   const ratings = state.ratings || {};
+  let pool = files.filter((f) => ratings[f] !== 'dislike');
+  if (!pool.length) pool = files.slice();
   const weighted = [];
-  for (const f of files) { const w = weightOf(ratings[f]); for (let k = 0; k < w; k++) weighted.push(f); }
+  for (const f of pool) { const w = weightOf(ratings[f]); for (let k = 0; k < w; k++) weighted.push(f); }
   if (state.settings.shuffle !== false) shuffle(weighted);
   return weighted;
 }
@@ -340,8 +342,8 @@ function rateFile(file, kind) {
       if (cur) updateRateButtons(cur);
       renderQueue();
       renderEditor();
-      toast(next === 'like' ? '♥ Liked — plays more often' : next === 'dislike' ? '⊘ Disliked — plays less often' : 'Rating cleared');
-      if (next === 'dislike' && file === cur) skip(1);
+      toast(next === 'like' ? '♥ Liked — plays more often' : next === 'less' ? '↓ Plays less often (still reappears)' : next === 'dislike' ? '⊘ Banned — won\'t play' : 'Rating cleared');
+      if ((next === 'dislike' || next === 'less') && file === cur) skip(1);
       return next;
     });
 }
@@ -625,7 +627,8 @@ function renderEditor() {
       const tags = document.createElement('span');
       tags.className = 'tags';
       if (rt === 'like') { const l = document.createElement('span'); l.className = 'tag tag-like'; l.textContent = '♥ Liked'; tags.appendChild(l); }
-      if (rt === 'dislike') { const dl = document.createElement('span'); dl.className = 'tag tag-dislike'; dl.textContent = '⊘ Disliked'; tags.appendChild(dl); }
+      if (rt === 'less') { const ls = document.createElement('span'); ls.className = 'tag tag-less'; ls.textContent = '↓ Less'; tags.appendChild(ls); }
+      if (rt === 'dislike') { const dl = document.createElement('span'); dl.className = 'tag tag-dislike'; dl.textContent = '⊘ Banned'; tags.appendChild(dl); }
       if (t.vibe) { const v = document.createElement('span'); v.className = 'tag vibe-' + t.vibe.toLowerCase(); v.textContent = t.vibe; tags.appendChild(v); }
       if (t.genre) { const g = document.createElement('span'); g.className = 'tag tag-genre'; g.textContent = t.genre; tags.appendChild(g); }
       name.appendChild(tags);
@@ -634,8 +637,12 @@ function renderEditor() {
     like.textContent = '♥'; like.title = 'Like — plays more often';
     like.className = rt === 'like' ? 'liked' : '';
     like.addEventListener('click', () => rateFile(t.file, 'like'));
+    const less = document.createElement('button');
+    less.textContent = '↓'; less.title = 'Play less — still reappears, just less often';
+    less.className = rt === 'less' ? 'lessed' : '';
+    less.addEventListener('click', () => rateFile(t.file, 'less'));
     const dislike = document.createElement('button');
-    dislike.textContent = '⊘'; dislike.title = 'Dislike — plays less often (still reappears)';
+    dislike.textContent = '⊘'; dislike.title = 'Ban — never play this track';
     dislike.className = rt === 'dislike' ? 'disliked' : '';
     dislike.addEventListener('click', () => rateFile(t.file, 'dislike'));
     const add = document.createElement('button');
@@ -648,7 +655,7 @@ function renderEditor() {
       fetch('/api/track?name=' + encodeURIComponent(t.file), { method: 'DELETE' }).then((r) => r.json()).then(() => reloadLibrary());
     });
     const dur = document.createElement('span'); dur.className = 'dur'; dur.textContent = fmtDur(t.duration);
-    li.append(name, dur, like, dislike, add, del);
+    li.append(name, dur, like, less, dislike, add, del);
     libUl.appendChild(li);
   });
 }

@@ -198,6 +198,7 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .tracklist button:hover:not(:disabled) { border-color: var(--accent); }
 .tracklist .del:hover { border-color: var(--bad); color: var(--bad); }
 .tracklist .liked { color: var(--accent); border-color: var(--accent); }
+.tracklist .lessed { color: var(--warn); border-color: var(--warn); }
 .tracklist .disliked { color: var(--bad); border-color: var(--bad); }
 
 /* ---------- accent cards ---------- */
@@ -269,7 +270,8 @@ h4 { margin: 0 0 12px; font-size: 0.98rem; display: flex; align-items: center; g
 .tag.vibe-warm { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); background: var(--warn-tint); }
 .tag.vibe-upbeat { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); background: var(--accent-tint); }
 .tag.tag-like { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); background: var(--accent-tint); }
-.tag.tag-dislike { color: var(--bad, #b5731a); border-color: color-mix(in srgb, var(--bad, #b5731a) 40%, transparent); background: var(--bad-tint, var(--warn-tint)); }
+.tag.tag-less { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); background: var(--warn-tint); }
+.tag.tag-dislike { color: var(--bad, #c0392b); border-color: color-mix(in srgb, var(--bad, #c0392b) 45%, transparent); background: var(--bad-tint, #c0392b14); }
 .pl-auto { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 1px 6px; border-radius: 999px; color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); background: var(--accent-tint); vertical-align: middle; }
 .dropzone { border: 2px dashed var(--border-strong); border-radius: var(--radius-sm); padding: 16px; text-align: center; color: var(--muted); font-size: 0.86rem; margin-bottom: 12px; transition: all 0.15s; }
 .dropzone svg { width: 24px; height: 24px; fill: none; stroke: var(--faint); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 2px; }

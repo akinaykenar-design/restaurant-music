@@ -13,11 +13,13 @@ web app (nothing to install).
 - **Now Playing** — dual-deck player with **crossfade** (adjustable) for
   seamless, gap-free background music; play/pause/skip, a seekable progress
   bar, volume, **up-next** queue and **recently-played** history.
-- **Like / Dislike** — like a track so it plays *more often*; dislike so it
-  plays *less often* (it still reappears — nothing is lost). Liked and disliked
-  tracks are tagged in the Library and can be filtered, so ratings are easy to
-  review and undo. Works from Now Playing or inline in the Library.
-- **Shuffle** with weighted rotation (likes surface more, dislikes less).
+- **Like / Less / Ban** — three levels of control: **like** (♥) plays a track
+  *more often*, **play less** (↓) keeps it in rotation but *less often*, and
+  **ban** (⊘) means it *never plays again*. Every rating is tagged in the
+  Library and filterable, so they're easy to review and undo. Works from Now
+  Playing or inline in the Library.
+- **Shuffle** with weighted rotation (liked surface more, "less" surface less,
+  banned never).
 - **Schedule** — fully **editable time blocks** (add / rename / delete / re-time)
   × days; assign a playlist per cell; switches automatically through the day.
 - **Library** — drag-and-drop upload, search, delete; friendly track titles.

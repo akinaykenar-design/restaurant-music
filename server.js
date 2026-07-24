@@ -363,7 +363,7 @@ app.post('/api/rate', (req, res) => {
   const rating = req.body && req.body.rating;
   if (!file) return res.status(400).json({ error: 'file required' });
   data.ratings = data.ratings || {};
-  if (rating === 'like' || rating === 'dislike') data.ratings[file] = rating;
+  if (rating === 'like' || rating === 'less' || rating === 'dislike') data.ratings[file] = rating;
   else delete data.ratings[file];
   saveData(data);
   res.json({ ok: true, ratings: data.ratings });
@@ -594,12 +594,14 @@ const station = {
     if (!tracks.length) tracks = scanLibrary().map((t) => t.file); // fall back to whole library
     tracks = tracks.filter((f) => fs.existsSync(path.join(MUSIC_DIR, f)));
 
-    // Smart rotation: liked tracks play more, disliked play less (but still
-    // reappear), everything shuffled.
+    // Smart rotation: banned (disliked) tracks never play; "less" tracks play
+    // less often but still reappear; liked tracks play more. Then shuffle.
     const ratings = data.ratings || {};
-    const weightOf = (r) => (r === 'like' ? 3 : r === 'dislike' ? 1 : 2);
+    const weightOf = (r) => (r === 'like' ? 3 : r === 'less' ? 1 : 2);
+    let pool = tracks.filter((f) => ratings[f] !== 'dislike');
+    if (!pool.length) pool = tracks.slice();
     const weighted = [];
-    for (const f of tracks) { const w = weightOf(ratings[f]); for (let k = 0; k < w; k++) weighted.push(f); }
+    for (const f of pool) { const w = weightOf(ratings[f]); for (let k = 0; k < w; k++) weighted.push(f); }
     if (data.settings.shuffle !== false) {
       for (let i = weighted.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
