@@ -51,7 +51,7 @@ function defaultData() {
     for (const b of blocks) schedule[d][b.id] = '';
   }
   return {
-    blocks, days, schedule, playlists: {}, ratings: {}, meta: {},
+    blocks, days, schedule, playlists: {}, autoPlaylists: [], ratings: {}, meta: {},
     settings: {
       volume: 0.8, followSchedule: true, shuffle: true, crossfade: 4,
       afterHoursPassword: 'staff', // change it in the unlocked panel
@@ -351,6 +351,7 @@ app.get('/api/state', (_req, res) => {
     days: data.days,
     schedule: data.schedule,
     playlists: data.playlists,
+    autoPlaylists: data.autoPlaylists || [],
     ratings: data.ratings || {},
     settings: publicSettings(),
   });
@@ -394,6 +395,10 @@ app.put('/api/playlists', (req, res) => {
     return res.status(400).json({ error: 'playlists object required' });
   }
   data.playlists = playlists;
+  // Optionally update which playlists are auto-generated (from the vibe tools);
+  // always prune the list to playlists that still exist.
+  if (Array.isArray(req.body.auto)) data.autoPlaylists = req.body.auto;
+  data.autoPlaylists = (data.autoPlaylists || []).filter((n) => n in playlists);
   // Drop schedule references to playlists that no longer exist.
   for (const d of data.days) {
     for (const b of data.blocks) {
@@ -402,7 +407,7 @@ app.put('/api/playlists', (req, res) => {
     }
   }
   saveData(data);
-  res.json({ ok: true, playlists: data.playlists, schedule: data.schedule });
+  res.json({ ok: true, playlists: data.playlists, autoPlaylists: data.autoPlaylists, schedule: data.schedule });
 });
 
 app.put('/api/schedule', (req, res) => {
@@ -589,12 +594,12 @@ const station = {
     if (!tracks.length) tracks = scanLibrary().map((t) => t.file); // fall back to whole library
     tracks = tracks.filter((f) => fs.existsSync(path.join(MUSIC_DIR, f)));
 
-    // Smart rotation: drop dislikes, play likes more, shuffle.
+    // Smart rotation: liked tracks play more, disliked play less (but still
+    // reappear), everything shuffled.
     const ratings = data.ratings || {};
-    let pool = tracks.filter((f) => ratings[f] !== 'dislike');
-    if (!pool.length) pool = tracks.slice();
+    const weightOf = (r) => (r === 'like' ? 3 : r === 'dislike' ? 1 : 2);
     const weighted = [];
-    for (const f of pool) { weighted.push(f); if (ratings[f] === 'like') weighted.push(f); }
+    for (const f of tracks) { const w = weightOf(ratings[f]); for (let k = 0; k < w; k++) weighted.push(f); }
     if (data.settings.shuffle !== false) {
       for (let i = weighted.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));

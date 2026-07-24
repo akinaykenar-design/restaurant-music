@@ -13,16 +13,22 @@ web app (nothing to install).
 - **Now Playing** — dual-deck player with **crossfade** (adjustable) for
   seamless, gap-free background music; play/pause/skip, a seekable progress
   bar, volume, **up-next** queue and **recently-played** history.
-- **Like / Dislike** — like a track so it plays *more often*; dislike to *ban*
-  it. Works from Now Playing or inline in the Library.
-- **Shuffle** with weighted rotation (likes surface more, dislikes never).
+- **Like / Dislike** — like a track so it plays *more often*; dislike so it
+  plays *less often* (it still reappears — nothing is lost). Liked and disliked
+  tracks are tagged in the Library and can be filtered, so ratings are easy to
+  review and undo. Works from Now Playing or inline in the Library.
+- **Shuffle** with weighted rotation (likes surface more, dislikes less).
 - **Schedule** — fully **editable time blocks** (add / rename / delete / re-time)
   × days; assign a playlist per cell; switches automatically through the day.
 - **Library** — drag-and-drop upload, search, delete; friendly track titles.
 - **Auto-tag by genre & vibe** — reads each track's embedded **genre** tag and
   analyses the audio for tempo + energy to bucket it **Chill / Warm / Upbeat**.
-  Filter and sort the library by genre or vibe, and **build vibe playlists** in
-  one click (great for chill lunch → upbeat dinner).
+  Filter and sort the library by genre, vibe or rating, and **build vibe
+  playlists** in one click (great for chill lunch → upbeat dinner).
+- **Auto & custom playlists** — vibe-built playlists are marked **Auto** and
+  refresh when you rebuild; the moment you hand-edit one it becomes your own
+  **custom** playlist and is never overwritten. Manual playlists are always
+  left untouched.
 - **After-hours staff mode** — hidden, password-gated; play a staff playlist
   off-schedule. Password stays server-side.
 - **Venue stream** — a continuous MP3 stream (`/stream`) a Q-SYS Core (or VLC)

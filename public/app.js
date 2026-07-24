@@ -1,7 +1,7 @@
 'use strict';
 
 // ---- state -----------------------------------------------------------------
-let state = { blocks: [], days: [], schedule: {}, playlists: {}, ratings: {}, settings: {} };
+let state = { blocks: [], days: [], schedule: {}, playlists: {}, autoPlaylists: [], ratings: {}, settings: {} };
 let library = [];
 let editing = null;
 
@@ -12,6 +12,7 @@ let currentBlockKey = null;
 let libFilter = '';       // library search term
 let libGenre = '';        // library genre filter
 let libVibe = '';         // library vibe filter (Chill/Warm/Upbeat)
+let libRating = '';       // library rating filter (like/dislike/rated/none)
 let libSort = 'title';    // library sort key
 
 // dual-deck crossfade player
@@ -57,17 +58,18 @@ document.querySelectorAll('.tab').forEach((btn) => {
   });
 });
 
-// ---- queue building (smart rotation: likes more, dislikes never) -----------
+// ---- queue building (smart rotation: likes more, dislikes less) ------------
 function shuffle(a) {
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
   return a;
 }
+// Weight each track by rating: liked plays more, disliked less (but still
+// reappears), neutral in between.
+const weightOf = (r) => (r === 'like' ? 3 : r === 'dislike' ? 1 : 2);
 function buildQueue(files) {
   const ratings = state.ratings || {};
-  let pool = files.filter((f) => ratings[f] !== 'dislike');
-  if (!pool.length) pool = files.slice();
   const weighted = [];
-  for (const f of pool) { weighted.push(f); if (ratings[f] === 'like') weighted.push(f); }
+  for (const f of files) { const w = weightOf(ratings[f]); for (let k = 0; k < w; k++) weighted.push(f); }
   if (state.settings.shuffle !== false) shuffle(weighted);
   return weighted;
 }
@@ -225,9 +227,10 @@ setInterval(() => {
 // Add all shown library tracks to the current playlist
 $('add-all').addEventListener('click', () => {
   if (!editing) return;
-  const shown = library.filter((t) => !libFilter || t.title.toLowerCase().includes(libFilter));
+  const shown = filteredLibrary();
   let added = 0;
   for (const t of shown) if (!state.playlists[editing].includes(t.file)) { state.playlists[editing].push(t.file); added++; }
+  markCustom(editing);
   savePlaylists();
   toast('Added ' + added + ' track' + (added === 1 ? '' : 's') + ' to ' + editing);
 });
@@ -313,6 +316,7 @@ $('crossfade').addEventListener('change', (e) => saveSettings({ crossfade: Numbe
 $('lib-search').addEventListener('input', (e) => { libFilter = e.target.value.trim().toLowerCase(); renderEditor(); });
 $('lib-genre').addEventListener('change', (e) => { libGenre = e.target.value; renderEditor(); });
 $('lib-vibe').addEventListener('change', (e) => { libVibe = e.target.value; renderEditor(); });
+$('lib-rating').addEventListener('change', (e) => { libRating = e.target.value; renderEditor(); });
 $('lib-sort').addEventListener('change', (e) => { libSort = e.target.value; renderEditor(); });
 
 // keyboard shortcuts (ignored while typing in a field)
@@ -336,7 +340,7 @@ function rateFile(file, kind) {
       if (cur) updateRateButtons(cur);
       renderQueue();
       renderEditor();
-      toast(next === 'like' ? '♥ Liked — plays more often' : next === 'dislike' ? '⊘ Disliked — won\'t play again' : 'Rating cleared');
+      toast(next === 'like' ? '♥ Liked — plays more often' : next === 'dislike' ? '⊘ Disliked — plays less often' : 'Rating cleared');
       if (next === 'dislike' && file === cur) skip(1);
       return next;
     });
@@ -482,6 +486,31 @@ function renderSchedule() {
 // ---- playlists tab ---------------------------------------------------------
 function emptyRow(text) { const li = document.createElement('li'); li.className = 'empty'; li.textContent = text; return li; }
 
+// The library filtered by the search box + genre / vibe / rating filters and
+// ordered by the current sort. Shared by the list render and "add all shown".
+function filteredLibrary() {
+  const vibeRank = { Chill: 0, Warm: 1, Upbeat: 2 };
+  const ratingMatch = (t) => {
+    if (!libRating) return true;
+    const r = ratingOf(t.file);
+    if (libRating === 'rated') return !!r;
+    if (libRating === 'none') return !r;
+    return r === libRating;
+  };
+  const shown = library.filter((t) =>
+    (!libFilter || t.title.toLowerCase().includes(libFilter) || (t.genre || '').toLowerCase().includes(libFilter) || (t.artist || '').toLowerCase().includes(libFilter)) &&
+    (!libGenre || t.genre === libGenre) &&
+    (!libVibe || t.vibe === libVibe) &&
+    ratingMatch(t));
+  return shown.sort((a, b) => {
+    if (libSort === 'vibe') return (vibeRank[a.vibe] ?? 9) - (vibeRank[b.vibe] ?? 9) || a.title.localeCompare(b.title);
+    if (libSort === 'bpm') return (a.bpm || 999) - (b.bpm || 999) || a.title.localeCompare(b.title);
+    if (libSort === 'genre') return (a.genre || '~').localeCompare(b.genre || '~') || a.title.localeCompare(b.title);
+    if (libSort === 'duration') return (a.duration || 0) - (b.duration || 0) || a.title.localeCompare(b.title);
+    return a.title.localeCompare(b.title);
+  });
+}
+
 function preview(file) {
   crossing = false; otherDeck().pause();
   queue = [file]; queueIndex = 0;
@@ -506,6 +535,13 @@ function renderPlaylistNames() {
     span.textContent = name + '  ';
     const cnt = document.createElement('span'); cnt.className = 'count'; cnt.textContent = (state.playlists[name] || []).length;
     span.appendChild(cnt);
+    if ((state.autoPlaylists || []).includes(name)) {
+      const badge = document.createElement('span');
+      badge.className = 'pl-auto'; badge.textContent = 'Auto';
+      badge.title = 'Auto-generated from your analysed music. Refreshes when you rebuild — edit it and it becomes your own custom playlist.';
+      span.appendChild(document.createTextNode(' '));
+      span.appendChild(badge);
+    }
     span.addEventListener('click', () => { editing = name; renderPlaylistNames(); renderEditor(); });
     const ren = document.createElement('button');
     ren.textContent = '✎'; ren.className = 'mini'; ren.title = 'Rename';
@@ -559,13 +595,13 @@ function renderEditor() {
       name.addEventListener('click', () => preview(file));
       const up = document.createElement('button');
       up.textContent = '↑'; up.className = 'mini'; up.title = 'Move up'; up.disabled = i === 0;
-      up.addEventListener('click', () => { [tracks[i - 1], tracks[i]] = [tracks[i], tracks[i - 1]]; savePlaylists(); });
+      up.addEventListener('click', () => { [tracks[i - 1], tracks[i]] = [tracks[i], tracks[i - 1]]; markCustom(editing); savePlaylists(); });
       const down = document.createElement('button');
       down.textContent = '↓'; down.className = 'mini'; down.title = 'Move down'; down.disabled = i === tracks.length - 1;
-      down.addEventListener('click', () => { [tracks[i + 1], tracks[i]] = [tracks[i], tracks[i + 1]]; savePlaylists(); });
+      down.addEventListener('click', () => { [tracks[i + 1], tracks[i]] = [tracks[i], tracks[i + 1]]; markCustom(editing); savePlaylists(); });
       const rm = document.createElement('button');
       rm.textContent = '−'; rm.className = 'del'; rm.title = 'Remove';
-      rm.addEventListener('click', () => { tracks.splice(i, 1); savePlaylists(); });
+      rm.addEventListener('click', () => { tracks.splice(i, 1); markCustom(editing); savePlaylists(); });
       const dur = document.createElement('span'); dur.className = 'dur'; dur.textContent = fmtDur(durOf(file));
       li.append(name, dur, up, down, rm);
       plUl.appendChild(li);
@@ -577,42 +613,34 @@ function renderEditor() {
   $('auto-vibe').disabled = !analysedCount;
 
   if (!library.length) { libUl.appendChild(emptyRow('No music yet — drop files above.')); return; }
-  const vibeRank = { Chill: 0, Warm: 1, Upbeat: 2 };
-  let shown = library.filter((t) =>
-    (!libFilter || t.title.toLowerCase().includes(libFilter) || (t.genre || '').toLowerCase().includes(libFilter) || (t.artist || '').toLowerCase().includes(libFilter)) &&
-    (!libGenre || t.genre === libGenre) &&
-    (!libVibe || t.vibe === libVibe));
-  shown = shown.slice().sort((a, b) => {
-    if (libSort === 'vibe') return (vibeRank[a.vibe] ?? 9) - (vibeRank[b.vibe] ?? 9) || a.title.localeCompare(b.title);
-    if (libSort === 'bpm') return (a.bpm || 999) - (b.bpm || 999) || a.title.localeCompare(b.title);
-    if (libSort === 'genre') return (a.genre || '~').localeCompare(b.genre || '~') || a.title.localeCompare(b.title);
-    if (libSort === 'duration') return (a.duration || 0) - (b.duration || 0) || a.title.localeCompare(b.title);
-    return a.title.localeCompare(b.title);
-  });
+  const shown = filteredLibrary();
   if (!shown.length) { libUl.appendChild(emptyRow('No tracks match those filters.')); return; }
   shown.forEach((t) => {
     const li = document.createElement('li');
     const name = document.createElement('span');
     name.className = 'name'; name.textContent = t.title; name.title = t.artist ? t.artist + ' — click to preview' : 'Click to preview';
     name.addEventListener('click', () => preview(t.file));
-    if (t.genre || t.vibe) {
+    const rt = ratingOf(t.file);
+    if (t.genre || t.vibe || rt) {
       const tags = document.createElement('span');
       tags.className = 'tags';
+      if (rt === 'like') { const l = document.createElement('span'); l.className = 'tag tag-like'; l.textContent = '♥ Liked'; tags.appendChild(l); }
+      if (rt === 'dislike') { const dl = document.createElement('span'); dl.className = 'tag tag-dislike'; dl.textContent = '⊘ Disliked'; tags.appendChild(dl); }
       if (t.vibe) { const v = document.createElement('span'); v.className = 'tag vibe-' + t.vibe.toLowerCase(); v.textContent = t.vibe; tags.appendChild(v); }
       if (t.genre) { const g = document.createElement('span'); g.className = 'tag tag-genre'; g.textContent = t.genre; tags.appendChild(g); }
       name.appendChild(tags);
     }
     const like = document.createElement('button');
-    like.textContent = '♥'; like.title = 'Like — play more often';
-    like.className = ratingOf(t.file) === 'like' ? 'liked' : '';
+    like.textContent = '♥'; like.title = 'Like — plays more often';
+    like.className = rt === 'like' ? 'liked' : '';
     like.addEventListener('click', () => rateFile(t.file, 'like'));
     const dislike = document.createElement('button');
-    dislike.textContent = '⊘'; dislike.title = 'Dislike — never play (ban)';
-    dislike.className = ratingOf(t.file) === 'dislike' ? 'disliked' : '';
+    dislike.textContent = '⊘'; dislike.title = 'Dislike — plays less often (still reappears)';
+    dislike.className = rt === 'dislike' ? 'disliked' : '';
     dislike.addEventListener('click', () => rateFile(t.file, 'dislike'));
     const add = document.createElement('button');
     add.textContent = '+'; add.disabled = !editing; add.title = editing ? 'Add to ' + editing : 'Select a playlist first';
-    add.addEventListener('click', () => { if (!editing) return; if (!state.playlists[editing].includes(t.file)) state.playlists[editing].push(t.file); savePlaylists(); });
+    add.addEventListener('click', () => { if (!editing) return; if (!state.playlists[editing].includes(t.file)) state.playlists[editing].push(t.file); markCustom(editing); savePlaylists(); });
     const del = document.createElement('button');
     del.textContent = '🗑'; del.className = 'del'; del.title = 'Delete from library';
     del.addEventListener('click', () => {
@@ -720,11 +748,19 @@ function buildVibePlaylists() {
   if (!analysed.length) { toast('Run “✨ Analyse audio” first'); return; }
   const buckets = { Chill: [], Warm: [], Upbeat: [] };
   analysed.forEach((t) => { if (buckets[t.vibe]) buckets[t.vibe].push(t.file); });
-  let made = 0;
-  for (const v of ['Chill', 'Warm', 'Upbeat']) { if (buckets[v].length) { state.playlists[v] = buckets[v]; made++; } }
-  if (!made) { toast('Nothing to group yet'); return; }
+  state.autoPlaylists = state.autoPlaylists || [];
+  let made = 0; let kept = 0;
+  for (const v of ['Chill', 'Warm', 'Upbeat']) {
+    if (!buckets[v].length) continue;
+    // Don't overwrite a same-named playlist you've customised.
+    if (state.playlists[v] && !state.autoPlaylists.includes(v)) { kept++; continue; }
+    state.playlists[v] = buckets[v];
+    if (!state.autoPlaylists.includes(v)) state.autoPlaylists.push(v);
+    made++;
+  }
+  if (!made && !kept) { toast('Nothing to group yet'); return; }
   savePlaylists();
-  toast(`Built ${made} vibe playlist${made === 1 ? '' : 's'}`);
+  toast(made ? `Built ${made} vibe playlist${made === 1 ? '' : 's'}${kept ? ` · kept ${kept} custom` : ''}` : `Kept your ${kept} custom playlist${kept === 1 ? '' : 's'}`);
 }
 
 // Fill the whole schedule from analysed music: builds Chill/Warm/Upbeat lists,
@@ -736,7 +772,13 @@ function autoScheduleByVibe() {
   if (!analysed.length) { toast('Run “✨ Analyse audio” in the Library first'); return; }
   const buckets = { Chill: [], Warm: [], Upbeat: [] };
   analysed.forEach((t) => { if (buckets[t.vibe]) buckets[t.vibe].push(t.file); });
-  for (const v of ['Chill', 'Warm', 'Upbeat']) if (buckets[v].length) state.playlists[v] = buckets[v];
+  state.autoPlaylists = state.autoPlaylists || [];
+  for (const v of ['Chill', 'Warm', 'Upbeat']) {
+    if (!buckets[v].length) continue;
+    if (state.playlists[v] && !state.autoPlaylists.includes(v)) continue; // keep your custom version
+    state.playlists[v] = buckets[v];
+    if (!state.autoPlaylists.includes(v)) state.autoPlaylists.push(v);
+  }
 
   const avail = (v) => state.playlists[v] && state.playlists[v].length;
   const pref = { Chill: ['Chill', 'Warm', 'Upbeat'], Warm: ['Warm', 'Chill', 'Upbeat'], Upbeat: ['Upbeat', 'Warm', 'Chill'] };
@@ -745,9 +787,10 @@ function autoScheduleByVibe() {
 
   // Save the new vibe playlists first (schedule refs must point at real lists),
   // then assign every block × day and save the schedule.
-  api('/api/playlists', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ playlists: state.playlists }) })
+  api('/api/playlists', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ playlists: state.playlists, auto: state.autoPlaylists || [] }) })
     .then((res) => {
       if (res.schedule) state.schedule = res.schedule;
+      if (res.autoPlaylists) state.autoPlaylists = res.autoPlaylists;
       let filled = 0;
       for (const d of state.days) {
         for (const b of state.blocks) {
@@ -781,6 +824,7 @@ function renamePlaylist(name) {
   if (state.playlists[nn]) return alert('A playlist with that name already exists.');
   state.playlists[nn] = state.playlists[name];
   delete state.playlists[name];
+  markCustom(name); // a renamed vibe list is now the user's own
   // keep schedule assignments pointing at the renamed playlist
   for (const d of state.days) for (const b of state.blocks) if (state.schedule[d][b.id] === name) state.schedule[d][b.id] = nn;
   if (editing === name) editing = nn;
@@ -789,10 +833,17 @@ function renamePlaylist(name) {
   toast('Renamed to "' + nn + '"');
 }
 
+// A playlist stops being "auto" the moment it's hand-edited — so the vibe
+// rebuild won't overwrite your custom version.
+function markCustom(name) {
+  state.autoPlaylists = (state.autoPlaylists || []).filter((n) => n !== name);
+}
+
 function savePlaylists() {
-  api('/api/playlists', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ playlists: state.playlists }) })
+  api('/api/playlists', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ playlists: state.playlists, auto: state.autoPlaylists || [] }) })
     .then((res) => {
       if (res.schedule) state.schedule = res.schedule;
+      if (res.autoPlaylists) state.autoPlaylists = res.autoPlaylists;
       renderPlaylistNames(); renderEditor(); renderSchedule(); refreshAhPlaylists();
     });
 }
@@ -969,6 +1020,7 @@ async function boot() {
   const [st, lib] = await Promise.all([api('/api/state'), api('/api/library')]);
   state = st; library = lib.tracks;
   state.settings = state.settings || {};
+  state.autoPlaylists = state.autoPlaylists || [];
 
   userVolume = state.settings.volume ?? 0.8;
   if (userVolume > 0) preMuteVol = userVolume;
