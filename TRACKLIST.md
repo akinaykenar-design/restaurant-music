@@ -117,32 +117,46 @@ Refreshment, Seaside Trip crew — the Four Tet / Bedouin lane): warm, emotive,
 mid-tempo organic house on real hand percussion and earthy analog textures —
 groovy but unhurried. These are the closest free Pixabay cousins (~100–122 BPM).
 
-**Top 4 — closest to the Landhouse signature:**
+**Core — rediskasound + LiVAiL** (all their on-style tracks):
 
 | Title | Artist | Source | Vibe |
 |---|---|---|---|
 | Butterfly Flight (Organic House) | rediskasound | https://pixabay.com/music/world-butterfly-flight-organic-house-460809/ | Warm |
 | Arabian Nights | LiVAiL | https://pixabay.com/music/deep-house-livail-arabian-nights-18520/ | Warm |
-| Afro Groove Tribal House | _(uploader n/a)_ | https://pixabay.com/music/upbeat-afro-groove-tribal-house-306076/ | Warm |
-| Desert Wind | Grand_Project | https://pixabay.com/music/upbeat-desert-wind-342899/ | Warm |
+| Dagon _(emotive, hypnotic — 6:51 builder)_ | LiVAiL | https://pixabay.com/music/deep-house-livail-dagon-18512/ | Warm |
+| Oasis _(base mix, not "Vocal Mix")_ | LiVAiL | https://pixabay.com/music/deep-house-livail-oasis-12/ | Warm |
 
-**The rest of the groove set:**
+**Similar producers (rounding out the rotation):**
 
 | Title | Artist | Source | Vibe |
 |---|---|---|---|
+| Afro Groove Tribal House | _(uploader n/a)_ | https://pixabay.com/music/upbeat-afro-groove-tribal-house-306076/ | Warm |
+| Desert Wind | Grand_Project | https://pixabay.com/music/upbeat-desert-wind-342899/ | Warm |
+| Run Free (Melodic Lounge Deep House) | TelevisedFella | https://pixabay.com/music/upbeat-run-free-melodic-lounge-deep-house-279770/ | Warm |
 | The Evening Deep House | 9JackJack8 | https://pixabay.com/music/deep-house-the-evening-deep-house-295163/ | Warm |
 | Back To Ibiza | Nver_Music | https://pixabay.com/music/deep-house-back-to-ibiza-royalty-free-music-202321/ | Warm |
-| Oasis _(base mix, not "Vocal Mix")_ | LiVAiL | https://pixabay.com/music/deep-house-livail-oasis-12/ | Warm |
 | Deep House (Royalty Free) | Nver_Music | https://pixabay.com/music/soft-house-deep-house-royalty-free-music-201267/ | Warm |
-| Run Free (Melodic Lounge Deep House) | TelevisedFella | https://pixabay.com/music/upbeat-run-free-melodic-lounge-deep-house-279770/ | Warm |
-| Holding Onto You | DeltaX-Music | https://pixabay.com/music/dance-holding-onto-you-248331/ | Upbeat |
-| Lo-fi House | The4Elements | https://pixabay.com/music/deep-house-lo-fi-house-200847/ | Warm |
+| Inspire Deep House | Nver_Music | https://pixabay.com/music/soft-house-inspire-deep-house-royalty-free-music-178466/ | Warm |
 | Velvet Vibe Sanctuary | Kulakovka | https://pixabay.com/music/upbeat-velvet-vibe-sanctuary-chill-fashion-lounge-deep-house-270242/ | Warm |
+| Lo-fi House | The4Elements | https://pixabay.com/music/deep-house-lo-fi-house-200847/ | Warm |
+| Atmosphere Downtempo | Nver_Music | https://pixabay.com/music/beats-atmosphere-downtempo-royalty-free-music-193084/ | Chill |
+| Lost in Dreams (abstract chill downtempo) | Kulakovka | https://pixabay.com/music/beats-lost-in-dreams-abstract-chill-downtempo-cinematic-future-beats-270241/ | Chill |
+| Tropical Melodic Sunsets | _(uploader n/a)_ | https://pixabay.com/music/soft-house-tropical-melodic-sunsets-114009/ | Warm |
+| Ibiza Breeze (Lounge Fashion Event) | _(uploader n/a)_ | https://pixabay.com/music/soft-house-ibiza-breeze-lounge-fashion-event-191649/ | Warm |
+| Holding Onto You | DeltaX-Music | https://pixabay.com/music/dance-holding-onto-you-248331/ | Upbeat |
 | Chill House · Sunset Groove | TurtleBeats | https://pixabay.com/music/upbeat-chill-house-sunset-groove-251697/ | Upbeat |
 
-> Listen-check: LiVAiL "Oasis" has a separate Vocal Mix — take the base version.
-> All Pixabay Content License (no attribution). Also browse **sunset-house-grooves**
-> and **vjgalaxy** on Pixabay for more of this.
+**19 verified tracks.** All Pixabay Content License (no attribution). The two
+Upbeat + the tropical/soft entries are least Landhouse-like — use later in dinner.
+
+**To push past 25 — grab straight from these artist profiles** (real tracks, exact
+URL wasn't indexable): rediskasound *"Organic Relax Background Music"* ·
+sunset-house-grooves *"Sunset House Classics" / "Deep House Sunset"* · vjgalaxy
+*"Deep Progressive House 01 / 02"* · Nver_Music *"In Deep House" / "Sarandi
+Sunset"* · Over-efficient *"Imagination"*.
+
+> Listen-check: take base/instrumental mixes; confirm ~100–122 BPM and no sung
+> vocals on a quick play.
 
 ---
 
