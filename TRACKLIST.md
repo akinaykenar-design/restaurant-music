@@ -56,6 +56,45 @@ royalty-free commercial use, background/public performance allowed, **no
 attribution required**. 🎧 = give it a quick listen before locking in (near-certainly
 instrumental, but confirm no stray vocal hook).
 
+### ⭐ Organic House core (recommended) — the Four Tet / Ben Böhmer lane
+
+The tight, on-brief set: warm pads, hand percussion, Mediterranean sundown.
+Pulled from the artists in the original guide (LiVAiL, rediskasound, The4Elements).
+
+**Tier 1 — nails the sound (start here):**
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Arabian Nights | LiVAiL | https://pixabay.com/music/deep-house-livail-arabian-nights-18520/ | Warm |
+| Oasis _(grab the base mix, not "Vocal Mix")_ | LiVAiL | https://pixabay.com/music/deep-house-livail-oasis-12/ | Chill |
+| Butterfly Flight (Organic House) | rediskasound | https://pixabay.com/music/world-butterfly-flight-organic-house-460809/ | Warm |
+| Desert Wind | Grand_Project | https://pixabay.com/music/upbeat-desert-wind-342899/ | Warm |
+
+**Tier 2 — warm melodic deep house / downtempo, in-lane:**
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Atmosphere Downtempo | Nver_Music | https://pixabay.com/music/beats-atmosphere-downtempo-royalty-free-music-193084/ | Chill |
+| The Evening Deep House | 9JackJack8 | https://pixabay.com/music/deep-house-the-evening-deep-house-295163/ | Warm |
+| Back To Ibiza | Nver_Music | https://pixabay.com/music/deep-house-back-to-ibiza-royalty-free-music-202321/ | Warm |
+| Deep House (Royalty Free) | Nver_Music | https://pixabay.com/music/soft-house-deep-house-royalty-free-music-201267/ | Warm |
+| Lo-fi House | The4Elements | https://pixabay.com/music/deep-house-lo-fi-house-200847/ | Chill |
+
+**Tier 3 — softer sundown/tropical (least Four-Tet; cut first if trimming):**
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Velvet Vibe Sanctuary | Kulakovka | https://pixabay.com/music/upbeat-velvet-vibe-sanctuary-chill-fashion-lounge-deep-house-270242/ | Warm |
+| Tropical Melodic Sunsets | _(uploader n/a)_ | https://pixabay.com/music/soft-house-tropical-melodic-sunsets-114009/ | Warm |
+| Ibiza Breeze (Lounge Fashion Event) | _(uploader n/a)_ | https://pixabay.com/music/soft-house-ibiza-breeze-lounge-fashion-event-191649/ | Warm |
+
+> Listen-check on load: LiVAiL "Oasis" has a separate Vocal Mix — take the base
+> version. All Pixabay Content License (no attribution).
+
+---
+
+### More Pixabay options (broader chill set)
+
 ### Batch 1 — Mediterranean / organic-house lunch→dinner (18 tracks)
 
 **Chill (lunch):**
