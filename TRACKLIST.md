@@ -83,6 +83,33 @@ grab 10–15 you like): https://pixabay.com/music/search/organic%20house/
 
 ---
 
+### 🌍 More like #3 — Ethnic / Mediterranean ambient
+
+More in the lane of the "Ethnic Ambient" track (oud, duduk, ney, nylon guitar,
+hand percussion, desert/sundown mood). All Pixabay, no attribution. Most-
+Mediterranean first.
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Ethnic Ambient _(the original #3)_ | AudioCoffee | https://pixabay.com/music/beats-ethnic-ambient-116695/ | Warm |
+| Middle Eastern Mystic Desert | Abydos_Music | https://pixabay.com/music/world-middle-eastern-mystic-desert-188927/ | Warm |
+| Meditative Oud (Palestinian Soul) | Ashot-Danielyan-Composer | https://pixabay.com/music/meditationspiritual-meditative-oud-palestinian-soul-112719/ | Chill |
+| Sad Duduk (Middle Eastern Ambient) | Ashot-Danielyan-Composer | https://pixabay.com/music/nostalgia-sad-duduk-middle-eastern-ambient-soundtrack-231102/ | Chill |
+| Echoes of the Desert – Mystic Arabic Ambient | DesiFreeMusic | https://pixabay.com/music/electronic-echoes-of-the-desert-mystic-arabic-ambient-452059/ | Warm |
+| Meditative Middle Eastern Flute | Ashot-Danielyan-Composer | https://pixabay.com/music/meditationspiritual-meditative-middle-eastern-flute-113656/ | Chill |
+| Oriental Style Ambient | _(uploader n/a)_ | https://pixabay.com/music/world-oriental-style-ambient-300804/ | Warm |
+| Crossing the Sands | matthewmikemusic | https://pixabay.com/music/world-crossing-the-sands-159031/ | Warm |
+| Desert Scape – Atmospheric World Loop | matthewmikemusic | https://pixabay.com/music/ambient-desert-scape-atmospheric-world-nature-loop-368595/ | Chill |
+| Arabic Meditation (Spiritual Ambient) | _(uploader n/a)_ | https://pixabay.com/music/world-arabic-meditation-music-copyright-free-spiritual-ambient-481785/ | Chill |
+| Egyptian Egypt Desert Music | _(uploader n/a)_ | https://pixabay.com/music/world-egyptian-egypt-desert-music-502005/ | Warm |
+| Desert Wind | Grand_Project | https://pixabay.com/music/upbeat-desert-wind-342899/ | Warm |
+
+> Also worth browsing: artist **djovan** (oriental / Maghreb / Andalusian oud
+> chillout — "Sahara Sunset," "Golden Sand," "Andalusian Oud Dreams"). Search
+> "djovan" on Pixabay Music.
+
+---
+
 ### ⭐ Organic House core (also good) — the Four Tet / Ben Böhmer lane
 
 The tight, on-brief set: warm pads, hand percussion, Mediterranean sundown.
