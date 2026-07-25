@@ -110,19 +110,21 @@ Mediterranean first.
 
 ---
 
-### 🎧 Four Tet / Lane 8 — melodic house with groove (the sound you want)
+### 🎧 Four Tet / Landhouse — organic house with groove (the sound you want)
 
-Melodic organic / deep house with an actual beat — warm arps, hand percussion,
-driving-but-chill (~100–122 BPM). Grooviest-but-classy first.
+**Landhouse** = German organic-house / downtempo producer (WAYU Records, Exotic
+Refreshment, Seaside Trip crew — the Four Tet / Bedouin lane): warm, emotive,
+mid-tempo organic house on real hand percussion and earthy analog textures —
+groovy but unhurried. These are the closest free Pixabay cousins (~100–122 BPM).
 
-**Top 4 — closest to the Four Tet / Lane 8 / afro-organic sound:**
+**Top 4 — closest to the Landhouse signature:**
 
 | Title | Artist | Source | Vibe |
 |---|---|---|---|
-| Arabian Nights | LiVAiL | https://pixabay.com/music/deep-house-livail-arabian-nights-18520/ | Warm |
 | Butterfly Flight (Organic House) | rediskasound | https://pixabay.com/music/world-butterfly-flight-organic-house-460809/ | Warm |
-| Run Free (Melodic Lounge Deep House) | TelevisedFella | https://pixabay.com/music/upbeat-run-free-melodic-lounge-deep-house-279770/ | Warm |
+| Arabian Nights | LiVAiL | https://pixabay.com/music/deep-house-livail-arabian-nights-18520/ | Warm |
 | Afro Groove Tribal House | _(uploader n/a)_ | https://pixabay.com/music/upbeat-afro-groove-tribal-house-306076/ | Warm |
+| Desert Wind | Grand_Project | https://pixabay.com/music/upbeat-desert-wind-342899/ | Warm |
 
 **The rest of the groove set:**
 
@@ -132,8 +134,8 @@ driving-but-chill (~100–122 BPM). Grooviest-but-classy first.
 | Back To Ibiza | Nver_Music | https://pixabay.com/music/deep-house-back-to-ibiza-royalty-free-music-202321/ | Warm |
 | Oasis _(base mix, not "Vocal Mix")_ | LiVAiL | https://pixabay.com/music/deep-house-livail-oasis-12/ | Warm |
 | Deep House (Royalty Free) | Nver_Music | https://pixabay.com/music/soft-house-deep-house-royalty-free-music-201267/ | Warm |
+| Run Free (Melodic Lounge Deep House) | TelevisedFella | https://pixabay.com/music/upbeat-run-free-melodic-lounge-deep-house-279770/ | Warm |
 | Holding Onto You | DeltaX-Music | https://pixabay.com/music/dance-holding-onto-you-248331/ | Upbeat |
-| Desert Wind | Grand_Project | https://pixabay.com/music/upbeat-desert-wind-342899/ | Warm |
 | Lo-fi House | The4Elements | https://pixabay.com/music/deep-house-lo-fi-house-200847/ | Warm |
 | Velvet Vibe Sanctuary | Kulakovka | https://pixabay.com/music/upbeat-velvet-vibe-sanctuary-chill-fashion-lounge-deep-house-270242/ | Warm |
 | Chill House · Sunset Groove | TurtleBeats | https://pixabay.com/music/upbeat-chill-house-sunset-groove-251697/ | Upbeat |
