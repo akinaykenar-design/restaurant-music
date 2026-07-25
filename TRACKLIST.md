@@ -109,6 +109,28 @@ _(none yet)_
 
 ---
 
+## ⬇️ Getting tracks into the app
+
+There are two paths, depending on the source:
+
+**A. Pixabay tracks (the batch above)** — no direct file link, so download by hand:
+1. Open each link → click **Download** on Pixabay (free)
+2. Drag the whole batch into the app's **Library** tab (or drop them into the
+   Pi's `music/` folder)
+3. **Library → ✨ Analyse audio**, then **✨ Build vibe playlists** / **Auto-fill
+   schedule**
+
+**B. CC0 / direct-link tracks (e.g. Internet Archive)** — auto-download with the
+included script. Add the direct file URLs to `music-sources.txt`, then, **on the
+Pi or your laptop** (open internet — a locked sandbox can't reach these hosts):
+```
+node scripts/import-music.js
+```
+The files land straight in `music/`; then Analyse as above. See the top of
+`music-sources.txt` for details.
+
+---
+
 ## 🔎 Sources we trust (for future searches)
 
 - **Pixabay Music** — https://pixabay.com/music/ (filter: Genre → House / Beats,

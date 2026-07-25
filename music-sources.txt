@@ -1,0 +1,13 @@
+# Watermans Music — direct download links for scripts/import-music.js
+#
+# One DIRECT file URL per line. Lines starting with # are ignored.
+#
+# Run on a machine with open internet (your Pi or laptop):
+#   node scripts/import-music.js
+#
+# Only direct file links work here — e.g. an Internet Archive file:
+#   https://archive.org/download/<identifier>/<file>.mp3
+# Pixabay tracks (see TRACKLIST.md) need their own Download button; grab those
+# by hand and drop them into the app's Library tab.
+#
+# --- add direct CC0 / public-domain links below (the agent fills these in) ---
