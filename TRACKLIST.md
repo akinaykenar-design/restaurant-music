@@ -56,7 +56,34 @@ royalty-free commercial use, background/public performance allowed, **no
 attribution required**. 🎧 = give it a quick listen before locking in (near-certainly
 instrumental, but confirm no stray vocal hook).
 
-### ⭐ Organic House core (recommended) — the Four Tet / Ben Böhmer lane
+### ⭐⭐ Original starter playlist (your favourite — the first set)
+
+The batch you rated highest. Keep this as the core.
+
+**Closest to the chill / Mediterranean / Four-Tet vibe:**
+
+| # | Title | Source | Vibe |
+|---|---|---|---|
+| 1 | Downtempo Lo-Fi | https://pixabay.com/music/beats-downtempo-lo-fi-royalty-free-music-167023/ | Chill |
+| 2 | Atmosphere Downtempo | https://pixabay.com/music/beats-atmosphere-downtempo-royalty-free-music-193084/ | Chill |
+| 3 | Ethnic Ambient (Mediterranean feel) | https://pixabay.com/music/beats-ethnic-ambient-116695/ | Chill |
+| 4 | Smooth Jazz Guitar – Chillout Lounge | https://pixabay.com/music/smooth-jazz-smooth-jazz-guitar-chillout-lounge-on-top-of-your-game-211136/ | Warm |
+
+**Warmer / sundown lounge (dinner):**
+
+| # | Title | Source | Vibe |
+|---|---|---|---|
+| 5 | Ibiza Waves – Ambient Chill Out | https://pixabay.com/music/ambient-ibiza-waves-ambient-chill-out-music-3897/ | Warm |
+| 6 | Sunset On The Beach – Ambient Chill | https://pixabay.com/music/post-rock-sunset-on-the-beach-ambient-chill-music-and-waves-10438/ | Warm |
+| 7 | Afro Groove Tribal House (livelier, for lunch) | https://pixabay.com/music/upbeat-afro-groove-tribal-house-306076/ | Upbeat |
+
+**⭐ Main hunting ground — Organic House** (this tag *is* the Four Tet sound;
+grab 10–15 you like): https://pixabay.com/music/search/organic%20house/
+**Artists to browse:** sunset-house-grooves, Tunetank, Kulakovka, Musicalex-morgan.
+
+---
+
+### ⭐ Organic House core (also good) — the Four Tet / Ben Böhmer lane
 
 The tight, on-brief set: warm pads, hand percussion, Mediterranean sundown.
 Pulled from the artists in the original guide (LiVAiL, rediskasound, The4Elements).
