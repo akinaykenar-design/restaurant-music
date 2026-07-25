@@ -110,40 +110,37 @@ Mediterranean first.
 
 ---
 
-### ⭐ Organic House core (also good) — the Four Tet / Ben Böhmer lane
+### 🎧 Four Tet / Lane 8 — melodic house with groove (the sound you want)
 
-The tight, on-brief set: warm pads, hand percussion, Mediterranean sundown.
-Pulled from the artists in the original guide (LiVAiL, rediskasound, The4Elements).
+Melodic organic / deep house with an actual beat — warm arps, hand percussion,
+driving-but-chill (~100–122 BPM). Grooviest-but-classy first.
 
-**Tier 1 — nails the sound (start here):**
+**Top 4 — closest to the Four Tet / Lane 8 / afro-organic sound:**
 
 | Title | Artist | Source | Vibe |
 |---|---|---|---|
 | Arabian Nights | LiVAiL | https://pixabay.com/music/deep-house-livail-arabian-nights-18520/ | Warm |
-| Oasis _(grab the base mix, not "Vocal Mix")_ | LiVAiL | https://pixabay.com/music/deep-house-livail-oasis-12/ | Chill |
 | Butterfly Flight (Organic House) | rediskasound | https://pixabay.com/music/world-butterfly-flight-organic-house-460809/ | Warm |
-| Desert Wind | Grand_Project | https://pixabay.com/music/upbeat-desert-wind-342899/ | Warm |
+| Run Free (Melodic Lounge Deep House) | TelevisedFella | https://pixabay.com/music/upbeat-run-free-melodic-lounge-deep-house-279770/ | Warm |
+| Afro Groove Tribal House | _(uploader n/a)_ | https://pixabay.com/music/upbeat-afro-groove-tribal-house-306076/ | Warm |
 
-**Tier 2 — warm melodic deep house / downtempo, in-lane:**
+**The rest of the groove set:**
 
 | Title | Artist | Source | Vibe |
 |---|---|---|---|
-| Atmosphere Downtempo | Nver_Music | https://pixabay.com/music/beats-atmosphere-downtempo-royalty-free-music-193084/ | Chill |
 | The Evening Deep House | 9JackJack8 | https://pixabay.com/music/deep-house-the-evening-deep-house-295163/ | Warm |
 | Back To Ibiza | Nver_Music | https://pixabay.com/music/deep-house-back-to-ibiza-royalty-free-music-202321/ | Warm |
+| Oasis _(base mix, not "Vocal Mix")_ | LiVAiL | https://pixabay.com/music/deep-house-livail-oasis-12/ | Warm |
 | Deep House (Royalty Free) | Nver_Music | https://pixabay.com/music/soft-house-deep-house-royalty-free-music-201267/ | Warm |
-| Lo-fi House | The4Elements | https://pixabay.com/music/deep-house-lo-fi-house-200847/ | Chill |
-
-**Tier 3 — softer sundown/tropical (least Four-Tet; cut first if trimming):**
-
-| Title | Artist | Source | Vibe |
-|---|---|---|---|
+| Holding Onto You | DeltaX-Music | https://pixabay.com/music/dance-holding-onto-you-248331/ | Upbeat |
+| Desert Wind | Grand_Project | https://pixabay.com/music/upbeat-desert-wind-342899/ | Warm |
+| Lo-fi House | The4Elements | https://pixabay.com/music/deep-house-lo-fi-house-200847/ | Warm |
 | Velvet Vibe Sanctuary | Kulakovka | https://pixabay.com/music/upbeat-velvet-vibe-sanctuary-chill-fashion-lounge-deep-house-270242/ | Warm |
-| Tropical Melodic Sunsets | _(uploader n/a)_ | https://pixabay.com/music/soft-house-tropical-melodic-sunsets-114009/ | Warm |
-| Ibiza Breeze (Lounge Fashion Event) | _(uploader n/a)_ | https://pixabay.com/music/soft-house-ibiza-breeze-lounge-fashion-event-191649/ | Warm |
+| Chill House · Sunset Groove | TurtleBeats | https://pixabay.com/music/upbeat-chill-house-sunset-groove-251697/ | Upbeat |
 
-> Listen-check on load: LiVAiL "Oasis" has a separate Vocal Mix — take the base
-> version. All Pixabay Content License (no attribution).
+> Listen-check: LiVAiL "Oasis" has a separate Vocal Mix — take the base version.
+> All Pixabay Content License (no attribution). Also browse **sunset-house-grooves**
+> and **vjgalaxy** on Pixabay for more of this.
 
 ---
 
