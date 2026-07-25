@@ -27,6 +27,10 @@ web app (nothing to install).
   analyses the audio for tempo + energy to bucket it **Chill / Warm / Upbeat**.
   Filter and sort the library by genre, vibe or rating, and **build vibe
   playlists** in one click (great for chill lunch → upbeat dinner).
+- **Scenes** — one-tap "crowd" modes on Now Playing (**Lunch · Dinner · Lively ·
+  Corporate · Wind-down**) that instantly play the right vibe for the room and
+  override the schedule; tap **Schedule** to hand back to auto. The active scene
+  is remembered, so a venue box that reboots mid-service resumes it.
 - **Auto & custom playlists** — vibe-built playlists are marked **Auto** and
   refresh when you rebuild; the moment you hand-edit one it becomes your own
   **custom** playlist and is never overwritten. Manual playlists are always

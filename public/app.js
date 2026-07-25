@@ -9,6 +9,7 @@ let queue = [];          // filenames in play order
 let queueIndex = 0;
 let history = [];         // recently played (newest first)
 let currentBlockKey = null;
+let activeScene = null;   // active manager "scene" override (or null = schedule/manual)
 let libFilter = '';       // library search term
 let libGenre = '';        // library genre filter
 let libVibe = '';         // library vibe filter (Chill/Warm/Upbeat)
@@ -23,6 +24,7 @@ let crossing = false;
 let userVolume = 0.8;
 
 const $ = (id) => document.getElementById(id);
+const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v); // HTMLMediaElement.volume must be in [0,1]
 const api = (url, opts) => fetch(url, opts).then((r) => r.json());
 const titleOf = (file) => {
   const t = library.find((x) => x.file === file);
@@ -165,7 +167,7 @@ function fadeVol(deck, to, ms) {
   (function step(now) {
     if (crossing) return;
     const t = Math.min(1, (now - t0) / ms);
-    deck.volume = from + (to - from) * t;
+    deck.volume = clamp01(from + (to - from) * t);
     if (t < 1) requestAnimationFrame(step);
   })(t0);
 }
@@ -251,8 +253,8 @@ function beginCrossfade(cf) {
   const dur = Math.max(0.1, cf) * 1000;
   (function ramp(now) {
     const t = Math.min(1, (now - t0) / dur);
-    from.volume = userVolume * (1 - t);
-    to.volume = userVolume * t;
+    from.volume = clamp01(userVolume * (1 - t));
+    to.volume = clamp01(userVolume * t);
     if (t < 1) requestAnimationFrame(ramp);
     else {
       active = 1 - active;
@@ -309,7 +311,68 @@ $('dislike').addEventListener('click', () => rate('dislike'));
 $('volume').addEventListener('input', (e) => { userVolume = Number(e.target.value); if (!crossing) activeDeck().volume = userVolume; updateMuteIcon(); });
 $('volume').addEventListener('change', () => saveSettings({ volume: userVolume }));
 
-$('follow').addEventListener('change', (e) => { saveSettings({ followSchedule: e.target.checked }); if (e.target.checked) applySchedule(true); });
+$('follow').addEventListener('change', (e) => {
+  if (e.target.checked) activeScene = null;
+  saveSettings({ followSchedule: e.target.checked, scene: e.target.checked ? '' : (activeScene || '') });
+  if (e.target.checked) applySchedule(true);
+  renderScenes();
+});
+
+// ---- scenes (one-tap "crowd" modes for the manager) ------------------------
+// Each scene draws from the analysed vibe buckets. Tapping one overrides the
+// schedule and plays appropriate music immediately; "Schedule" returns to auto.
+const SCENES = [
+  { id: 'lunch',     icon: '☀️', label: 'Lunch',     vibes: ['Chill'],          desc: 'Relaxed daytime' },
+  { id: 'dinner',    icon: '🍷', label: 'Dinner',    vibes: ['Warm'],           desc: 'Warm evening service' },
+  { id: 'lively',    icon: '🔥', label: 'Lively',    vibes: ['Upbeat', 'Warm'], desc: 'Young / busy crowd' },
+  { id: 'corporate', icon: '💼', label: 'Corporate', vibes: ['Chill', 'Warm'],  desc: 'Polished & low-key' },
+  { id: 'winddown',  icon: '🌙', label: 'Wind-down', vibes: ['Chill'],          desc: 'Late / closing' },
+];
+
+function renderScenes() {
+  const box = $('scenes'); if (!box) return;
+  box.innerHTML = '';
+  SCENES.forEach((s) => {
+    const b = document.createElement('button');
+    b.className = 'scene' + (activeScene === s.id ? ' on' : '');
+    b.title = s.desc;
+    b.innerHTML = `<span class="scene-ic">${s.icon}</span>${s.label}`;
+    b.addEventListener('click', () => playScene(s.id));
+    box.appendChild(b);
+  });
+  const sched = document.createElement('button');
+  sched.className = 'scene scene-auto' + (!activeScene && state.settings.followSchedule ? ' on' : '');
+  sched.title = 'Follow the weekly schedule automatically';
+  sched.innerHTML = '<span class="scene-ic">🗓️</span>Schedule';
+  sched.addEventListener('click', () => {
+    activeScene = null;
+    $('follow').checked = true;
+    saveSettings({ followSchedule: true, scene: '' });
+    applySchedule(true);
+    renderScenes();
+    toast('Following the schedule');
+  });
+  box.appendChild(sched);
+}
+
+function playScene(id) {
+  const s = SCENES.find((x) => x.id === id);
+  if (!s) return;
+  const files = library.filter((t) => s.vibes.includes(t.vibe)).map((t) => t.file);
+  if (!files.length) {
+    const anyAnalysed = library.some((t) => t.vibe);
+    toast(anyAnalysed ? `No ${s.label} tracks yet — add or analyse more music` : 'Analyse your music first: Library → ✨ Analyse audio');
+    return;
+  }
+  activeScene = id;
+  $('follow').checked = false;
+  saveSettings({ followSchedule: false, scene: id });
+  $('now-block').textContent = s.icon + ' ' + s.label + ' scene';
+  $('now-sub').textContent = s.desc + ' · ' + files.length + ' track' + (files.length === 1 ? '' : 's');
+  loadQueue(files, true);
+  renderScenes();
+  toast('Scene: ' + s.label);
+}
 $('shuffle').addEventListener('change', (e) => { state.settings.shuffle = e.target.checked; saveSettings({ shuffle: e.target.checked }); });
 $('crossfade').addEventListener('input', (e) => { state.settings.crossfade = Number(e.target.value); $('cf-val').textContent = e.target.value + 's'; });
 $('crossfade').addEventListener('change', (e) => saveSettings({ crossfade: Number(e.target.value) }));
@@ -1047,7 +1110,12 @@ async function boot() {
   updateOnboard();
   renderQueue();
   renderHistory();
+  renderScenes();
   applySchedule(true);
+  // Re-apply a saved scene override (e.g. the venue box rebooted mid-service).
+  if (!state.settings.followSchedule && state.settings.scene && SCENES.some((s) => s.id === state.settings.scene)) {
+    playScene(state.settings.scene);
+  }
   loadStreamInfo();
   setupUpload();
   $('analyze-btn').addEventListener('click', analyzeLibrary);

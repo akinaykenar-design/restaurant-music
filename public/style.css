@@ -177,6 +177,14 @@ input[type='range']::-moz-range-thumb { width: 15px; height: 15px; border: none;
 .chip.range input[type=range] { width: 84px; }
 .chip select, .chip input[type='time'] { background: transparent; border: none; color: var(--text); font: inherit; font-size: 0.82rem; cursor: pointer; padding: 0; }
 .chip select:focus, .chip input[type='time']:focus { outline: none; }
+/* scenes — one-tap crowd modes */
+.scenes { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 2px; }
+.scene { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.14s ease; }
+.scene:hover { border-color: var(--accent); transform: translateY(-1px); }
+.scene.on { color: #fff; background: var(--accent); border-color: var(--accent); box-shadow: 0 8px 18px -8px var(--accent); }
+.scene-ic { font-size: 0.98rem; line-height: 1; }
+.scene-auto.on { background: var(--warn); border-color: var(--warn); box-shadow: 0 8px 18px -8px var(--warn); }
+
 .add-all { width: 100%; margin-bottom: 12px; font-size: 0.84rem; }
 .add-all:disabled { opacity: 0.5; cursor: not-allowed; }
 .chip.range b { color: var(--text); min-width: 22px; text-align: right; }
