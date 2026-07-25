@@ -10,4 +10,18 @@
 # Pixabay tracks (see TRACKLIST.md) need their own Download button; grab those
 # by hand and drop them into the app's Library tab.
 #
-# --- add direct CC0 / public-domain links below (the agent fills these in) ---
+# --- Batch 2: CC-BY instrumental downtempo/ambient (Wikimedia Commons) ---
+# These are CC-BY: free for commercial use but you MUST credit the artist.
+# See the "Attribution log" in TRACKLIST.md for the credit list to display.
+https://upload.wikimedia.org/wikipedia/commons/6/68/Broke_For_Free_-_01_-_Night_Owl.ogg
+https://upload.wikimedia.org/wikipedia/commons/7/73/Broke_For_Free_-_03_-_Day_Bird.ogg
+https://upload.wikimedia.org/wikipedia/commons/7/77/Broke_For_Free_-_09_-_Drop_of_Water_In_the_Ocean.ogg
+https://upload.wikimedia.org/wikipedia/commons/6/67/Broke_For_Free_-_10_-_Covered_In_Oil.ogg
+https://upload.wikimedia.org/wikipedia/commons/3/3d/Lee_Rosevere_-_38_-_The_Future_of_Music.ogg
+https://upload.wikimedia.org/wikipedia/commons/5/52/Lee_Rosevere_-_46_-_ASMR.ogg
+https://upload.wikimedia.org/wikipedia/commons/5/56/Lee_Rosevere_-_60_-_Crack_In_The_Glass_That_Lets_The_Cold_Air_In.ogg
+https://upload.wikimedia.org/wikipedia/commons/d/da/Chris_Zabriskie_-_01_-_Cylinder_One.ogg
+https://upload.wikimedia.org/wikipedia/commons/1/1d/Chris_Zabriskie_-_02_-_Cylinder_Two.ogg
+https://upload.wikimedia.org/wikipedia/commons/c/c6/Chris_Zabriskie_-_04_-_Cylinder_Four.ogg
+https://upload.wikimedia.org/wikipedia/commons/6/64/Kai_Engel_-_04_-_Cobweb_Morning.ogg
+https://upload.wikimedia.org/wikipedia/commons/3/34/Kai_Engel_-_01_-_Brand_New_World.ogg

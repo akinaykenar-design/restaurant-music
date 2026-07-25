@@ -98,14 +98,48 @@ instrumental, but confirm no stray vocal hook).
 > **Sunset Vibes** is tropical-house and the most likely to have a wordless vocal
 > hook — listen first.
 
+### Batch 2 — auto-import CC-BY (Wikimedia Commons, 12 tracks)
+
+These have **direct download links** (already in `music-sources.txt`) — run
+`node scripts/import-music.js` on the Pi/laptop to fetch them. They're **CC-BY:
+free for commercial use but credit is required** — see the Attribution log below.
+Style leans ambient / downtempo / lo-fi (great for lunch + calm dinner), not
+Balearic house. All instrumental.
+
+| Title | Artist | Genre | Vibe | License |
+|---|---|---|---|---|
+| Night Owl | Broke For Free | Downtempo | Chill | CC-BY 3.0 |
+| Day Bird | Broke For Free | Downtempo | Warm | CC-BY 3.0 |
+| Drop of Water In the Ocean | Broke For Free | Downtempo / ambient | Chill | CC-BY 3.0 |
+| Covered In Oil | Broke For Free | Downtempo | Chill | CC-BY 3.0 |
+| The Future of Music | Lee Rosevere | Chill electronic | Chill | CC-BY 4.0 |
+| ASMR | Lee Rosevere | Ambient / downtempo | Chill | CC-BY 4.0 |
+| Crack In The Glass… | Lee Rosevere | Ambient chillout | Chill | CC-BY 4.0 |
+| Cylinder One | Chris Zabriskie | Ambient | Chill | CC-BY 4.0 |
+| Cylinder Two | Chris Zabriskie | Ambient | Chill | CC-BY 4.0 |
+| Cylinder Four | Chris Zabriskie | Ambient | Chill | CC-BY 4.0 |
+| Cobweb Morning | Kai Engel | Ambient / neoclassical | Chill | CC-BY 4.0 |
+| Brand New World | Kai Engel | Downtempo / neoclassical | Warm | CC-BY 4.0 |
+
+> URLs are derived from Wikimedia Commons' stable path scheme; if any file was
+> renamed/removed the importer just reports a 404 and skips it — tell me and I'll
+> swap in a replacement.
+
 ---
 
 ## 🎚️ Attribution log (for any CC-BY tracks)
 
 Keep this list visible somewhere (a page in the Admin tab or a printed sheet) if
-we use any credit-required tracks:
+we use any credit-required tracks. A simple line per artist satisfies CC-BY:
 
-_(none yet)_
+**Batch 2 (Wikimedia Commons):**
+- Music by **Broke For Free** — licensed under CC BY 3.0
+- Music by **Lee Rosevere** — licensed under CC BY 4.0
+- Music by **Chris Zabriskie** — licensed under CC BY 4.0
+- Music by **Kai Engel** — licensed under CC BY 4.0
+
+> Displaying these once (e.g. a small "Music credits" card in the app or a framed
+> note near the counter) covers the attribution requirement for all their tracks.
 
 ---
 
