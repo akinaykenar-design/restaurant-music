@@ -51,11 +51,52 @@ grants commercial public performance with no royalties owed. The safe categories
 
 ## ✅ Confirmed picks
 
-_(Filled in as the research agent verifies tracks. Newest batches on top.)_
+All tracks below are on **Pixabay** under the **Pixabay Content License** —
+royalty-free commercial use, background/public performance allowed, **no
+attribution required**. 🎧 = give it a quick listen before locking in (near-certainly
+instrumental, but confirm no stray vocal hook).
 
-| Title | Artist | Source (link) | Genre | Vibe | License | Status |
-|---|---|---|---|---|---|---|
-| _pending first batch…_ | | | | | | |
+### Batch 1 — Mediterranean / organic-house lunch→dinner (18 tracks)
+
+**Chill (lunch):**
+
+| Title | Artist | Source | Genre | License | Status |
+|---|---|---|---|---|---|
+| Spanish Guitar Backing Chill | _(uploader n/a)_ | https://pixabay.com/music/solo-guitar-spanish-guitar-backing-chill-151507/ | Spanish / nylon guitar | Pixabay | todo |
+| Ibiza Waves – Ambient Chill Out | JuliusH | https://pixabay.com/music/ambient-ibiza-waves-ambient-chill-out-music-3897/ | Balearic ambient | Pixabay | todo |
+| Chilling Waves – Ambient Chill Out | JuliusH | https://pixabay.com/music/ambient-chilling-waves-ambient-chill-out-music-for-relaxation-13880/ | Ambient chillout | Pixabay | todo |
+| Balearic Beat | alanajordan | https://pixabay.com/music/beats-balearic-beat-299358/ | Balearic downtempo | Pixabay | todo |
+| Lost in Dreams | Kulakovka | https://pixabay.com/music/beats-lost-in-dreams-abstract-chill-downtempo-cinematic-future-beats-270241/ | Downtempo | Pixabay | todo |
+| Reflected Light | SergePavkinMusic | https://pixabay.com/music/beautiful-plays-reflected-light-147979/ | Ambient / atmospheric | Pixabay | todo |
+| Lo-fi Podcast Cozy Chillout Lounge | Denis-Pavlov-Music | https://pixabay.com/music/beats-lo-fi-podcast-cozy-relaxing-chillout-lounge-music-214440/ | Lo-fi lounge | Pixabay | todo |
+| Lofi Study – Calm Peaceful Chill Hop | FASSounds | https://pixabay.com/music/beats-lofi-study-calm-peaceful-chill-hop-112191/ | Lo-fi chillhop | Pixabay | todo |
+| Serene Peace | Ashot-Danielyan-Composer | https://pixabay.com/music/ambient-serene-peace-110617/ | Ambient | Pixabay | todo |
+
+**Warm (dinner):**
+
+| Title | Artist | Source | Genre | License | Status |
+|---|---|---|---|---|---|
+| Mesmerising Sunset 🎧 | SergePavkinMusic | https://pixabay.com/music/beats-mesmerising-sunset-265903/ | Melodic sunset chill | Pixabay | todo |
+| Ibiza Breeze (Lounge Fashion Event) 🎧 | _(uploader n/a)_ | https://pixabay.com/music/soft-house-ibiza-breeze-lounge-fashion-event-191649/ | Balearic soft/lounge house | Pixabay | todo |
+| Back To Ibiza 🎧 | Nver_Music | https://pixabay.com/music/deep-house-back-to-ibiza-royalty-free-music-202321/ | Ibiza deep house | Pixabay | todo |
+| Deep and Chill Lounge – Instrumental Edit | DELOSound | https://pixabay.com/music/beats-deep-and-chill-lounge-instrumental-edit-165960/ | Deep house / lounge | Pixabay | todo |
+| The Evening Deep House 🎧 | 9JackJack8 | https://pixabay.com/music/deep-house-the-evening-deep-house-295163/ | Deep house | Pixabay | todo |
+| Deep House (Royalty Free) 🎧 | Nver_Music | https://pixabay.com/music/soft-house-deep-house-royalty-free-music-201267/ | Deep house | Pixabay | todo |
+| Desert Wind | Grand_Project | https://pixabay.com/music/upbeat-desert-wind-342899/ | Organic / world (hand percussion) | Pixabay | todo |
+
+**Upbeat (buzzy dinner):**
+
+| Title | Artist | Source | Genre | License | Status |
+|---|---|---|---|---|---|
+| Chill House · Sunset Groove 🎧 | TurtleBeats | https://pixabay.com/music/upbeat-chill-house-sunset-groove-251697/ | Sunset chill house | Pixabay | todo |
+| Sunset Vibes 🎧 | Maksym_Dudchyk | https://pixabay.com/music/house-sunset-vibes-198338/ | Sunset / tropical house | Pixabay | todo |
+
+> **Before go-live:** open each link, confirm it still shows "Pixabay Content
+> License," and screenshot that page (your paper trail for skipping the OneMusic
+> licence). Two tracks (_Spanish Guitar Backing Chill_, _Ibiza Breeze_) have a
+> verified URL but the uploader name wasn't listed — check on the page.
+> **Sunset Vibes** is tropical-house and the most likely to have a wordless vocal
+> hook — listen first.
 
 ---
 
