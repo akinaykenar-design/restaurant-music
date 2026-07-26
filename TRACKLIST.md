@@ -51,10 +51,44 @@ grants commercial public performance with no royalties owed. The safe categories
 
 ## ✅ Confirmed picks
 
-All tracks below are on **Pixabay** under the **Pixabay Content License** —
-royalty-free commercial use, background/public performance allowed, **no
-attribution required**. 🎧 = give it a quick listen before locking in (near-certainly
-instrumental, but confirm no stray vocal hook).
+All Pixabay tracks are **Pixabay Content License** (no attribution). The
+**real-artist CC-BY** set below is free for commercial use too, but **requires a
+displayed credit** (see Attribution log).
+
+### 🎨 Real-artist CC-BY — Mediterranean / ambient organic (not stock)
+
+Actual indie/CC musicians from Free Music Archive, ccMixter, Bandcamp, incompetech
+& scottbuckley.com.au. **Credit required** (CC-BY). Confirm each licence badge
+still reads **CC BY** (never NC/ND) on the page before download.
+
+**Most Mediterranean / organic (start here):**
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| reNovation | airtone | https://ccmixter.org/files/airtone/60674 | Warm |
+| Desert City | Kevin MacLeod | https://incompetech.com/music/royalty-free/music.html | Warm |
+| Ibn Al-Noor | Kevin MacLeod | https://incompetech.com/music/royalty-free/music.html | Chill |
+| Yeln | Meydän | https://meydan.bandcamp.com/track/yeln | Chill |
+| Mist | Meydän | https://meydan.bandcamp.com/track/mist | Chill |
+| Night Owl | Broke For Free | https://freemusicarchive.org/music/Broke_For_Free/ | Warm |
+
+**Warm ambient bed (dinner):**
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Curiousity | Lee Rosevere | https://freemusicarchive.org/music/lee-rosevere/music-for-podcasts-ambient | Warm |
+| Featherlight | Lee Rosevere | https://freemusicarchive.org/music/lee-rosevere/music-for-podcasts-ambient | Chill |
+| Brand New World | Kai Engel | https://freemusicarchive.org/music/Kai_Engel/Sustains | Warm |
+| Aurora | Scott Buckley | https://www.scottbuckley.com.au/library/aurora/ | Warm |
+| Borealis | Scott Buckley | https://www.scottbuckley.com.au/library/borealis/ | Chill |
+| Undertow | Scott Buckley | https://www.scottbuckley.com.au/library/undertow/ | Chill |
+| Cylinder Two | Chris Zabriskie | https://chriszabriskie.bandcamp.com/album/cylinders | Chill |
+| Cylinder Seven | Chris Zabriskie | https://chriszabriskie.bandcamp.com/album/cylinders | Chill |
+
+> Ear-check the two Kevin MacLeod tracks first — they carry the literal
+> oud/Mediterranean instrumentation but feel slightly more "library" than the rest.
+
+---
 
 ### ⭐⭐ Original starter playlist (your favourite — the first set)
 
@@ -238,9 +272,13 @@ Balearic house. All instrumental.
 Keep this list visible somewhere (a page in the Admin tab or a printed sheet) if
 we use any credit-required tracks. A simple line per artist satisfies CC-BY:
 
-**Batch 2 (Wikimedia Commons):**
+**Real-artist CC-BY set (+ Wikimedia Commons):**
 - Music by **Broke For Free** — licensed under CC BY 3.0
+- Music by **airtone** — licensed under CC BY 3.0 (ccmixter.org)
+- "Desert City" / "Ibn Al-Noor" by **Kevin MacLeod** (incompetech.com) — CC BY 3.0 / 4.0
+- Music by **Meydän** — licensed under CC BY 4.0
 - Music by **Lee Rosevere** — licensed under CC BY 4.0
+- Music by **Scott Buckley** — www.scottbuckley.com.au — CC BY 4.0
 - Music by **Chris Zabriskie** — licensed under CC BY 4.0
 - Music by **Kai Engel** — licensed under CC BY 4.0
 
