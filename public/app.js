@@ -101,16 +101,8 @@ $('pbar').addEventListener('click', (e) => {
   d.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * d.duration;
 });
 
-// toast notifications
-let toastTimer;
-function toast(msg) {
-  const t = $('toast');
-  if (!t) return;
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
-}
+// Toast pop-ups disabled — kept as a no-op so call sites stay harmless.
+function toast(_msg) { /* popups removed */ }
 
 // mute / unmute (remembers previous level)
 let preMuteVol = 0.8;
