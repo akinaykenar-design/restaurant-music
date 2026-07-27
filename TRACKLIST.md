@@ -136,6 +136,33 @@ profiles for dozens more in the same feel):
 
 ---
 
+### 🎯 Artist deep-dive — browse the full catalogues
+
+The three producers behind your favourites. Open these and scroll — the fastest
+way to find more you'll like (janevo = Nver Avetyan).
+
+- **TurtleBeats** — https://pixabay.com/users/turtlebeats-46526702/ — **~265 tracks, nearly all on-vibe chill-house** ⭐ best goldmine
+- **janevo / Nver Avetyan** — https://pixabay.com/users/nveravetyanmusic-29393722/ — ~752 tracks (filter hard: downtempo/lofi/ethnic)
+- **JuliusH** — https://pixabay.com/users/juliush-3921568/ — big beach/ibiza-chill catalogue (lots of nature/piano too, skim past)
+
+**New verified tracks from this dig:**
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Middle East (Ethnic Arabic) | janevo | https://pixabay.com/music/upbeat-middle-east-ethnic-arabic-music-156548/ | Warm |
+| Caravan | janevo | https://pixabay.com/music/world-caravan-royalty-free-music-174938/ | Warm |
+| A Warm Chill Hop | janevo | https://pixabay.com/music/beats-a-warm-chill-hop-royalty-free-music-215850/ | Warm |
+| Modern Soul (Chill Hop) | janevo | https://pixabay.com/music/beats-modern-soul-chill-hop-235653/ | Warm |
+| Chilled Hop (Calm Chill) | janevo | https://pixabay.com/music/beats-chilled-hop-calm-chill-background-157538/ | Chill |
+| Chill House · Dreams | TurtleBeats | https://pixabay.com/music/upbeat-chill-house-dreams-285526/ | Warm |
+| Chill House · Flicker and Flow | TurtleBeats | https://pixabay.com/music/upbeat-chill-house-flicker-and-flow-285530/ | Warm |
+
+> Browse-only (titles confirmed, grab from the profiles above): JuliusH *"Echoes
+> of Dawn"*, *"Chill Music – Lounge – Evening"* · janevo *"Winter Calm (Lofi Chill
+> Hop)"*, *"Aesthetic Beat"*, *"Calming Soul"*.
+
+---
+
 ### 🌍 More like #3 — Ethnic / Mediterranean ambient
 
 More in the lane of the "Ethnic Ambient" track (oud, duduk, ney, nylon guitar,
