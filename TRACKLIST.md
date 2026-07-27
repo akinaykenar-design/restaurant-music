@@ -163,6 +163,38 @@ way to find more you'll like (janevo = Nver Avetyan).
 
 ---
 
+### 🥁 More beats (groove-forward)
+
+**New producer to mine:** **SoulProdMusic** — https://pixabay.com/users/soulprodmusic-30064790/
+— 200+ organic house / downtempo / soulful house. Also **VLADISLAV_ZAVORIN** (organic/chill house).
+
+**Grooviest (afro / house / ethnic):**
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Amapiano / African House | Kenny G (Pixabay) | https://pixabay.com/music/afrobeat-amapianoafrican-house-music-kenny-g-128397/ | Upbeat |
+| Match Out (Afro Amapiano) | (Pixabay) | https://pixabay.com/music/afrobeat-match-out-free-afro-amapiano-instrumental-178406/ | Upbeat |
+| Amapiano | (Pixabay) | https://pixabay.com/music/afrobeat-amapiano-286609/ | Upbeat |
+| Deep House Instrumental | (Pixabay) | https://pixabay.com/music/upbeat-deep-house-instrumental-290474/ | Upbeat |
+| Kalimba Beat (ethnic groove) | (Pixabay) | https://pixabay.com/music/beats-kalimba-beat-151612/ | Warm |
+| Future Downtempo Lounge · Sunset | (Pixabay) | https://pixabay.com/music/beats-future-downtempo-lounge-sunset-417744/ | Warm |
+
+**janevo chill-hop / beats:**
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Chill Trap Music | janevo | https://pixabay.com/music/beats-chill-trap-music-152461/ | Warm |
+| Chill Hip Hop | janevo | https://pixabay.com/music/beats-chill-hip-hop-137476/ | Chill |
+| Modern Hip-Hop Chill | janevo | https://pixabay.com/music/beats-modern-hip-hop-chill-310294/ | Chill |
+| Midnight Serenade (LoFi Chill Hop) | janevo | https://pixabay.com/music/smooth-jazz-midnight-serenade-234214/ | Chill |
+| Sunset Vibes (Lo-Fi / Chillhop) | (Pixabay) | https://pixabay.com/music/beats-sunset-vibes-lo-fichillhop-9503/ | Warm |
+
+> More on his profile (search snippets, grab direct): janevo *"Flow Journey (Soul
+> Chill Hop)"*, *"Kiss Umbra (Jazz Lofi)"*, *"Dream Lounge"*, *"Luxury Style (Calm
+> Deep House)"*, *"Middle East Duduk"*.
+
+---
+
 ### 🌍 More like #3 — Ethnic / Mediterranean ambient
 
 More in the lane of the "Ethnic Ambient" track (oud, duduk, ney, nylon guitar,
