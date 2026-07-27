@@ -55,6 +55,20 @@ All Pixabay tracks are **Pixabay Content License** (no attribution). The
 **real-artist CC-BY** set below is free for commercial use too, but **requires a
 displayed credit** (see Attribution log).
 
+### 🗓️ Daily finds — 2026-07-27
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Summer Afro Tropical Instrumental | (Pixabay) | https://pixabay.com/music/island-summer-afro-tropical-instrumental-263946/ | Warm |
+| Namosy \| Amapiano | Kontraa | https://pixabay.com/music/afrobeat-namosy-amapiano-music-330499/ | Warm |
+| Unlock Me \| Amapiano | Kontraa | https://pixabay.com/music/upbeat-unlock-me-amapiano-music-149058/ | Upbeat |
+| Stable Afro House (Full) | (Pixabay) | https://pixabay.com/music/afrobeat-stable-afro-house-full-366150/ | Upbeat |
+| ВДОХ, ВЫДОХ (Downtempo, "Inhale Exhale") | Vladislav Zavorin | https://pixabay.com/music/pop-%D0%B2%D0%B4%D0%BE%D1%85-%D0%B2%D1%8B%D0%B4%D0%BE%D1%85-downtempo-%D0%B2%D0%BB%D0%B0%D0%B4%D0%B8%D1%81%D0%BB%D0%B0%D0%B2-%D0%B7%D0%B0%D0%B2%D0%BE%D1%80%D0%B8%D0%BD-407919/ | Warm |
+| МИЛАЯ (Downtempo, "Sweet") | Vladislav Zavorin | https://pixabay.com/music/upbeat-%D0%BC%D0%B8%D0%BB%D0%B0%D1%8F-%D0%B4%D0%B0%D1%83%D0%BD%D1%82%D0%B5%D0%BC%D0%BF%D0%BE-%D0%B2%D0%BB%D0%B0%D0%B4%D0%B8%D1%81%D0%BB%D0%B0%D0%B2-%D0%B7%D0%B0%D0%B2%D0%BE%D1%80%D0%B8%D0%BD-378290 | Warm |
+
+> New producer: **Kontraa** (amapiano). *Browse-only lead:* djovan "Golden Sand –
+> Oriental Chillout Oud" (couldn't pin the URL — search "arabic oud" on Pixabay).
+
 ### 🎨 Real-artist CC-BY — Mediterranean / ambient organic (not stock)
 
 Actual indie/CC musicians from Free Music Archive, ccMixter, Bandcamp, incompetech
