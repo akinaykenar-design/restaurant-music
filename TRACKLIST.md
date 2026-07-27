@@ -111,9 +111,28 @@ The batch you rated highest. Keep this as the core.
 | 6 | Sunset On The Beach – Ambient Chill | https://pixabay.com/music/post-rock-sunset-on-the-beach-ambient-chill-music-and-waves-10438/ | Warm |
 | 7 | Afro Groove Tribal House (livelier, for lunch) | https://pixabay.com/music/upbeat-afro-groove-tribal-house-306076/ | Upbeat |
 
-**⭐ Main hunting ground — Organic House** (this tag *is* the Four Tet sound;
-grab 10–15 you like): https://pixabay.com/music/search/organic%20house/
-**Artists to browse:** sunset-house-grooves, Tunetank, Kulakovka, Musicalex-morgan.
+**⭐ Mine these artists — they MADE the tracks you loved** (open their Pixabay
+profiles for dozens more in the same feel):
+- **janevo** — made #1 "Downtempo Lo-Fi" and #2 "Atmosphere Downtempo"
+- **JuliusH** — made #5 "Ibiza Waves" and #6 "Sunset On The Beach" (huge beach/ibiza-chill catalogue)
+- **TurtleBeats** — organic/chill-house groove (the #7 end)
+
+**More like the first set (Pixabay, closest first):**
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Chillout Lounge Downtempo (Warm Relaxed Ambient) | REDproductions | https://pixabay.com/music/beats-chillout-lounge-downtempo-cool-atmospheric-warm-relaxed-ambient-music-21040/ | Chill |
+| Future Downtempo Lounge · Sunset | (Pixabay) | https://pixabay.com/music/beats-future-downtempo-lounge-sunset-417744/ | Warm |
+| Chill Abstract | janevo | https://pixabay.com/music/beats-chill-abstract-background-music-154682/ | Chill |
+| LoFi Chill Hip Hop | (Pixabay) | https://pixabay.com/music/beats-lofi-chill-hip-hop-135244/ | Chill |
+| Ethnic Background (drums, percussion, folk) | (Pixabay) | https://pixabay.com/music/world-ethnic-background-music-drums-percussion-folk-motives-5872/ | Warm |
+| Chilling Waves – Ambient Chill Out | JuliusH | https://pixabay.com/music/ambient-chilling-waves-ambient-chill-out-music-for-relaxation-13880/ | Chill |
+| Chill House · Sunset Groove | TurtleBeats | https://pixabay.com/music/upbeat-chill-house-sunset-groove-251697/ | Warm |
+| Chill House · Groove Under the Moon | TurtleBeats | https://pixabay.com/music/upbeat-chill-house-groove-under-the-moon-251691/ | Warm |
+| Afro House | (Pixabay) | https://pixabay.com/music/afrobeat-afro-house-455843/ | Upbeat |
+
+> Also worth a browse: DARIOCOIRO "Sunset On The Sand" (soft/latin/afro house),
+> and the Pixabay tag pages `organic house`, `afro house`, `chillout lounge`.
 
 ---
 
