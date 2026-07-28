@@ -62,6 +62,11 @@ search, so a couple may be shorter than ideal).
 - Ibiza Waves – Ambient Chill Out — JuliusH — https://pixabay.com/music/ambient-ibiza-waves-ambient-chill-out-music-3897/
 - Middle Eastern Mystic Desert — Abydos_Music — https://pixabay.com/music/world-middle-eastern-mystic-desert-188927/
 - Caravan — janevo — https://pixabay.com/music/world-caravan-royalty-free-music-174938/
+- Spanish Guitar Backing Chill — https://pixabay.com/music/solo-guitar-spanish-guitar-backing-chill-151507/
+- Balearic Beat — https://pixabay.com/music/beats-balearic-beat-299358/
+- Middle East (Ethnic Arabic) — janevo — https://pixabay.com/music/upbeat-middle-east-ethnic-arabic-music-156548/
+- Crossing the Sands — matthewmikemusic — https://pixabay.com/music/world-crossing-the-sands-159031/
+- Oriental Style Ambient — https://pixabay.com/music/world-oriental-style-ambient-300804/
 
 ### 🍷 Dinner — warm, sundown, deeper groove
 - Butterfly Flight (Organic House) — rediskasound — https://pixabay.com/music/world-butterfly-flight-organic-house-460809/
@@ -69,6 +74,11 @@ search, so a couple may be shorter than ideal).
 - Back To Ibiza — Nver_Music — https://pixabay.com/music/deep-house-back-to-ibiza-royalty-free-music-202321/
 - The Evening Deep House — 9JackJack8 — https://pixabay.com/music/deep-house-the-evening-deep-house-295163/
 - Desert Wind — Grand_Project — https://pixabay.com/music/upbeat-desert-wind-342899/
+- Dagon — LiVAiL — https://pixabay.com/music/deep-house-livail-dagon-18512/
+- Oasis (base mix) — LiVAiL — https://pixabay.com/music/deep-house-livail-oasis-12/
+- Inspire Deep House — Nver_Music — https://pixabay.com/music/soft-house-inspire-deep-house-royalty-free-music-178466/
+- Run Free (Melodic Lounge Deep House) — TelevisedFella — https://pixabay.com/music/upbeat-run-free-melodic-lounge-deep-house-279770/
+- Velvet Vibe Sanctuary — Kulakovka — https://pixabay.com/music/upbeat-velvet-vibe-sanctuary-chill-fashion-lounge-deep-house-270242/
 
 ### 🔥 Lively — young/busy, afro-house groove
 - Afro Groove Tribal House — https://pixabay.com/music/upbeat-afro-groove-tribal-house-306076/
@@ -76,6 +86,11 @@ search, so a couple may be shorter than ideal).
 - Unlock Me (Amapiano) — Kontraa — https://pixabay.com/music/upbeat-unlock-me-amapiano-music-149058/
 - Stable Afro House — https://pixabay.com/music/afrobeat-stable-afro-house-full-366150/
 - Holding Onto You — DeltaX-Music — https://pixabay.com/music/dance-holding-onto-you-248331/
+- Namosy (Amapiano) — Kontraa — https://pixabay.com/music/afrobeat-namosy-amapiano-music-330499/
+- Summer Afro Tropical Instrumental — https://pixabay.com/music/island-summer-afro-tropical-instrumental-263946/
+- Amapiano / African House — Kenny G — https://pixabay.com/music/afrobeat-amapianoafrican-house-music-kenny-g-128397/
+- Chill House · Groove Under the Moon — TurtleBeats — https://pixabay.com/music/upbeat-chill-house-groove-under-the-moon-251691/
+- Match Out (Afro Amapiano) — https://pixabay.com/music/afrobeat-match-out-free-afro-amapiano-instrumental-178406/
 
 ### 💼 Corporate — polished, low-key
 - Deep and Chill Lounge (Instrumental) — DELOSound — https://pixabay.com/music/beats-deep-and-chill-lounge-instrumental-edit-165960/
@@ -83,6 +98,11 @@ search, so a couple may be shorter than ideal).
 - Chillout Lounge Downtempo — REDproductions — https://pixabay.com/music/beats-chillout-lounge-downtempo-cool-atmospheric-warm-relaxed-ambient-music-21040/
 - Deep House (Royalty Free) — Nver_Music — https://pixabay.com/music/soft-house-deep-house-royalty-free-music-201267/
 - Future Downtempo Lounge · Sunset — https://pixabay.com/music/beats-future-downtempo-lounge-sunset-417744/
+- Ibiza Breeze (Lounge) — https://pixabay.com/music/soft-house-ibiza-breeze-lounge-fashion-event-191649/
+- Lost in Dreams — Kulakovka — https://pixabay.com/music/beats-lost-in-dreams-abstract-chill-downtempo-cinematic-future-beats-270241/
+- МИЛАЯ (Downtempo) — Vladislav Zavorin — https://pixabay.com/music/upbeat-%D0%BC%D0%B8%D0%BB%D0%B0%D1%8F-%D0%B4%D0%B0%D1%83%D0%BD%D1%82%D0%B5%D0%BC%D0%BF%D0%BE-%D0%B2%D0%BB%D0%B0%D0%B4%D0%B8%D1%81%D0%BB%D0%B0%D0%B2-%D0%B7%D0%B0%D0%B2%D0%BE%D1%80%D0%B8%D0%BD-378290
+- Kalimba Beat — https://pixabay.com/music/beats-kalimba-beat-151612/
+- Echoes of the Desert (Mystic Arabic Ambient) — https://pixabay.com/music/electronic-echoes-of-the-desert-mystic-arabic-ambient-452059/
 
 ### 🌙 Wind-down — late, mellow (not sleepy)
 - Sunset On The Beach – Ambient Chill — JuliusH — https://pixabay.com/music/post-rock-sunset-on-the-beach-ambient-chill-music-and-waves-10438/
@@ -90,6 +110,11 @@ search, so a couple may be shorter than ideal).
 - Mesmerising Sunset — SergePavkinMusic — https://pixabay.com/music/beats-mesmerising-sunset-265903/
 - ВДОХ, ВЫДОХ (Downtempo) — Vladislav Zavorin — https://pixabay.com/music/pop-%D0%B2%D0%B4%D0%BE%D1%85-%D0%B2%D1%8B%D0%B4%D0%BE%D1%85-downtempo-%D0%B2%D0%BB%D0%B0%D0%B4%D0%B8%D1%81%D0%BB%D0%B0%D0%B2-%D0%B7%D0%B0%D0%B2%D0%BE%D1%80%D0%B8%D0%BD-407919/
 - Tropical Melodic Sunsets — https://pixabay.com/music/soft-house-tropical-melodic-sunsets-114009/
+- Serene Peace — Ashot-Danielyan — https://pixabay.com/music/ambient-serene-peace-110617/
+- Meditative Oud (Palestinian Soul) — https://pixabay.com/music/meditationspiritual-meditative-oud-palestinian-soul-112719/
+- Desert Scape (Atmospheric World Loop) — https://pixabay.com/music/ambient-desert-scape-atmospheric-world-nature-loop-368595/
+- Sad Duduk (Middle Eastern Ambient) — https://pixabay.com/music/nostalgia-sad-duduk-middle-eastern-ambient-soundtrack-231102/
+- Egyptian Egypt Desert Music — https://pixabay.com/music/world-egyptian-egypt-desert-music-502005/
 
 ---
 
