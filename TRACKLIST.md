@@ -49,6 +49,50 @@ grants commercial public performance with no royalties owed. The safe categories
 
 ---
 
+## 🍽️ Ready-made service playlists (5 per service)
+
+Curated from our verified list, matched to each Scene. All Pixabay (no
+attribution). Aim is full-length tracks — the app shows real durations once
+loaded, so cull anything under ~3 min there (Pixabay lengths aren't visible from
+search, so a couple may be shorter than ideal).
+
+### ☀️ Lunch — relaxed, Mediterranean daytime
+- Ethnic Ambient — janevo — https://pixabay.com/music/beats-ethnic-ambient-116695/
+- Atmosphere Downtempo — Nver Avetyan — https://pixabay.com/music/beats-atmosphere-downtempo-royalty-free-music-193084/
+- Ibiza Waves – Ambient Chill Out — JuliusH — https://pixabay.com/music/ambient-ibiza-waves-ambient-chill-out-music-3897/
+- Middle Eastern Mystic Desert — Abydos_Music — https://pixabay.com/music/world-middle-eastern-mystic-desert-188927/
+- Caravan — janevo — https://pixabay.com/music/world-caravan-royalty-free-music-174938/
+
+### 🍷 Dinner — warm, sundown, deeper groove
+- Butterfly Flight (Organic House) — rediskasound — https://pixabay.com/music/world-butterfly-flight-organic-house-460809/
+- Arabian Nights — LiVAiL — https://pixabay.com/music/deep-house-livail-arabian-nights-18520/
+- Back To Ibiza — Nver_Music — https://pixabay.com/music/deep-house-back-to-ibiza-royalty-free-music-202321/
+- The Evening Deep House — 9JackJack8 — https://pixabay.com/music/deep-house-the-evening-deep-house-295163/
+- Desert Wind — Grand_Project — https://pixabay.com/music/upbeat-desert-wind-342899/
+
+### 🔥 Lively — young/busy, afro-house groove
+- Afro Groove Tribal House — https://pixabay.com/music/upbeat-afro-groove-tribal-house-306076/
+- Chill House · Sunset Groove — TurtleBeats — https://pixabay.com/music/upbeat-chill-house-sunset-groove-251697/
+- Unlock Me (Amapiano) — Kontraa — https://pixabay.com/music/upbeat-unlock-me-amapiano-music-149058/
+- Stable Afro House — https://pixabay.com/music/afrobeat-stable-afro-house-full-366150/
+- Holding Onto You — DeltaX-Music — https://pixabay.com/music/dance-holding-onto-you-248331/
+
+### 💼 Corporate — polished, low-key
+- Deep and Chill Lounge (Instrumental) — DELOSound — https://pixabay.com/music/beats-deep-and-chill-lounge-instrumental-edit-165960/
+- Reflected Light — SergePavkinMusic — https://pixabay.com/music/beautiful-plays-reflected-light-147979/
+- Chillout Lounge Downtempo — REDproductions — https://pixabay.com/music/beats-chillout-lounge-downtempo-cool-atmospheric-warm-relaxed-ambient-music-21040/
+- Deep House (Royalty Free) — Nver_Music — https://pixabay.com/music/soft-house-deep-house-royalty-free-music-201267/
+- Future Downtempo Lounge · Sunset — https://pixabay.com/music/beats-future-downtempo-lounge-sunset-417744/
+
+### 🌙 Wind-down — late, mellow (not sleepy)
+- Sunset On The Beach – Ambient Chill — JuliusH — https://pixabay.com/music/post-rock-sunset-on-the-beach-ambient-chill-music-and-waves-10438/
+- Chilling Waves – Ambient Chill Out — JuliusH — https://pixabay.com/music/ambient-chilling-waves-ambient-chill-out-music-for-relaxation-13880/
+- Mesmerising Sunset — SergePavkinMusic — https://pixabay.com/music/beats-mesmerising-sunset-265903/
+- ВДОХ, ВЫДОХ (Downtempo) — Vladislav Zavorin — https://pixabay.com/music/pop-%D0%B2%D0%B4%D0%BE%D1%85-%D0%B2%D1%8B%D0%B4%D0%BE%D1%85-downtempo-%D0%B2%D0%BB%D0%B0%D0%B4%D0%B8%D1%81%D0%BB%D0%B0%D0%B2-%D0%B7%D0%B0%D0%B2%D0%BE%D1%80%D0%B8%D0%BD-407919/
+- Tropical Melodic Sunsets — https://pixabay.com/music/soft-house-tropical-melodic-sunsets-114009/
+
+---
+
 ## 🎛️ Producer directory (browse these — best way to source)
 
 All Pixabay (free commercial, no attribution). Open a profile and scroll — far
