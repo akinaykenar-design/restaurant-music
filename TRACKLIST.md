@@ -49,6 +49,35 @@ grants commercial public performance with no royalties owed. The safe categories
 
 ---
 
+## 🎛️ Producer directory (browse these — best way to source)
+
+All Pixabay (free commercial, no attribution). Open a profile and scroll — far
+faster than one-off tracks. **On-vibe, best-fit first.**
+
+> **Start with these three for the restaurant: djovan · SergeQuadrado · Play House.**
+> djovan + SergeQuadrado own the warm Mediterranean/ethnic side; Play House brings the organic/deep-house groove.
+
+| Producer | Profile | Style |
+|---|---|---|
+| **djovan** ⭐ | https://pixabay.com/users/djovan-36764943/ | Ethnic / Mediterranean world grooves (~239) — bullseye |
+| **SergeQuadrado** ⭐ | https://pixabay.com/users/sergequadrado-24990007/ | Mediterranean / ethnic / flamenco / world |
+| **Play House** | https://pixabay.com/users/playhousesound-43083879/ | Organic / afro / deep / melodic house (Paris) |
+| **TurtleBeats** | https://pixabay.com/users/turtlebeats-46526702/ | Chill house / sunset groove (~265) |
+| **SoulProdMusic** | https://pixabay.com/users/soulprodmusic-30064790/ | Lo-fi / chillhop + soft house (200+) |
+| **lofidreams** | https://pixabay.com/users/lofidreams-25132446/ | Lo-fi / chill / chillhop (~279) |
+| **Kulakovka** | https://pixabay.com/users/kulakovka-47183261/ | Lo-fi, chill downtempo (~339) |
+| **Vladislav Zavorin** | https://pixabay.com/users/владислав_заворин-43127785/ | Downtempo / lo-fi chill |
+| **TelevisedFella** | https://pixabay.com/users/televisedfella-44139298/ | House / chill house |
+| **artbybigvee** | https://pixabay.com/users/artbybigvee-7284076/ | Afro / amapiano (Nigeria) |
+| **Abydos_Music** | https://pixabay.com/users/abydos_music-27178115/ | Organic acoustic↔electronic |
+| **DesiFreeMusic** | https://pixabay.com/users/desifreemusic-28163210/ | Ethnic instrumental (world) |
+| **janevo / Nver Avetyan** | https://pixabay.com/users/nveravetyanmusic-29393722/ | Made your faves — big catalogue, filter to downtempo/lofi/ethnic |
+
+Search-only (profile URL not confirmable — search the name on Pixabay Music):
+**LiVAiL** (deep house), **rediskasound** (organic house), **DARIOCOIRO** (house).
+
+---
+
 ## ✅ Confirmed picks
 
 All Pixabay tracks are **Pixabay Content License** (no attribution). The
