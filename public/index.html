@@ -79,6 +79,18 @@
 
             <div class="scenes" id="scenes" aria-label="Quick scenes for the current crowd"></div>
 
+            <details class="stream-box" id="stream-box">
+              <summary>📻 Play a web stream</summary>
+              <div class="stream-row">
+                <select id="stream-presets" aria-label="Saved streams"><option value="">Saved streams…</option></select>
+                <input id="stream-url" type="url" placeholder="Paste stream URL (mp3/aac)…" />
+                <button id="stream-play" class="ghost">▶ Play</button>
+                <button id="stream-save" class="ghost" title="Save this stream">＋</button>
+                <button id="stream-stop" class="ghost" hidden>■ Stop</button>
+              </div>
+              <p class="hint stream-note">Point it at a royalty-free / CC audio stream. A commercial internet-radio station still needs a venue licence in Australia.</p>
+            </details>
+
             <div class="vol-row">
               <button id="mute" class="mutebtn" title="Mute" aria-label="Mute">
                 <svg class="vic" id="vic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 5V4L8 9H4z"/></svg>

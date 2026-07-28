@@ -27,6 +27,10 @@ web app (nothing to install).
   analyses the audio for tempo + energy to bucket it **Chill / Warm / Upbeat**.
   Filter and sort the library by genre, vibe or rating, and **build vibe
   playlists** in one click (great for chill lunch → upbeat dinner).
+- **Web stream** — paste any internet-radio / audio stream URL (or pick a saved
+  one) on Now Playing and it plays through the app instead of the local library.
+  Use a royalty-free / CC stream for trading hours (a commercial station still
+  needs a venue licence).
 - **Scenes** — one-tap "crowd" modes on Now Playing (**Lunch · Dinner · Lively ·
   Corporate · Wind-down**) that instantly play the right vibe for the room and
   override the schedule; tap **Schedule** to hand back to auto. The active scene

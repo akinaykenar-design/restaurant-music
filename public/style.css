@@ -185,6 +185,17 @@ input[type='range']::-moz-range-thumb { width: 15px; height: 15px; border: none;
 .scene-ic { font-size: 0.98rem; line-height: 1; }
 .scene-auto.on { background: var(--warn); border-color: var(--warn); box-shadow: 0 8px 18px -8px var(--warn); }
 
+/* web stream box */
+.stream-box { margin: 14px 0 2px; border: 1px solid var(--border); border-radius: 12px; padding: 2px 14px; background: var(--surface-2); }
+.stream-box summary { cursor: pointer; font-size: 0.84rem; font-weight: 600; padding: 10px 0; color: var(--muted); }
+.stream-box[open] summary { color: var(--text); }
+.stream-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 2px 0 6px; }
+.stream-row select, .stream-row input { background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 9px; padding: 8px 10px; font: inherit; font-size: 0.84rem; }
+.stream-row select:focus, .stream-row input:focus { outline: none; border-color: var(--accent); }
+.stream-row input { flex: 1; min-width: 150px; }
+.stream-row .ghost { flex: none; }
+.stream-note { margin: 0 0 8px; font-size: 0.74rem; }
+
 .add-all { width: 100%; margin-bottom: 12px; font-size: 0.84rem; }
 .add-all:disabled { opacity: 0.5; cursor: not-allowed; }
 .chip.range b { color: var(--text); min-width: 22px; text-align: right; }
