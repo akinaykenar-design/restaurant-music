@@ -153,6 +153,22 @@ All Pixabay tracks are **Pixabay Content License** (no attribution). The
 **real-artist CC-BY** set below is free for commercial use too, but **requires a
 displayed credit** (see Attribution log).
 
+### 🗓️ Daily finds — 2026-07-28
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Middle Eastern Moon | Abydos_Music | https://pixabay.com/music/world-middle-eastern-moon-201542/ | Warm |
+| Amatry | artbybigvee | https://pixabay.com/music/afrobeat-amatry-artbybigvee-171818/ | Warm |
+| THE HILLS | artbybigvee | https://pixabay.com/music/afrobeat-the-hills-153598/ | Warm |
+| Davido Inspired | artbybigvee | https://pixabay.com/music/afrobeat-davido-inspired-176432/ | Upbeat |
+| Hakuna Matata (Afro House) | Play House | https://pixabay.com/music/afrobeat-hakuna-matata-afro-house-copyright-free-music-play-house-322660/ | Warm |
+| Messy (Afro House) | Play House | https://pixabay.com/music/upbeat-play-house-messy-afro-house-version-306948/ | Upbeat |
+| Deep House Soul | Play House | https://pixabay.com/music/upbeat-deep-house-soul-copyright-free-music-play-house-287390/ | Warm |
+| Deep House Whispers | Play House | https://pixabay.com/music/dance-deep-house-whispers-play-house-no-copyright-music-play-house-206943/ | Warm |
+
+> djovan/SergeQuadrado yielded no confirmable URLs today (search index gap) —
+> worth a manual browse of djovan's profile for the oud/sunset tracks.
+
 ### 🗓️ Daily finds — 2026-07-27
 
 | Title | Artist | Source | Vibe |
