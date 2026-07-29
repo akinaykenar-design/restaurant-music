@@ -153,6 +153,23 @@ All Pixabay tracks are **Pixabay Content License** (no attribution). The
 **real-artist CC-BY** set below is free for commercial use too, but **requires a
 displayed credit** (see Attribution log).
 
+### 🗓️ Daily finds — 2026-07-29
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Mediterranean Dance | (uploader n/a) | https://pixabay.com/music/folk-mediterranean-dance-335024/ | Warm |
+| Mediterranean Village Dance | (uploader n/a) | https://pixabay.com/music/folk-mediterranean-village-dance-140626/ | Warm |
+| Light Bossa Nova Jazz — Seaside Cafe | (Pixabay) | https://pixabay.com/music/smooth-jazz-light-bossa-nova-jazz-seaside-cafe-music-207166/ | Chill |
+| Bossa Nova Romantic Relaxed Lounge | (Pixabay) | https://pixabay.com/music/bossa-nova-bossa-nova-romantic-relaxed-lounge-music-349582/ | Warm |
+| ИГЕЛИЯ КАК СОН (House Mix) | Vladislav Zavorin | https://pixabay.com/music/pop-%D0%B8%D0%B3%D0%B5%D0%BB%D0%B8%D1%8F-%D0%BA%D0%B0%D0%BA-%D1%81%D0%BE%D0%BD-%D1%85%D0%B0%D1%83%D1%81-%D0%BC%D0%B8%D0%BA%D1%81-%D0%B2%D0%BB%D0%B0%D0%B4%D0%B8%D1%81%D0%BB%D0%B0%D0%B2-%D0%B7%D0%B0%D0%B2%D0%BE%D1%80%D0%B8%D0%BD-290817/ | Warm |
+| ЛЮБИМАЯ (Downtempo) | Vladislav Zavorin | https://pixabay.com/music/pop-%D0%BB%D1%8E%D0%B1%D0%B8%D0%BC%D0%B0%D1%8F-%D0%B4%D0%B0%D1%83%D0%BD%D1%82%D0%B5%D0%BC%D0%BF%D0%BE-%D0%B2%D0%BB%D0%B0%D0%B4%D0%B8%D1%81%D0%BB%D0%B0%D0%B2-%D0%B7%D0%B0%D0%B2%D0%BE%D1%80%D0%B8%D0%BD-369912/ | Chill |
+| E go better! | artbybigvee | https://pixabay.com/music/afrobeat-e-go-better-312047/ | Warm |
+| Afro House x Electronic Synth | YellowBirdBeats | https://pixabay.com/music/afrobeat-afro-house-x-electronic-synth-miniature-292176/ | Upbeat |
+
+> Ear-check: the two "Mediterranean Dance" (uploader unconfirmed) and the Zavorin
+> tracks (confirm instrumental). Short (~2 min): "Afro House x Synth", "E go better".
+> Browse-only leads: Play House "Oh Love"/"WE"/"Tribal Groove", artbybigvee "Euphoria"/"Bitter Sweet".
+
 ### 🗓️ Daily finds — 2026-07-28
 
 | Title | Artist | Source | Vibe |
