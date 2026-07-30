@@ -118,6 +118,32 @@ search, so a couple may be shorter than ideal).
 
 ---
 
+## 🌍 Other free sites — real indie artists (CC-BY, credit required)
+
+Not Pixabay, not stock — actual named artists with character. **Credit required**
+(CC-BY / BY-SA; ShareAlike only matters if you *edit* a track — plain playback is
+fine). Credits logged in the Attribution section.
+
+**⭐ Jahzzar** (Javier Suárez, Spain — warm organic downtempo / dub-soul, real Mediterranean feel):
+- Siesta — https://freemusicarchive.org/music/Jahzzar/Travellers_Guide/Siesta
+- The Guitarist — https://freemusicarchive.org/music/Jahzzar/RawDub/02_-_The_Guitarist
+- Comedie — https://freemusicarchive.org/music/Jahzzar/Super_1222/05_Comedie
+- Miss Breeze · Coffee Drops (RawDub album) — https://jahzzar.bandcamp.com/album/rawdub
+
+**Vlad Gluschenko** (Balearic sunset chill):
+- Sea Breeze — https://free-stock-music.com/vlad-gluschenko-sea-breeze.html
+- Summer Ballad — https://free-stock-music.com/vlad-gluschenko-summer-ballad.html
+
+**Broke For Free** (warm organic-electronic, leans a touch ambient):
+- Something Elated — https://freemusicarchive.org/music/Broke_For_Free/Something_EP/Broke_For_Free_-_Something_EP_-_05_Something_Elated/
+- Night Owl — https://freemusicarchive.org/music/Broke_For_Free/Directionless_EP/Broke_For_Free_-_Directionless_EP_-_01_Night_Owl
+
+> **Honest note:** the literal oud / Nicola-Cruz organic-house sound at a commercial-free
+> licence is scarce off Pixabay (most is CC-**NC** = not venue-legal). Jahzzar & Vlad
+> Gluschenko are the closest real-artist matches with clean commercial licences.
+
+---
+
 ## 🧭 Sweep finds (cleaned — generic filler removed)
 
 > Purged the elevator-music filler (generic "bossa/podcast/coffee-shop/background/
@@ -637,6 +663,8 @@ we use any credit-required tracks. A simple line per artist satisfies CC-BY:
 
 **Real-artist CC-BY set (+ Wikimedia Commons):**
 - Music by **Broke For Free** — licensed under CC BY 3.0
+- Music by **Jahzzar** — licensed under CC BY-SA 3.0 — betterwithmusic.com
+- Music by **Vlad Gluschenko** — licensed under CC BY 3.0
 - Music by **airtone** — licensed under CC BY 3.0 (ccmixter.org)
 - "Desert City" / "Ibn Al-Noor" by **Kevin MacLeod** (incompetech.com) — CC BY 3.0 / 4.0
 - Music by **Meydän** — licensed under CC BY 4.0
