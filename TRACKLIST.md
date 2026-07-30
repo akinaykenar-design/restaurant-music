@@ -118,6 +118,74 @@ search, so a couple may be shorter than ideal).
 
 ---
 
+## 🧭 Big sweep (toward 100) — all Pixabay, no lofi, no afro
+
+### Mediterranean / ethnic (10)
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Sahara Sunrise | (n/a) | https://pixabay.com/music/world-sahara-sunrise-11681/ | Warm |
+| Sahara Desert Music (Middle Eastern) | (n/a) | https://pixabay.com/music/world-sahara-desert-music-middle-eastern-313836/ | Warm |
+| Desert Caravan | (n/a) | https://pixabay.com/music/upbeat-desert-caravan-109182/ | Warm |
+| Whirling Dervish Groove (Ney, Darbuka & Tanbur) | (n/a) | https://pixabay.com/music/world-whirling-dervish-groove-ney-darbuka-amp-tanbur-422969/ | Warm |
+| Oriental Serenity Loop | Abydos_Music | https://pixabay.com/music/world-oriental-serenity-loop-199469/ | Warm |
+| Middle Eastern Mystic Desert – Loop 1 | Abydos_Music | https://pixabay.com/music/world-middle-eastern-mystic-desert-loop-1-290476/ | Warm |
+| Flamenco | (n/a) | https://pixabay.com/music/folk-flamenco-148421/ | Warm |
+| Fast Flamenco Guitar (short ~2:16) | (n/a) | https://pixabay.com/music/solo-guitar-fast-flamenco-guitar-instrumental-253442/ | Warm |
+| Bouzouki Joe | (n/a) | https://pixabay.com/music/acoustic-group-bouzouki-joe-363686/ | Upbeat |
+| Greek Aegean Sunshine (bouzouki, ear-check) | DjYogi | https://pixabay.com/music/upbeat-greek-aegean-sunshine-bouzouki-groove-421454/ | Upbeat |
+
+> **djovan browse-gold** (open profile, grab the file): "Golden Sand", "Sahara Sunset",
+> "Oasis of Peace", "Pearls of Fez", "Andalusian Oud Dreams", "Mystic Maghreb" —
+> https://pixabay.com/users/djovan-36764943/ · New producers: Mohamed_hassan (oud/ney), nickpanek (flamenco guitar).
+
+### Smooth-jazz / bossa / seaside lounge (16)
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Café Bossa | (n/a) | https://pixabay.com/music/bossa-nova-café-bossa-239390/ | Warm |
+| Jazz Bossa Nova | (n/a) | https://pixabay.com/music/bossa-nova-jazz-bossa-nova-163669/ | Warm |
+| Bossa Nova Summer (Instrumental Brazil) | BrazilMusicalmix2020 | https://pixabay.com/music/bossa-nova-bossa-nova-summer-instrumental-brazil-7969/ | Warm |
+| Cocktail Music | (n/a) | https://pixabay.com/music/bossa-nova-cocktail-music-110969/ | Warm |
+| Cafe Restaurant Bossa Nova | (n/a) | https://pixabay.com/music/bossa-nova-cafe-restaurant-bossa-nova-music-416082/ | Warm |
+| Bossa Nova Jazz Piano Summer Cafe | Denis-Pavlov-Music | https://pixabay.com/music/bossa-nova-bossa-nova-jazz-piano-summer-cafe-podcast-music-398166/ | Warm |
+| Sunny Bossa Nova Jazz Summer | (n/a) | https://pixabay.com/music/bossa-nova-sunny-bossa-nova-jazz-podcast-summer-music-228153/ | Warm |
+| Piano and Guitar Bossa | (n/a) | https://pixabay.com/music/bossa-nova-piano-and-guitar-bossa-3690/ | Warm |
+| Bossa Nova | (n/a) | https://pixabay.com/music/bossa-nova-bossa-nova-14396/ | Chill |
+| Jazz Underscore – Echoes of the Lounge | (n/a) | https://pixabay.com/music/smooth-jazz-youtube-jazz-underscore-echoes-of-the-lounge-378998/ | Warm |
+| Podcast Smooth Jazz Instrumental | (n/a) | https://pixabay.com/music/smooth-jazz-podcast-smooth-jazz-instrumental-music-225674/ | Warm |
+| Jazz Funk Groove (liveliest) | (n/a) | https://pixabay.com/music/smooth-jazz-jazz-funk-groove-instrumental-222618/ | Warm |
+| Jazz Podcast Night Relaxing Vibes | Denis-Pavlov-Music | https://pixabay.com/music/traditional-jazz-jazz-podcast-night-relaxing-vibes-242886/ | Chill |
+| Soothing Serene Smooth Jazz Cafe | (n/a) | https://pixabay.com/music/traditional-jazz-podcast-soothing-serene-smooth-jazz-romantic-cafe-vibes-213058/ | Chill |
+| Relaxing Jazz Coffee Shop | (n/a) | https://pixabay.com/music/traditional-jazz-relaxing-jazz-podcast-coffee-shop-music-192283/ | Chill |
+| Cozy Jazz Cafe | (n/a) | https://pixabay.com/music/traditional-jazz-cozy-jazz-cafe-relaxing-podcast-r-background-music-202447/ | Chill |
+
+> **New producer: alex-morgan** ⭐ https://pixabay.com/users/alex-morgan-54692529/ — smooth-jazz + bossa
+> cafe lounge, deep catalogue. Browse-gold: Back_Drop "Secret Affair / Duke Street / Over The Line".
+
+### Chillout-lounge · Ibiza / Balearic beach chill (10)
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Fashion Lounge Chill Ambient | (n/a) | https://pixabay.com/music/upbeat-fashion-lounge-chill-ambient-198438/ | Chill |
+| Deep House | (n/a) | https://pixabay.com/music/house-deep-house-347239/ | Warm |
+| Deep House Music | (n/a) | https://pixabay.com/music/house-deep-house-music-350046/ | Warm |
+| Sunrise (acoustic/Balearic) | NaturesEye | https://pixabay.com/music/acoustic-group-sunrise-191368/ | Chill |
+| Chill Out Music (6:02) | JuliusH | https://pixabay.com/music/beats-chill-out-music-3943/ | Warm |
+| Awakening – Chill Out | JuliusH | https://pixabay.com/music/ambient-awakening-chill-out-music-1295/ | Chill |
+| Ambient Ethereal Chill Out | JuliusH | https://pixabay.com/music/ambient-ambient-ethereal-chill-out-music-8509/ | Chill |
+| Lounge Beach Music | (n/a) | https://pixabay.com/music/beats-lounge-beach-music-9872/ | Warm |
+| Island Breeze (tropical chill) | (n/a) | https://pixabay.com/music/soft-house-island-breeze-relaxation-music-tropical-chill-laid-back-138907/ | Warm |
+| Summer House Background | (n/a) | https://pixabay.com/music/deep-house-summer-house-background-music-424084/ | Warm |
+
+> **Browse-gold producers (goldmines for this lane):** **9JackJack8** ⭐
+> https://pixabay.com/users/9jackjack8-44663645/ (Ibiza deep/balearic — "Balearic Breeze",
+> "Fading Summer", "Warm Stillness", "See My Eyes") · **Oleg-Mazur** ⭐
+> https://pixabay.com/users/oleg-mazur-20414368/ ("Enchanted Sunset", "Chillout Enigmatic",
+> "Ambient Lounge") · sunset-house-grooves · PWLPL · DrBeat_Music · NaturesEye · QubeSounds.
+
+---
+
 ## 🎛️ Producer directory (browse these — best way to source)
 
 All Pixabay (free commercial, no attribution). Open a profile and scroll — far
