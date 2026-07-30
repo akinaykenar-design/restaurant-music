@@ -118,9 +118,13 @@ search, so a couple may be shorter than ideal).
 
 ---
 
-## 🧭 Big sweep (toward 100) — all Pixabay, no lofi, no afro
+## 🧭 Sweep finds (cleaned — generic filler removed)
 
-### Mediterranean / ethnic (10)
+> Purged the elevator-music filler (generic "bossa/podcast/coffee-shop/background/
+> Deep House" stock). What's left below = tracks with actual character, plus the
+> **browse-gold artists** — which is where the real quality is. Quality > quantity.
+
+### Mediterranean / ethnic
 
 | Title | Artist | Source | Vibe |
 |---|---|---|---|
@@ -133,50 +137,27 @@ search, so a couple may be shorter than ideal).
 | Flamenco | (n/a) | https://pixabay.com/music/folk-flamenco-148421/ | Warm |
 | Fast Flamenco Guitar (short ~2:16) | (n/a) | https://pixabay.com/music/solo-guitar-fast-flamenco-guitar-instrumental-253442/ | Warm |
 | Bouzouki Joe | (n/a) | https://pixabay.com/music/acoustic-group-bouzouki-joe-363686/ | Upbeat |
-| Greek Aegean Sunshine (bouzouki, ear-check) | DjYogi | https://pixabay.com/music/upbeat-greek-aegean-sunshine-bouzouki-groove-421454/ | Upbeat |
 
 > **djovan browse-gold** (open profile, grab the file): "Golden Sand", "Sahara Sunset",
 > "Oasis of Peace", "Pearls of Fez", "Andalusian Oud Dreams", "Mystic Maghreb" —
 > https://pixabay.com/users/djovan-36764943/ · New producers: Mohamed_hassan (oud/ney), nickpanek (flamenco guitar).
 
-### Smooth-jazz / bossa / seaside lounge (16)
+### Smooth-jazz / bossa — CUT (was generic elevator filler)
+
+The auto-scraped bossa/podcast/coffee-shop tracks were stock muzak — removed. For
+this lane use only **characterful artists**: **Back_Drop** (smooth-jazz *guitar* with
+soul — "Secret Affair", "Duke Street", "Over The Line") and **alex-morgan**
+(https://pixabay.com/users/alex-morgan-54692529/ — pick the longer "Smooth Jazz [setting]"
+ones, skip the 90-second filler).
+
+### Chillout-lounge · Ibiza / Balearic (JuliusH + acoustic)
 
 | Title | Artist | Source | Vibe |
 |---|---|---|---|
-| Café Bossa | (n/a) | https://pixabay.com/music/bossa-nova-café-bossa-239390/ | Warm |
-| Jazz Bossa Nova | (n/a) | https://pixabay.com/music/bossa-nova-jazz-bossa-nova-163669/ | Warm |
-| Bossa Nova Summer (Instrumental Brazil) | BrazilMusicalmix2020 | https://pixabay.com/music/bossa-nova-bossa-nova-summer-instrumental-brazil-7969/ | Warm |
-| Cocktail Music | (n/a) | https://pixabay.com/music/bossa-nova-cocktail-music-110969/ | Warm |
-| Cafe Restaurant Bossa Nova | (n/a) | https://pixabay.com/music/bossa-nova-cafe-restaurant-bossa-nova-music-416082/ | Warm |
-| Bossa Nova Jazz Piano Summer Cafe | Denis-Pavlov-Music | https://pixabay.com/music/bossa-nova-bossa-nova-jazz-piano-summer-cafe-podcast-music-398166/ | Warm |
-| Sunny Bossa Nova Jazz Summer | (n/a) | https://pixabay.com/music/bossa-nova-sunny-bossa-nova-jazz-podcast-summer-music-228153/ | Warm |
-| Piano and Guitar Bossa | (n/a) | https://pixabay.com/music/bossa-nova-piano-and-guitar-bossa-3690/ | Warm |
-| Bossa Nova | (n/a) | https://pixabay.com/music/bossa-nova-bossa-nova-14396/ | Chill |
-| Jazz Underscore – Echoes of the Lounge | (n/a) | https://pixabay.com/music/smooth-jazz-youtube-jazz-underscore-echoes-of-the-lounge-378998/ | Warm |
-| Podcast Smooth Jazz Instrumental | (n/a) | https://pixabay.com/music/smooth-jazz-podcast-smooth-jazz-instrumental-music-225674/ | Warm |
-| Jazz Funk Groove (liveliest) | (n/a) | https://pixabay.com/music/smooth-jazz-jazz-funk-groove-instrumental-222618/ | Warm |
-| Jazz Podcast Night Relaxing Vibes | Denis-Pavlov-Music | https://pixabay.com/music/traditional-jazz-jazz-podcast-night-relaxing-vibes-242886/ | Chill |
-| Soothing Serene Smooth Jazz Cafe | (n/a) | https://pixabay.com/music/traditional-jazz-podcast-soothing-serene-smooth-jazz-romantic-cafe-vibes-213058/ | Chill |
-| Relaxing Jazz Coffee Shop | (n/a) | https://pixabay.com/music/traditional-jazz-relaxing-jazz-podcast-coffee-shop-music-192283/ | Chill |
-| Cozy Jazz Cafe | (n/a) | https://pixabay.com/music/traditional-jazz-cozy-jazz-cafe-relaxing-podcast-r-background-music-202447/ | Chill |
-
-> **New producer: alex-morgan** ⭐ https://pixabay.com/users/alex-morgan-54692529/ — smooth-jazz + bossa
-> cafe lounge, deep catalogue. Browse-gold: Back_Drop "Secret Affair / Duke Street / Over The Line".
-
-### Chillout-lounge · Ibiza / Balearic beach chill (10)
-
-| Title | Artist | Source | Vibe |
-|---|---|---|---|
-| Fashion Lounge Chill Ambient | (n/a) | https://pixabay.com/music/upbeat-fashion-lounge-chill-ambient-198438/ | Chill |
-| Deep House | (n/a) | https://pixabay.com/music/house-deep-house-347239/ | Warm |
-| Deep House Music | (n/a) | https://pixabay.com/music/house-deep-house-music-350046/ | Warm |
 | Sunrise (acoustic/Balearic) | NaturesEye | https://pixabay.com/music/acoustic-group-sunrise-191368/ | Chill |
 | Chill Out Music (6:02) | JuliusH | https://pixabay.com/music/beats-chill-out-music-3943/ | Warm |
 | Awakening – Chill Out | JuliusH | https://pixabay.com/music/ambient-awakening-chill-out-music-1295/ | Chill |
 | Ambient Ethereal Chill Out | JuliusH | https://pixabay.com/music/ambient-ambient-ethereal-chill-out-music-8509/ | Chill |
-| Lounge Beach Music | (n/a) | https://pixabay.com/music/beats-lounge-beach-music-9872/ | Warm |
-| Island Breeze (tropical chill) | (n/a) | https://pixabay.com/music/soft-house-island-breeze-relaxation-music-tropical-chill-laid-back-138907/ | Warm |
-| Summer House Background | (n/a) | https://pixabay.com/music/deep-house-summer-house-background-music-424084/ | Warm |
 
 > **Browse-gold producers (goldmines for this lane):** **9JackJack8** ⭐
 > https://pixabay.com/users/9jackjack8-44663645/ (Ibiza deep/balearic — "Balearic Breeze",
@@ -184,16 +165,13 @@ search, so a couple may be shorter than ideal).
 > https://pixabay.com/users/oleg-mazur-20414368/ ("Enchanted Sunset", "Chillout Enigmatic",
 > "Ambient Lounge") · sunset-house-grooves · PWLPL · DrBeat_Music · NaturesEye · QubeSounds.
 
-### Warm melodic deep house — no afro (6)
+### Warm melodic deep house — no afro
 
 | Title | Artist | Source | Vibe |
 |---|---|---|---|
 | Progressive House | Nver Avetyan | https://pixabay.com/music/deep-house-preogressive-house-royalty-free-music-198169/ | Warm |
 | Instrumental Deep House | Nver Avetyan | https://pixabay.com/music/soft-house-instrumental-deep-house-199100/ | Warm |
 | The Golden Hour | (n/a) | https://pixabay.com/music/beats-the-golden-hour-510937/ | Warm |
-| DeepHouse2 | (n/a) | https://pixabay.com/music/deep-house-deephouse2-407503/ | Warm |
-| Deep House | (n/a) | https://pixabay.com/music/deep-house-deep-house-112301/ | Warm |
-| Deep House Instrumental (ear-check energy) | (n/a) | https://pixabay.com/music/upbeat-deep-house-instrumental-354596/ | Upbeat |
 
 > **Browse-gold:** TelevisedFella (melodic house — "Something More", "Yours Yours Yours"),
 > Tunetank (soft/deep house lounge), vjgalaxy (deep/prog house), LiVAiL "A New Life",
@@ -203,16 +181,8 @@ search, so a couple may be shorter than ideal).
 
 ### Round 2 — goldmine deep-dives
 
-**Smooth-jazz / bossa (alex-morgan + Back_Drop lane):**
-
-| Title | Source | Vibe |
-|---|---|---|
-| Relaxing Soft Warm Jazz Piano Bossa Nova | https://pixabay.com/music/smooth-jazz-relaxing-soft-warm-jazz-piano-bossa-nova-podcast-music-203913/ | Warm |
-| Soothing Jazz (Cozy Serene) | https://pixabay.com/music/smooth-jazz-soothing-jazz-cozy-relaxing-serene-music-317588/ | Chill |
-| Bossa Nova Morning Café | https://pixabay.com/music/bossa-nova-bossa-nova-morning-caf%C3%A9-233025/ | Warm |
-| Bossa Nova (Background) | https://pixabay.com/music/bossa-nova-background-music-505061/ | Warm |
-| Bossa Nova Romantic Loop | https://pixabay.com/music/bossa-nova-bossa-nova-romantic-loop-415719/ | Warm |
-| Bossa Nova | https://pixabay.com/music/bossa-nova-bossa-nova-156936/ | Warm |
+**Smooth-jazz / bossa** — auto-scraped bossa tracks CUT (generic filler). Use the
+characterful artists below only.
 
 > **Back_Drop browse-gold** (search "Back_Drop"): Secret Affair (3:46) ⭐, Over The Line
 > (3:44) ⭐, Duke Street, It Might Be You. **alex-morgan** (longest first): Smooth Jazz
@@ -241,12 +211,10 @@ anything tagged sleep/meditation):
 > **Oleg-Mazur browse-gold** (https://pixabay.com/users/oleg-mazur-20414368/): Enchanted Sunset
 > 6:51 ⭐, Fantastic Atmosphere 7:50 ⭐, Ambient Lounge 5:03, Chillout Lounge 3:19, Big Dreams 4:00.
 
-### 📊 Sweep tally
-**~50 new verified tracks** added across the sweep + round 2 (list now ~158 total). Getting
-to a full 100+ is now about **browsing the goldmine profiles** the sweep surfaced —
-Pixabay hides most track URLs from search, but these profiles hold hundreds more:
-**9JackJack8 · Oleg-Mazur · alex-morgan · djovan · Simon Le Grec · Back_Drop ·
-TelevisedFella · Tunetank · sunset-house-grooves**. Open, scroll, grab.
+### 📊 Note
+Went for volume, got muzak — lesson learned. **Quality over quantity from here.**
+The good stuff lives in the **browse-gold artist profiles** above, not in scraped bulk lists.
+
 
 ---
 
