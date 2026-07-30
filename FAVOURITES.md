@@ -15,7 +15,7 @@ The keep-list: artists and tracks **you've said you like**. Distinct from
 | **janevo / Nver Avetyan** | https://pixabay.com/users/nveravetyanmusic-29393722/ | Made your original favourites (Downtempo Lo-Fi, Atmosphere Downtempo, Ethnic Ambient) — filter to downtempo/ethnic, skip his lofi |
 | **JuliusH** | https://pixabay.com/users/juliush-3921568/ | Made Ibiza Waves + Sunset On The Beach |
 | **TurtleBeats** | https://pixabay.com/users/turtlebeats-46526702/ | Chill-house grooves — liked several |
-| **REDproductions** ⭐ | search "REDproductions" on Pixabay | Chillout lounge / downtempo — "fucking awesome", loved it |
+| **REDproductions** ⭐ | https://pixabay.com/users/redproductions-970568/?tab=audio | LOVED their downtempo-lounge (21040/21206/21208 + "Ambient Breezy Chillout"). Note: rest of catalogue is lofi — skip those. Chase this *sound* from other producers instead. |
 | **Back_Drop** | search "Back_Drop" on Pixabay | Smooth-jazz-guitar chillout lounge — made the favourite jazz track |
 
 _To confirm (recommended, not yet rated):_ **djovan** (Mediterranean/ethnic — likely a match), **SergeQuadrado**, **myshoun** (sax lounge).
