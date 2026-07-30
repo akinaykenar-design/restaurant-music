@@ -276,8 +276,28 @@ profiles for dozens more in the same feel):
 | Chill House · Groove Under the Moon | TurtleBeats | https://pixabay.com/music/upbeat-chill-house-groove-under-the-moon-251691/ | Warm |
 | Afro House | (Pixabay) | https://pixabay.com/music/afrobeat-afro-house-455843/ | Upbeat |
 
-> Also worth a browse: DARIOCOIRO "Sunset On The Sand" (soft/latin/afro house),
-> and the Pixabay tag pages `organic house`, `afro house`, `chillout lounge`.
+> Also worth a browse: the Pixabay tag pages `chillout lounge`, `downtempo`.
+
+**More like the first batch — round 2 (no afro, no lofi):**
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Warm Electronic | Nver Avetyan (janevo) | https://pixabay.com/music/ambient-warm-electronic-royalty-free-music-209259/ | Chill |
+| Downtempo Lounge (Stylish Electronic) | REDproductions | https://pixabay.com/music/beats-downtempo-lounge-stylish-innovative-technology-electronic-music-21206/ | Chill |
+| Downtempo Retro (Ambient Tape) | REDproductions | https://pixabay.com/music/beats-downtempo-retro-hot-ambient-tape-atmospheric-music-21208/ | Chill |
+| Mellow Smooth Jazz – Acoustic Guitar | Back_Drop | https://pixabay.com/music/smooth-jazz-mellow-smooth-jazz-relaxing-acoustic-guitar-197646/ | Warm |
+| Modern Downtempo Lounge (Vastness) | (uploader n/a) | https://pixabay.com/music/corporate-modern-downtempo-lounge-vastness-182090/ | Chill |
+| Mediterranean Breeze | DesiFreeMusic | https://pixabay.com/music/acoustic-group-mediterranean-breeze-315547/ | Warm |
+| Piano Jazz Bossa Nova – Cozy Café | (uploader n/a) | https://pixabay.com/music/smooth-jazz-piano-jazz-bossa-nova-cozy-caf%C3%A9-coffee-shop-music-203916/ | Warm |
+| Evening Saxophone | myshoun | https://pixabay.com/music/smooth-jazz-evening-saxophone-251964/ | Warm |
+| Aesthetic Sunset – Chill & Ambient | (uploader n/a) | https://pixabay.com/music/ambient-aesthetic-sunset-chill-amp-ambient-music-for-reels-amp-tiktok-318241/ | Chill |
+| Echoes of the Night | (uploader n/a) | https://pixabay.com/music/ambient-echoes-of-the-night-208325/ | Chill |
+
+> **New producers = your favourites' makers:** **Back_Drop** (the smooth-jazz-guitar
+> chillout series behind your favourite jazz track), **REDproductions** (chillout-
+> lounge downtempo — the 21040/21206/21208 sibling series), **myshoun** (sax lounge).
+> Browse-only leads: djovan "Golden Sand / Sahara Sunset / Oasis of Peace" (oud
+> Mediterranean), Back_Drop "Secret Affair / Duke Street", 9JackJack8 "Balearic Breeze".
 
 ---
 
