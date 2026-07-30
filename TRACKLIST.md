@@ -310,6 +310,8 @@ downtempo producer, deep catalogue). Grab instrumental/original mixes, skip voca
 | Signs (Secret Love) | Simon Le Grec | https://pixabay.com/music/beats-simon-le-grec-signs-secret-love-357320/ | Warm |
 | La Femme (Club Mix) | Simon Le Grec | https://pixabay.com/music/upbeat-simon-le-grec-la-femme-club-mix-353369/ | Upbeat |
 | So What (Radio Mix) | Simon Le Grec | https://pixabay.com/music/funk-simon-le-grec-so-what-radio-mix-353355/ | Upbeat |
+| Voices (Original Mix) | Simon Le Grec | https://pixabay.com/music/beats-simon-le-grec-voices-original-mix-353806/ | Warm |
+| So What (Club Mix, extended) | Simon Le Grec | https://pixabay.com/music/upbeat-simon-le-grec-so-what-club-mix-353366/ | Upbeat |
 | Relax Downtempo Lounge (Bush) | (uploader n/a) | https://pixabay.com/music/beats-relax-downtempo-lounge-bush-84181/ | Chill |
 
 > **New producers to follow:** **Simon Le Grec** ⭐ (search his name — deep chillout
