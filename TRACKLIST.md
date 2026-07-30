@@ -279,6 +279,13 @@ All Pixabay tracks are **Pixabay Content License** (no attribution). The
 **real-artist CC-BY** set below is free for commercial use too, but **requires a
 displayed credit** (see Attribution log).
 
+### 🗓️ Daily finds — 2026-07-30 (electronic only)
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Moonlight (deep, calm, atmospheric) | Oleg-Mazur | https://pixabay.com/music/pop-moonlight-chill-most-beautiful-deep-calm-and-atmospheric-music-160391/ | Chill |
+| Chill House · Lost In the Night | TurtleBeats | https://pixabay.com/music/beats-chill-house-lost-in-the-night-251694/ | Warm |
+
 ### 🗓️ Daily finds — 2026-07-29
 
 | Title | Artist | Source | Vibe |
