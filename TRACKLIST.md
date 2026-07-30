@@ -201,6 +201,34 @@ search, so a couple may be shorter than ideal).
 
 ---
 
+### Round 2 — goldmine deep-dives
+
+**Smooth-jazz / bossa (alex-morgan + Back_Drop lane):**
+
+| Title | Source | Vibe |
+|---|---|---|
+| Relaxing Soft Warm Jazz Piano Bossa Nova | https://pixabay.com/music/smooth-jazz-relaxing-soft-warm-jazz-piano-bossa-nova-podcast-music-203913/ | Warm |
+| Soothing Jazz (Cozy Serene) | https://pixabay.com/music/smooth-jazz-soothing-jazz-cozy-relaxing-serene-music-317588/ | Chill |
+| Bossa Nova Morning Café | https://pixabay.com/music/bossa-nova-bossa-nova-morning-caf%C3%A9-233025/ | Warm |
+| Bossa Nova (Background) | https://pixabay.com/music/bossa-nova-background-music-505061/ | Warm |
+| Bossa Nova Romantic Loop | https://pixabay.com/music/bossa-nova-bossa-nova-romantic-loop-415719/ | Warm |
+| Bossa Nova | https://pixabay.com/music/bossa-nova-bossa-nova-156936/ | Warm |
+
+> **Back_Drop browse-gold** (search "Back_Drop"): Secret Affair (3:46) ⭐, Over The Line
+> (3:44) ⭐, Duke Street, It Might Be You. **alex-morgan** (longest first): Smooth Jazz
+> Lounge–Relaxing Evening (3:14), Smooth Jazz Restaurant/Cocktail Bar/Coffee Shop (~3:00).
+
+**djovan ⭐ — browse from profile** (https://pixabay.com/users/djovan-36764943/ — Pixabay
+won't expose his track links to search, so grab these by name on his profile; skip
+anything tagged sleep/meditation):
+- Golden Sand – Oriental Chillout Oud (4:13) · Sahara Sunset – Oriental Relax (3:53)
+- Oasis of Peace – Maghreb Lounge (2:51) · Pearls of Fez (3:06) · Andalusian Oud Dreams (4:00)
+- Mystic Maghreb – Oud & Desert Wind (3:48) · Essence of Andalusia (4:00) · Night in Marrakech
+- Eternal Caravan (2:58) · Medina Lights – Soft Oud & Kanun
+
+> **SergeQuadrado** (browse only, huge catalogue): filter to folk/world/Latin — keep
+> flamenco/Spanish-guitar, Mediterranean-dance, gypsy-swing; skip sad/sorrow/meditation.
+
 ### 📊 Sweep tally
 **~42 new verified tracks** added today across 5 lanes (list now ~148 total). Getting
 to a full 100+ is now about **browsing the goldmine profiles** the sweep surfaced —
