@@ -229,8 +229,20 @@ anything tagged sleep/meditation):
 > **SergeQuadrado** (browse only, huge catalogue): filter to folk/world/Latin — keep
 > flamenco/Spanish-guitar, Mediterranean-dance, gypsy-swing; skip sad/sorrow/meditation.
 
+**Ibiza / chillout-lounge (9JackJack8 + Oleg-Mazur):**
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Orison (Calm Relaxing Chillout) | Oleg-Mazur | https://pixabay.com/music/pop-orison-calm-and-relaxing-chillout-atmosphere-165686/ | Warm |
+
+> **9JackJack8 browse-gold** (https://pixabay.com/users/9jackjack8-44663645/): Warm Stillness
+> (Minimal Ibiza Deep House) 3:21 ⭐, Balearic Breeze 3:49 ⭐, See My Eyes (Atmospheric) 3:33 ⭐,
+> City Lights 2:57, Overworked 3:33, Eastern Current 3:12, Deep House Beat 4:11.
+> **Oleg-Mazur browse-gold** (https://pixabay.com/users/oleg-mazur-20414368/): Enchanted Sunset
+> 6:51 ⭐, Fantastic Atmosphere 7:50 ⭐, Ambient Lounge 5:03, Chillout Lounge 3:19, Big Dreams 4:00.
+
 ### 📊 Sweep tally
-**~42 new verified tracks** added today across 5 lanes (list now ~148 total). Getting
+**~50 new verified tracks** added across the sweep + round 2 (list now ~158 total). Getting
 to a full 100+ is now about **browsing the goldmine profiles** the sweep surfaced —
 Pixabay hides most track URLs from search, but these profiles hold hundreds more:
 **9JackJack8 · Oleg-Mazur · alex-morgan · djovan · Simon Le Grec · Back_Drop ·
