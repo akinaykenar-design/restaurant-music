@@ -18,7 +18,9 @@ The keep-list: artists and tracks **you've said you like**. Distinct from
 | **REDproductions** ⭐ | https://pixabay.com/users/redproductions-970568/?tab=audio | LOVED their downtempo-lounge (21040/21206/21208 + "Ambient Breezy Chillout"). Note: rest of catalogue is lofi — skip those. Chase this *sound* from other producers instead. |
 | **Back_Drop** | search "Back_Drop" on Pixabay | Smooth-jazz-guitar chillout lounge — made the favourite jazz track |
 
-_To confirm (recommended, not yet rated):_ **djovan** (Mediterranean/ethnic — likely a match), **SergeQuadrado**, **myshoun** (sax lounge).
+| **Simon Le Grec** ⭐ | search "Simon Le Grec" on Pixabay | Greek chillout/lounge/downtempo — REDproductions lane, deep catalogue (skip Vocal Mixes) |
+
+_To confirm (recommended, not yet rated):_ **djovan** (Mediterranean/ethnic — likely a match), **SergeQuadrado**, **myshoun** (sax lounge), **Oleg-Mazur** (ambient/chillout lounge).
 
 **Hard no:** afro / amapiano / tribal house · lo-fi / chill-hop.
 

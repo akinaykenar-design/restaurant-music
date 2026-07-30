@@ -299,6 +299,24 @@ profiles for dozens more in the same feel):
 > Browse-only leads: djovan "Golden Sand / Sahara Sunset / Oasis of Peace" (oud
 > Mediterranean), Back_Drop "Secret Affair / Duke Street", 9JackJack8 "Balearic Breeze".
 
+**⭐⭐ Simon Le Grec** — the REDproductions-lane goldmine (Greek chillout/lounge/
+downtempo producer, deep catalogue). Grab instrumental/original mixes, skip vocal mixes:
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| La Mer (Premium Chillout) | Simon Le Grec | https://pixabay.com/music/beats-simon-le-grec-la-mer-premium-chillout-346552/ | Warm |
+| Pas Sans Toi (Instrumental) | Simon Le Grec | https://pixabay.com/music/beats-simon-le-grec-pas-sans-toi-instrumental-353796/ | Chill |
+| One More Night (Original Mix) | Simon Le Grec | https://pixabay.com/music/beats-simon-le-grec-one-more-night-original-mix-353788/ | Warm |
+| Signs (Secret Love) | Simon Le Grec | https://pixabay.com/music/beats-simon-le-grec-signs-secret-love-357320/ | Warm |
+| La Femme (Club Mix) | Simon Le Grec | https://pixabay.com/music/upbeat-simon-le-grec-la-femme-club-mix-353369/ | Upbeat |
+| So What (Radio Mix) | Simon Le Grec | https://pixabay.com/music/funk-simon-le-grec-so-what-radio-mix-353355/ | Upbeat |
+| Relax Downtempo Lounge (Bush) | (uploader n/a) | https://pixabay.com/music/beats-relax-downtempo-lounge-bush-84181/ | Chill |
+
+> **New producers to follow:** **Simon Le Grec** ⭐ (search his name — deep chillout
+> catalogue, skip the "Vocal Mix" ones) and **Oleg-Mazur**
+> (https://pixabay.com/users/oleg-mazur-20414368/ — ambient/chillout/deep-house
+> lounge, e.g. "Chillout Lounge – Enigmatic", "Enchanted Sunset").
+
 ---
 
 ### 🎯 Artist deep-dive — browse the full catalogues
