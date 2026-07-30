@@ -184,6 +184,30 @@ search, so a couple may be shorter than ideal).
 > https://pixabay.com/users/oleg-mazur-20414368/ ("Enchanted Sunset", "Chillout Enigmatic",
 > "Ambient Lounge") · sunset-house-grooves · PWLPL · DrBeat_Music · NaturesEye · QubeSounds.
 
+### Warm melodic deep house — no afro (6)
+
+| Title | Artist | Source | Vibe |
+|---|---|---|---|
+| Progressive House | Nver Avetyan | https://pixabay.com/music/deep-house-preogressive-house-royalty-free-music-198169/ | Warm |
+| Instrumental Deep House | Nver Avetyan | https://pixabay.com/music/soft-house-instrumental-deep-house-199100/ | Warm |
+| The Golden Hour | (n/a) | https://pixabay.com/music/beats-the-golden-hour-510937/ | Warm |
+| DeepHouse2 | (n/a) | https://pixabay.com/music/deep-house-deephouse2-407503/ | Warm |
+| Deep House | (n/a) | https://pixabay.com/music/deep-house-deep-house-112301/ | Warm |
+| Deep House Instrumental (ear-check energy) | (n/a) | https://pixabay.com/music/upbeat-deep-house-instrumental-354596/ | Upbeat |
+
+> **Browse-gold:** TelevisedFella (melodic house — "Something More", "Yours Yours Yours"),
+> Tunetank (soft/deep house lounge), vjgalaxy (deep/prog house), LiVAiL "A New Life",
+> rediskasound "Chill House Background", Nver "Sarandi Sunset / In Deep House".
+
+---
+
+### 📊 Sweep tally
+**~42 new verified tracks** added today across 5 lanes (list now ~148 total). Getting
+to a full 100+ is now about **browsing the goldmine profiles** the sweep surfaced —
+Pixabay hides most track URLs from search, but these profiles hold hundreds more:
+**9JackJack8 · Oleg-Mazur · alex-morgan · djovan · Simon Le Grec · Back_Drop ·
+TelevisedFella · Tunetank · sunset-house-grooves**. Open, scroll, grab.
+
 ---
 
 ## 🎛️ Producer directory (browse these — best way to source)
