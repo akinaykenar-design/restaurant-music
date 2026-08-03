@@ -455,9 +455,8 @@ $('follow').addEventListener('change', (e) => {
 // Each scene draws from the analysed vibe buckets. Tapping one overrides the
 // schedule and plays appropriate music immediately; "Schedule" returns to auto.
 const SCENES = [
-  { id: 'lively',    icon: '🔥', label: 'Lively',    vibes: ['Lively', 'Warm'], desc: 'Young / busy crowd' },
-  { id: 'corporate', icon: '💼', label: 'Corporate', vibes: ['Warm', 'Chill'],  desc: 'Polished & low-key' },
-  { id: 'winddown',  icon: '🌙', label: 'Wind-down', vibes: ['Chill'],          desc: 'Late / closing' },
+  { id: 'lively',   icon: '🔥', label: 'Lively',    vibes: ['Lively', 'Warm'], desc: 'Young / busy crowd' },
+  { id: 'winddown', icon: '🌙', label: 'Wind-down', vibes: ['Chill', 'Warm'],  desc: 'Relaxed / closing' },
 ];
 
 function renderScenes() {
