@@ -421,6 +421,40 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
   .play svg { width: 25px; height: 25px; }
 }
 
+/* Touch devices (iPad, phones): enlarge the small controls that are fiddly to
+   tap — applies wherever there's a coarse pointer, safe on any width. */
+@media (pointer: coarse) {
+  .tracklist button, .mini { width: 40px; height: 40px; font-size: 1rem; border-radius: 10px; }
+  .tracklist li { padding: 13px 12px; }
+  .chip input, .chip.range input[type=range] { transform: scale(1.15); }
+  input[type='range'] { height: 8px; }
+  input[type='range']::-webkit-slider-thumb { width: 24px; height: 24px; }
+  input[type='range']::-moz-range-thumb { width: 24px; height: 24px; }
+  .block-row .del { width: 46px; height: 46px; }
+}
+
+/* iPad-sized touch screens: make the main controls comfortably chunky
+   (excludes small phones, which stay compact to avoid overflow). */
+@media (pointer: coarse) and (min-width: 700px) {
+  .tab { padding: 12px 20px; font-size: 1rem; }
+  .lockbtn { width: 44px; height: 44px; }
+  .lockbtn svg { width: 20px; height: 20px; }
+  .scene { padding: 13px 20px; font-size: 0.95rem; }
+  .scene-ic { font-size: 1.1rem; }
+  .chip { padding: 12px 18px; font-size: 0.92rem; }
+  .ghost { padding: 13px 20px; font-size: 0.98rem; }
+  .tbtn { width: 62px; height: 62px; }
+  .rate { width: 58px; height: 58px; }
+  .play { width: 74px; height: 74px; }
+  .transport svg { width: 28px; height: 28px; }
+  .play svg { width: 30px; height: 30px; }
+  .lib-filter, .lib-search, #schedule-table select, .ah-row input, .ah-row select,
+  .block-row input, .pl-new input, #add-playlist, #new-playlist { padding: 13px 14px; font-size: 0.98rem; }
+  .np-title { font-size: 1.9rem; }
+  #playlist-names li { padding: 14px 14px; }
+  .more-opts > summary { font-size: 0.92rem; padding: 8px 0; }
+}
+
 /* ---------- printable poster ---------- */
 @media print {
   .topbar, main, .miniplayer, .toast { display: none !important; }
