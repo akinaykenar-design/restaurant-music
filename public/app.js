@@ -101,10 +101,13 @@ const vizEq = (() => {
   let W = 1, H = 1;
   let audioCtx = null, analyser = null, freq = null, wired = false;
 
+  const host = canvas.parentElement || canvas; // the .art box
   function resize() {
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const r = canvas.getBoundingClientRect();
-    const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+    const box = host.getBoundingClientRect();
+    const inset = 13; // matches the CSS inset on .viz-eq
+    const w = Math.max(1, Math.round(box.width - inset * 2));
+    const h = Math.max(1, Math.round(box.height - inset * 2));
     if (w === W && h === H && canvas.width) return; // nothing changed
     W = w; H = h;
     canvas.width = W * dpr; canvas.height = H * dpr;
@@ -113,10 +116,10 @@ const vizEq = (() => {
   resize();
   window.addEventListener('resize', resize);
   window.addEventListener('load', resize);
-  // Re-measure whenever the art box actually changes size (tab switch,
-  // breakpoint, orientation, late font/layout) so the meter never ends up
-  // drawn to a stale size — which showed as clipped / off-centre.
-  if (window.ResizeObserver) { try { new ResizeObserver(resize).observe(canvas); } catch (e) { /* ignore */ } }
+  // Re-measure whenever the art box changes (tab switch, breakpoint,
+  // orientation, late font/layout). Observe the parent, not the canvas, so
+  // sizing the canvas can never feed back into another resize.
+  if (window.ResizeObserver) { try { new ResizeObserver(resize).observe(host); } catch (e) { /* ignore */ } }
 
   function wireAudio() {
     if (wired) return; // createMediaElementSource is one-shot per element

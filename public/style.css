@@ -2,14 +2,14 @@
    clean, Apple/lichess-flavoured, light with dark mode, teal accent used sparingly. */
 
 :root {
-  --bg: #f4f5f7;
+  --bg: #f3f1ee;
   --surface: #ffffff;
-  --surface-2: #fbfbfc;
-  --text: #1b1c1e;
-  --muted: #6b7076;
-  --faint: #969ba1;
-  --border: #e7e8ec;
-  --border-strong: #d7d9df;
+  --surface-2: #faf8f5;
+  --text: #201e1b;
+  --muted: #6d6863;
+  --faint: #9a938b;
+  --border: #e8e4dd;
+  --border-strong: #d9d3cb;
   --accent: #10917b;
   --accent-press: #0b7362;
   --accent-tint: #10917b14;
@@ -27,9 +27,9 @@
    or when the user manually picks dark via the toggle. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #0f1113; --surface: #191b1e; --surface-2: #1f2226;
-    --text: #edeef0; --muted: #9ba0a6; --faint: #71767c;
-    --border: #2a2d31; --border-strong: #3a3e44;
+    --bg: #121110; --surface: #1c1a18; --surface-2: #221f1c;
+    --text: #eeece8; --muted: #a29c94; --faint: #756f68;
+    --border: #2e2b27; --border-strong: #403b35;
     --accent: #2bb89c; --accent-press: #45c7ad; --accent-tint: #2bb89c1f;
     --warn: #e0a752; --warn-tint: #e0a75218; --bad: #ef8377; --bad-tint: #ef83771f;
     --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
@@ -37,7 +37,7 @@
   }
 }
 :root[data-theme='dark'] {
-  --bg: #0f1113; --surface: #191b1e; --surface-2: #1f2226;
+  --bg: #121110; --surface: #1c1a18; --surface-2: #221f1c;
   --text: #edeef0; --muted: #9ba0a6; --faint: #71767c;
   --border: #2a2d31; --border-strong: #3a3e44;
   --accent: #2bb89c; --accent-press: #45c7ad; --accent-tint: #2bb89c1f;
@@ -106,16 +106,16 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 }
 .player::before {
   content: ''; position: absolute; top: -70%; right: -10%; width: 60%; height: 200%;
-  background: radial-gradient(closest-side, var(--accent-tint), transparent 70%);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--warn) 8%, transparent), transparent 70%);
   pointer-events: none; z-index: 0;
 }
 .player > * { position: relative; z-index: 1; }
 .art {
   width: 176px; height: 176px; border-radius: var(--radius-sm);
-  background: linear-gradient(150deg, var(--accent), color-mix(in srgb, var(--accent) 45%, #04140f));
+  background: linear-gradient(150deg, #2c3238, #14181c);
   display: flex; align-items: flex-end; justify-content: center;
   position: relative; overflow: hidden;
-  box-shadow: 0 14px 34px -10px color-mix(in srgb, var(--accent) 60%, transparent), inset 0 1px 0 rgba(255,255,255,0.14);
+  box-shadow: 0 14px 34px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
 }
 .art::before {
   content: ''; position: absolute; inset: -45%;
@@ -124,7 +124,9 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 }
 .player.playing .art::before { opacity: 0.6; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.viz-eq { position: absolute; inset: 13px; width: auto; height: auto; border-radius: 9px; display: block; }
+/* Explicit size (not auto) — a canvas is a replaced element, so width:auto
+   would resolve to its intrinsic buffer size and feed back into a resize loop. */
+.viz-eq { position: absolute; top: 13px; left: 13px; width: calc(100% - 26px); height: calc(100% - 26px); border-radius: 9px; display: block; }
 
 /* progress / seek */
 .progress { margin: 14px 0 4px; }
@@ -373,6 +375,26 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
   .pl-cols, .pl-layout { grid-template-columns: 1fr; }
   .miniplayer:not([hidden]) { display: flex; }
   main { padding-bottom: 88px; }
+}
+
+/* Phone header: keep brand + theme/lock on one row, tabs on their own full
+   width row that scrolls sideways instead of wrapping into a tall mess. */
+@media (max-width: 600px) {
+  .topbar {
+    display: grid; justify-content: stretch;
+    grid-template-columns: 1fr auto auto; gap: 10px 8px;
+    grid-template-areas: "brand theme lock" "tabs tabs tabs";
+    padding: 10px 16px;
+  }
+  .brand { grid-area: brand; }
+  #theme { grid-area: theme; }
+  #lock { grid-area: lock; }
+  .tabs {
+    grid-area: tabs; width: 100%; flex-wrap: nowrap; gap: 6px;
+    overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { white-space: nowrap; flex: 0 0 auto; padding: 7px 13px; }
 }
 
 /* Small phones: shrink the transport row so the five buttons never overflow. */
