@@ -217,8 +217,8 @@ function readId3(full) {
 }
 
 // Bucket a track into a serving "vibe" from its measured energy (RMS, ~0.02–0.30
-// for music) and tempo. Chill for quiet-lunch, Upbeat for busy-dinner. '' = not
-// analysed yet.
+// for music) and tempo. Three levels is the reliable ceiling for energy+tempo:
+// Chill (relaxed), Warm (mid), Lively (high). '' = not analysed yet.
 function vibeFor(energy, bpm) {
   if (energy == null || !isFinite(energy)) return '';
   const e = Math.max(0, Math.min(1, (energy - 0.03) / 0.20));      // loudness/density
@@ -226,8 +226,12 @@ function vibeFor(energy, bpm) {
   const s = 0.6 * e + 0.4 * b;
   if (s < 0.34) return 'Chill';
   if (s < 0.62) return 'Warm';
-  return 'Upbeat';
+  return 'Lively';
 }
+
+// Migrate the old 'Upbeat' label to 'Lively' so libraries analysed before the
+// rename keep working without re-analysis.
+const normalizeVibe = (v) => (v === 'Upbeat' ? 'Lively' : v || '');
 
 let metaDirty = false;
 
@@ -252,7 +256,7 @@ function trackMeta(file) {
     duration: trackDuration(file),
     energy: keep && prev.energy != null ? prev.energy : null,
     analyzedBpm: keep ? (prev.analyzedBpm || null) : null,
-    vibe: keep ? (prev.vibe || '') : '',
+    vibe: keep ? normalizeVibe(prev.vibe) : '',
     analyzedAt: keep ? (prev.analyzedAt || null) : null,
   };
   data.meta[file] = m;
@@ -277,7 +281,7 @@ function scanLibrary() {
         artist: m.artist || '',
         bpm: m.analyzedBpm || m.bpm || null,
         energy: m.energy != null ? m.energy : null,
-        vibe: m.vibe || '',
+        vibe: normalizeVibe(m.vibe),
       };
     });
     // Drop cache entries for files that no longer exist.

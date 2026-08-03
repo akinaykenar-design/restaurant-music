@@ -12,7 +12,7 @@ let currentBlockKey = null;
 let activeScene = null;   // active manager "scene" override (or null = schedule/manual)
 let libFilter = '';       // library search term
 let libGenre = '';        // library genre filter
-let libVibe = '';         // library vibe filter (Chill/Warm/Upbeat)
+let libVibe = '';         // library vibe filter (Chill/Warm/Lively)
 let libRating = '';       // library rating filter (like/dislike/rated/none)
 let libSort = 'title';    // library sort key
 
@@ -455,10 +455,8 @@ $('follow').addEventListener('change', (e) => {
 // Each scene draws from the analysed vibe buckets. Tapping one overrides the
 // schedule and plays appropriate music immediately; "Schedule" returns to auto.
 const SCENES = [
-  { id: 'lunch',     icon: '☀️', label: 'Lunch',     vibes: ['Chill'],          desc: 'Relaxed daytime' },
-  { id: 'dinner',    icon: '🍷', label: 'Dinner',    vibes: ['Warm'],           desc: 'Warm evening service' },
-  { id: 'lively',    icon: '🔥', label: 'Lively',    vibes: ['Upbeat', 'Warm'], desc: 'Young / busy crowd' },
-  { id: 'corporate', icon: '💼', label: 'Corporate', vibes: ['Chill', 'Warm'],  desc: 'Polished & low-key' },
+  { id: 'lively',    icon: '🔥', label: 'Lively',    vibes: ['Lively', 'Warm'], desc: 'Young / busy crowd' },
+  { id: 'corporate', icon: '💼', label: 'Corporate', vibes: ['Warm', 'Chill'],  desc: 'Polished & low-key' },
   { id: 'winddown',  icon: '🌙', label: 'Wind-down', vibes: ['Chill'],          desc: 'Late / closing' },
 ];
 
@@ -691,7 +689,7 @@ function emptyRow(text) { const li = document.createElement('li'); li.className 
 // The library filtered by the search box + genre / vibe / rating filters and
 // ordered by the current sort. Shared by the list render and "add all shown".
 function filteredLibrary() {
-  const vibeRank = { Chill: 0, Warm: 1, Upbeat: 2 };
+  const vibeRank = { Chill: 0, Warm: 1, Lively: 2 };
   const ratingMatch = (t) => {
     if (!libRating) return true;
     const r = ratingOf(t.file);
@@ -879,7 +877,7 @@ function syncGenreOptions() {
 
 // ---- audio analysis (genre is read server-side; tempo + energy here) --------
 // Decode each track in the browser and measure loudness (RMS) and tempo, then
-// POST the result so the server can bucket it into a Chill / Warm / Upbeat vibe.
+// POST the result so the server can bucket it into a Chill / Warm / Lively vibe.
 async function analyzeLibrary() {
   const AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) { toast('This browser can’t analyse audio'); return; }
@@ -949,15 +947,15 @@ function estimateBpm(ch, sr) {
   return Math.round(bpm);
 }
 
-// Group every analysed track into Chill / Warm / Upbeat playlists in one click.
+// Group every analysed track into Chill / Warm / Lively playlists in one click.
 function buildVibePlaylists() {
   const analysed = library.filter((t) => t.vibe);
   if (!analysed.length) { toast('Run “✨ Analyse audio” first'); return; }
-  const buckets = { Chill: [], Warm: [], Upbeat: [] };
+  const buckets = { Chill: [], Warm: [], Lively: [] };
   analysed.forEach((t) => { if (buckets[t.vibe]) buckets[t.vibe].push(t.file); });
   state.autoPlaylists = state.autoPlaylists || [];
   let made = 0; let kept = 0;
-  for (const v of ['Chill', 'Warm', 'Upbeat']) {
+  for (const v of ['Chill', 'Warm', 'Lively']) {
     if (!buckets[v].length) continue;
     // Don't overwrite a same-named playlist you've customised.
     if (state.playlists[v] && !state.autoPlaylists.includes(v)) { kept++; continue; }
@@ -970,17 +968,17 @@ function buildVibePlaylists() {
   toast(made ? `Built ${made} vibe playlist${made === 1 ? '' : 's'}${kept ? ` · kept ${kept} custom` : ''}` : `Kept your ${kept} custom playlist${kept === 1 ? '' : 's'}`);
 }
 
-// Fill the whole schedule from analysed music: builds Chill/Warm/Upbeat lists,
+// Fill the whole schedule from analysed music: builds Chill/Warm/Lively lists,
 // then assigns each block a vibe by its start time — chill through the day,
 // warmer in the afternoon, upbeat into dinner. Falls back to the nearest
 // available vibe if a bucket is empty.
 function autoScheduleByVibe() {
   const analysed = library.filter((t) => t.vibe);
   if (!analysed.length) { toast('Run “✨ Analyse audio” in the Library first'); return; }
-  const buckets = { Chill: [], Warm: [], Upbeat: [] };
+  const buckets = { Chill: [], Warm: [], Lively: [] };
   analysed.forEach((t) => { if (buckets[t.vibe]) buckets[t.vibe].push(t.file); });
   state.autoPlaylists = state.autoPlaylists || [];
-  for (const v of ['Chill', 'Warm', 'Upbeat']) {
+  for (const v of ['Chill', 'Warm', 'Lively']) {
     if (!buckets[v].length) continue;
     if (state.playlists[v] && !state.autoPlaylists.includes(v)) continue; // keep your custom version
     state.playlists[v] = buckets[v];
@@ -988,9 +986,9 @@ function autoScheduleByVibe() {
   }
 
   const avail = (v) => state.playlists[v] && state.playlists[v].length;
-  const pref = { Chill: ['Chill', 'Warm', 'Upbeat'], Warm: ['Warm', 'Chill', 'Upbeat'], Upbeat: ['Upbeat', 'Warm', 'Chill'] };
+  const pref = { Chill: ['Chill', 'Warm', 'Lively'], Warm: ['Warm', 'Chill', 'Lively'], Lively: ['Lively', 'Warm', 'Chill'] };
   const pick = (want) => { for (const v of pref[want]) if (avail(v)) return v; return ''; };
-  const wantFor = (h) => (h < 11 ? 'Chill' : h < 15 ? 'Chill' : h < 18 ? 'Warm' : 'Upbeat');
+  const wantFor = (h) => (h < 11 ? 'Chill' : h < 15 ? 'Chill' : h < 18 ? 'Warm' : 'Lively');
 
   // Save the new vibe playlists first (schedule refs must point at real lists),
   // then assign every block × day and save the schedule.

@@ -277,7 +277,7 @@ h4 { margin: 0 0 12px; font-size: 0.98rem; display: flex; align-items: center; g
 .tag-genre { text-transform: capitalize; }
 .tag.vibe-chill { color: #3a8fb0; border-color: #3a8fb055; background: #3a8fb016; }
 .tag.vibe-warm { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); background: var(--warn-tint); }
-.tag.vibe-upbeat { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); background: var(--accent-tint); }
+.tag.vibe-lively { color: #d9704e; border-color: #d9704e66; background: #d9704e1f; }
 .tag.tag-like { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); background: var(--accent-tint); }
 .tag.tag-less { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); background: var(--warn-tint); }
 .tag.tag-dislike { color: var(--bad, #c0392b); border-color: color-mix(in srgb, var(--bad, #c0392b) 45%, transparent); background: var(--bad-tint, #c0392b14); }
