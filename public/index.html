@@ -177,8 +177,9 @@
                 <button id="add-all" class="ghost add-all" disabled>+ Add all shown to playlist</button>
                 <div id="dropzone" class="dropzone">
                   <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0 4 4m-4-4-4 4M4 20h16"/></svg>
-                  <p>Drop music here, or <label for="file-input" class="link">browse</label></p>
+                  <p>Drop music — a whole <b>folder</b> works too — or <label for="file-input" class="link">browse files</label> · <label for="folder-input" class="link">a folder</label></p>
                   <input type="file" id="file-input" accept="audio/*,.mp3,.m4a,.aac,.ogg,.wav,.flac" multiple hidden />
+                  <input type="file" id="folder-input" webkitdirectory directory multiple hidden />
                   <div id="upload-status" class="upload-status"></div>
                 </div>
                 <ul id="lib-tracks" class="tracklist"></ul>

@@ -1077,10 +1077,38 @@ function setupUpload() {
     await reloadLibrary();
     setTimeout(() => (status.textContent = ''), 4000);
   }
+  // Recursively pull every file out of a dropped folder (or files).
+  function readEntry(entry, out) {
+    return new Promise((resolve) => {
+      if (!entry) return resolve();
+      if (entry.isFile) { entry.file((f) => { out.push(f); resolve(); }, () => resolve()); }
+      else if (entry.isDirectory) {
+        const reader = entry.createReader();
+        const readBatch = () => reader.readEntries((entries) => {
+          if (!entries.length) return resolve();
+          Promise.all(entries.map((en) => readEntry(en, out))).then(readBatch);
+        }, () => resolve());
+        readBatch();
+      } else resolve();
+    });
+  }
+  async function filesFromDrop(dt) {
+    // Grab the directory entries synchronously (the items list is only valid
+    // during the drop event), then read them recursively.
+    const items = dt && dt.items;
+    if (items && items.length && items[0].webkitGetAsEntry) {
+      const entries = [...items].map((it) => it.webkitGetAsEntry && it.webkitGetAsEntry()).filter(Boolean);
+      if (entries.length) { const out = []; await Promise.all(entries.map((en) => readEntry(en, out))); return out; }
+    }
+    return [...((dt && dt.files) || [])];
+  }
+
   input.addEventListener('change', () => uploadFiles(input.files));
+  const folderInput = $('folder-input');
+  if (folderInput) folderInput.addEventListener('change', () => uploadFiles(folderInput.files));
   ['dragenter', 'dragover'].forEach((ev) => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.add('drag'); }));
   ['dragleave', 'drop'].forEach((ev) => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.remove('drag'); }));
-  zone.addEventListener('drop', (e) => { if (e.dataTransfer && e.dataTransfer.files) uploadFiles(e.dataTransfer.files); });
+  zone.addEventListener('drop', (e) => { filesFromDrop(e.dataTransfer).then(uploadFiles); });
 }
 
 // ---- venue stream + headless player ----------------------------------------

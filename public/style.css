@@ -254,7 +254,7 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .restore-label { display: inline-flex; align-items: center; cursor: pointer; }
 
 /* ---------- library / playlists ---------- */
-.pl-layout { display: grid; grid-template-columns: 244px 1fr; gap: 16px; }
+.pl-layout { display: grid; grid-template-columns: 244px 1fr; gap: 16px; align-items: start; }
 #playlist-names { list-style: none; padding: 0; margin: 0 0 12px; }
 #playlist-names li { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 6px; background: var(--surface-2); cursor: pointer; }
 #playlist-names li.active { border-color: var(--accent); background: var(--accent-tint); }
@@ -263,7 +263,7 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 input:not([type]), input[type='text'], .pl-new input { flex: 1; min-width: 0; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 9px; padding: 10px; font: inherit; }
 .ah-row input { min-width: 0; }
 #add-playlist { background: var(--accent); border: none; color: var(--bg); border-radius: 9px; padding: 10px 14px; cursor: pointer; font-weight: 600; }
-.pl-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.pl-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
 h4 { margin: 0 0 12px; font-size: 0.98rem; display: flex; align-items: center; gap: 8px; }
 .count { background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; color: var(--muted); font-weight: 400; }
 
