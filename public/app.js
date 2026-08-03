@@ -10,7 +10,6 @@ let queueIndex = 0;
 let history = [];         // recently played (newest first)
 let currentBlockKey = null;
 let activeScene = null;   // active manager "scene" override (or null = schedule/manual)
-let streaming = false;    // playing an external web stream (not the local library)
 let libFilter = '';       // library search term
 let libGenre = '';        // library genre filter
 let libVibe = '';         // library vibe filter (Chill/Warm/Upbeat)
@@ -139,7 +138,6 @@ $('mini-play').addEventListener('click', () => $('playpause').click());
 $('mini-next').addEventListener('click', () => skip(1));
 
 function loadQueue(files, autoplay) {
-  streaming = false; // switching to the local library ends any web stream
   queue = buildQueue(files);
   queueIndex = 0;
   crossing = false;
@@ -271,7 +269,7 @@ function skip(dir) {
 // deck events (wired once)
 decks.forEach((d, idx) => {
   d.addEventListener('timeupdate', () => {
-    if (idx !== active || streaming) return;
+    if (idx !== active) return;
     updateProgress(d);
     if (crossing) return;
     const cf = Number(state.settings.crossfade ?? 4);
@@ -279,7 +277,7 @@ decks.forEach((d, idx) => {
     if (d.duration - d.currentTime <= cf && queue.length > 1) beginCrossfade(cf);
   });
   d.addEventListener('ended', () => {
-    if (idx !== active || crossing || streaming) return;
+    if (idx !== active || crossing) return;
     if (queue.length) startTrack((queueIndex + 1) % queue.length, true);
   });
   d.addEventListener('play', () => { if (idx === active) setPlayingUI(true); });
@@ -288,7 +286,6 @@ decks.forEach((d, idx) => {
 
 // ---- transport + toggles ---------------------------------------------------
 $('playpause').addEventListener('click', () => {
-  if (streaming) { const d = activeDeck(); if (d.paused) d.play().catch(() => {}); else d.pause(); return; }
   if (!activeDeck().src || !queue.length) {
     const first = Object.keys(state.playlists).find((n) => (state.playlists[n] || []).length);
     if (first) { $('now-block').textContent = 'Playing now'; $('now-sub').textContent = 'Playlist: ' + first; loadQueue(state.playlists[first], true); }
@@ -369,63 +366,6 @@ function playScene(id) {
   toast('Scene: ' + s.label);
 }
 
-// ---- web stream (internet radio / any audio stream URL) --------------------
-function renderStreamPresets() {
-  const sel = $('stream-presets'); if (!sel) return;
-  const streams = state.settings.streams || [];
-  sel.innerHTML = '<option value="">Saved streams…</option>' +
-    streams.map((s, i) => `<option value="${i}">${(s.name || s.url).replace(/</g, '&lt;')}</option>`).join('');
-}
-function playStream(url, name) {
-  url = (url || '').trim();
-  if (!url) return;
-  if (!/^https?:\/\//i.test(url)) { toast('Enter a full stream URL (http…)'); return; }
-  streaming = true;
-  activeScene = null;
-  crossing = false;
-  otherDeck().pause();
-  queue = []; queueIndex = 0;
-  $('follow').checked = false;
-  saveSettings({ followSchedule: false, scene: '' });
-  const d = activeDeck();
-  d.src = url;
-  d.volume = userVolume;
-  d.play().catch(() => toast('Could not play that stream — check the URL'));
-  $('now-block').textContent = '🔴 WEB STREAM';
-  $('now-title').textContent = name || 'Live stream';
-  $('now-sub').textContent = 'Streaming — ' + (name || url);
-  $('stream-stop').hidden = false;
-  updateProgress(d);
-  renderScenes(); renderQueue();
-}
-function stopStream() {
-  streaming = false;
-  activeDeck().pause();
-  $('stream-stop').hidden = true;
-  $('now-block').textContent = '—';
-  $('now-sub').textContent = 'Stream stopped — press Play or pick a Scene.';
-  setPlayingUI(false);
-}
-function setupStream() {
-  renderStreamPresets();
-  $('stream-play').addEventListener('click', () => playStream($('stream-url').value));
-  $('stream-stop').addEventListener('click', stopStream);
-  $('stream-save').addEventListener('click', () => {
-    const url = $('stream-url').value.trim();
-    if (!/^https?:\/\//i.test(url)) { toast('Enter a full stream URL first'); return; }
-    const name = (prompt('Name this stream', '') || url).trim();
-    state.settings.streams = state.settings.streams || [];
-    state.settings.streams.push({ name, url });
-    saveSettings({ streams: state.settings.streams });
-    renderStreamPresets();
-    toast('Saved "' + name + '"');
-  });
-  $('stream-presets').addEventListener('change', (e) => {
-    if (e.target.value === '') return;
-    const s = (state.settings.streams || [])[Number(e.target.value)];
-    if (s) { $('stream-url').value = s.url; playStream(s.url, s.name); }
-  });
-}
 
 $('shuffle').addEventListener('change', (e) => { state.settings.shuffle = e.target.checked; saveSettings({ shuffle: e.target.checked }); });
 $('crossfade').addEventListener('input', (e) => { state.settings.crossfade = Number(e.target.value); $('cf-val').textContent = e.target.value + 's'; });
@@ -631,7 +571,6 @@ function filteredLibrary() {
 }
 
 function preview(file) {
-  streaming = false;
   crossing = false; otherDeck().pause();
   queue = [file]; queueIndex = 0;
   $('now-block').textContent = 'Preview';
@@ -1173,7 +1112,6 @@ async function boot() {
   }
   loadStreamInfo();
   setupUpload();
-  setupStream();
   $('analyze-btn').addEventListener('click', analyzeLibrary);
   $('auto-vibe').addEventListener('click', buildVibePlaylists);
   $('auto-schedule').addEventListener('click', autoScheduleByVibe);
