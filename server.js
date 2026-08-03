@@ -497,6 +497,30 @@ app.post('/api/afterhours/password', (req, res) => {
   res.json({ ok: true });
 });
 
+// One-tap update: pull the latest code, then exit so systemd (Restart=always)
+// relaunches the service on the new version — no terminal needed. Admin-gated
+// by the same password as the after-hours / Admin unlock.
+app.post('/api/update', (req, res) => {
+  const password = req.body && req.body.password;
+  if (!data.settings.afterHoursPassword || password !== data.settings.afterHoursPassword) {
+    return res.status(403).json({ error: 'wrong password' });
+  }
+  const git = spawn('git', ['pull', '--ff-only'], { cwd: ROOT });
+  let out = '';
+  git.stdout.on('data', (d) => { out += d; });
+  git.stderr.on('data', (d) => { out += d; });
+  git.on('error', (e) => { if (!res.headersSent) res.status(500).json({ error: 'git unavailable: ' + e.message }); });
+  git.on('close', (code) => {
+    if (res.headersSent) return;
+    const text = out.trim();
+    if (code !== 0) return res.status(500).json({ ok: false, output: text || ('git exited ' + code) });
+    const updated = !/Already up to date/i.test(text);
+    res.json({ ok: true, updated, output: text });
+    // Flush the response, then exit; systemd restarts us on the pulled code.
+    if (updated) setTimeout(() => process.exit(0), 1200);
+  });
+});
+
 // ---- audio streaming (HTTP range) -----------------------------------------
 
 app.get('/audio/:file', (req, res) => {

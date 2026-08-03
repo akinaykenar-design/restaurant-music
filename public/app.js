@@ -1169,6 +1169,21 @@ function setupAdmin() {
   $('admin-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUnlock(); });
   $('admin-relock').addEventListener('click', showLocked);
 
+  const updateBtn = $('app-update');
+  if (updateBtn) updateBtn.addEventListener('click', () => {
+    const st = $('update-status'); const b = updateBtn;
+    b.disabled = true; st.textContent = 'Updating…';
+    fetch('/api/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: adminPass }) })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.error) { st.textContent = 'Failed: ' + d.error; b.disabled = false; return; }
+        if (!d.updated) { st.textContent = 'Already up to date.'; b.disabled = false; return; }
+        st.textContent = 'Updated — restarting, reloading in 6s…';
+        setTimeout(() => location.reload(), 6000);
+      })
+      .catch(() => { st.textContent = 'Restarting… reloading in 6s'; setTimeout(() => location.reload(), 6000); });
+  });
+
   $('ah-play').addEventListener('click', () => {
     const name = $('ah-playlist').value;
     if (!name || !state.playlists[name] || !state.playlists[name].length) return alert('That playlist is empty.');
