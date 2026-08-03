@@ -96,7 +96,10 @@ const vizEq = (() => {
   if (!canvas || !canvas.getContext) return { onPlay() {} };
   const g = canvas.getContext('2d');
   const COLS = 13, ROWS = 16;
-  const levels = new Array(COLS).fill(0); // smoothed bar heights 0..1
+  const levels = new Array(COLS).fill(0); // smoothed audio target 0..1
+  const shown = new Array(COLS).fill(0);  // integer segments currently lit
+  const nextAt = new Array(COLS).fill(0); // when this column may step again
+  const RISE_MS = 45, FALL_MS = 120;      // climb one segment, then wait; fall slower
   let W = 1, H = 1;
   let audioCtx = null, analyser = null, freq = null, wired = false;
 
@@ -185,7 +188,7 @@ const vizEq = (() => {
     const segH = Math.max(1, pitchY * 0.68); // short segment + thin gap above it
     const baseY = H - padBot;
     for (let i = 0; i < COLS; i++) {
-      const lit = Math.round(Math.max(0.06, levels[i]) * ROWS); // >=1 so no dead column
+      const lit = shown[i];
       const x = padX + i * pitchX + insetX;
       for (let r = 0; r < ROWS; r++) {
         const frac = r / (ROWS - 1);
@@ -201,10 +204,22 @@ const vizEq = (() => {
     }
   }
 
+  // Step each column toward its target one segment at a time, pausing between
+  // steps, so bars climb rung-by-rung like a hardware VU meter (not a smooth
+  // slide).
+  function step(now) {
+    for (let i = 0; i < COLS; i++) {
+      const target = Math.round(Math.max(0.06, levels[i]) * ROWS); // >=1, no dead column
+      if (now < nextAt[i]) continue;
+      if (shown[i] < target) { shown[i]++; nextAt[i] = now + RISE_MS; }
+      else if (shown[i] > target) { shown[i]--; nextAt[i] = now + FALL_MS; }
+    }
+  }
   function loop(now) {
     const playing = !!(document.querySelector('.player') || {}).classList &&
       document.querySelector('.player').classList.contains('playing');
     sample(playing, now / 1000);
+    step(now);
     draw();
     requestAnimationFrame(loop);
   }
