@@ -15,6 +15,8 @@ let libGenre = '';        // library genre filter
 let libVibe = '';         // library vibe filter (Chill/Warm/Lively)
 let libRating = '';       // library rating filter (like/dislike/rated/none)
 let libSort = 'title';    // library sort key
+let libSelect = false;    // multi-select (long-press) mode in the library
+const libSelected = new Set(); // files currently selected
 
 // dual-deck crossfade player
 const decks = [new Audio(), new Audio()];
@@ -791,6 +793,42 @@ function renderPlaylistNames() {
   });
 }
 
+// ---- library multi-select (long-press → select → bulk delete/ban) ----------
+function updateSelBar() {
+  const bar = $('lib-selbar'); if (!bar) return;
+  bar.hidden = !libSelect;
+  const c = $('lib-selcount'); if (c) c.textContent = libSelected.size + ' selected';
+}
+function exitSelect() {
+  libSelect = false; libSelected.clear();
+  const ul = $('lib-tracks'); if (ul) { ul.classList.remove('selecting'); ul.querySelectorAll('li.sel').forEach((li) => li.classList.remove('sel')); }
+  updateSelBar();
+}
+function toggleRow(li, file) {
+  if (libSelected.has(file)) { libSelected.delete(file); li.classList.remove('sel'); }
+  else { libSelected.add(file); li.classList.add('sel'); }
+  if (!libSelected.size) return exitSelect();
+  updateSelBar();
+}
+function enterSelect(li, file) {
+  libSelect = true;
+  const ul = $('lib-tracks'); if (ul) ul.classList.add('selecting');
+  libSelected.clear(); libSelected.add(file); li.classList.add('sel');
+  updateSelBar();
+}
+// Long-press (touch or mouse) to start selecting a row.
+function attachLongPress(li, file) {
+  let timer = null;
+  const start = () => { timer = setTimeout(() => { timer = null; li.__lp = true; if (!libSelect) enterSelect(li, file); }, 450); };
+  const cancel = () => { if (timer) { clearTimeout(timer); timer = null; } };
+  li.addEventListener('touchstart', start, { passive: true });
+  li.addEventListener('touchmove', cancel, { passive: true });
+  li.addEventListener('touchend', cancel);
+  li.addEventListener('mousedown', start);
+  li.addEventListener('mouseup', cancel);
+  li.addEventListener('mouseleave', cancel);
+}
+
 function renderEditor() {
   if (editing) {
     const tks = state.playlists[editing] || [];
@@ -846,7 +884,13 @@ function renderEditor() {
     art.appendChild(aimg);
     const name = document.createElement('span');
     name.className = 'name'; name.textContent = t.title; name.title = t.title + (t.artist ? ' — ' + t.artist : '');
-    name.addEventListener('click', () => preview(t.file));
+    name.addEventListener('click', () => { if (!libSelect) preview(t.file); });
+    attachLongPress(li, t.file);
+    li.addEventListener('click', () => {
+      if (li.__lp) { li.__lp = false; return; } // swallow the click that ends a long-press
+      if (libSelect) toggleRow(li, t.file);
+    });
+    if (libSelected.has(t.file)) li.classList.add('sel');
     const rt = ratingOf(t.file);
     // Tags live in their own span (a sibling of the name) so the name can
     // ellipsis-truncate without clipping the tags.
@@ -1337,6 +1381,29 @@ async function boot() {
       if (st) st.textContent = 'Done — sorted into vibes and scheduled. ✅';
     } catch (e) { if (st) st.textContent = 'Something went wrong — try again.'; }
     finally { autoAll.disabled = false; }
+  });
+
+  const selCancel = $('lib-selcancel'); if (selCancel) selCancel.addEventListener('click', exitSelect);
+  const selDel = $('lib-seldel');
+  if (selDel) selDel.addEventListener('click', async () => {
+    const files = [...libSelected]; if (!files.length) return;
+    if (!confirm('Delete ' + files.length + ' track' + (files.length === 1 ? '' : 's') + ' from the library?')) return;
+    selDel.disabled = true;
+    for (const f of files) { try { await fetch('/api/track?name=' + encodeURIComponent(f), { method: 'DELETE' }); } catch (e) { /* ignore */ } }
+    selDel.disabled = false;
+    exitSelect();
+    reloadLibrary();
+  });
+  const selBan = $('lib-selban');
+  if (selBan) selBan.addEventListener('click', async () => {
+    const files = [...libSelected]; if (!files.length) return;
+    let last;
+    for (const f of files) {
+      try { const r = await fetch('/api/rate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file: f, rating: 'dislike' }) }); last = await r.json(); } catch (e) { /* ignore */ }
+    }
+    if (last && last.ratings) state.ratings = last.ratings;
+    exitSelect();
+    renderEditor();
   });
   setupVenuePlayer();
   setupAdmin();

@@ -293,6 +293,18 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .lib-advanced[open] > summary { color: var(--text); }
 .lib-advanced[open] > summary::before { content: '▾ '; }
 .lib-advanced .pl-layout { margin-bottom: 16px; }
+.sel-hint { font-size: 0.76rem; margin: 0 0 10px; color: var(--faint); }
+.lib-selbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+.lib-selbar #lib-selcount { font-weight: 600; font-size: 0.9rem; }
+.selbar-actions { display: flex; gap: 8px; }
+.lib-selbar .del { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, transparent); }
+.lib-selbar .del:hover { background: var(--bad-tint); }
+/* selecting mode: hide per-row buttons, show a tick, highlight selected rows */
+.tracklist.selecting li { cursor: pointer; }
+.tracklist.selecting li button, .tracklist.selecting li .dur { display: none; }
+.tracklist.selecting li::after { content: '○'; color: var(--faint); font-size: 1.2rem; flex: none; margin-left: 4px; }
+.tracklist.selecting li.sel { border-color: var(--play); background: var(--play-tint); }
+.tracklist.selecting li.sel::after { content: '✓'; color: var(--play); font-weight: 700; }
 
 .pl-layout { display: grid; grid-template-columns: 244px 1fr; gap: 16px; align-items: start; }
 #playlist-names { list-style: none; padding: 0; margin: 0 0 12px; }
