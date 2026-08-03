@@ -817,19 +817,18 @@ function renderEditor() {
   shown.forEach((t) => {
     const li = document.createElement('li');
     const name = document.createElement('span');
-    name.className = 'name'; name.textContent = t.title; name.title = t.artist ? t.artist + ' — click to preview' : 'Click to preview';
+    name.className = 'name'; name.textContent = t.title; name.title = t.title + (t.artist ? ' — ' + t.artist : '');
     name.addEventListener('click', () => preview(t.file));
     const rt = ratingOf(t.file);
-    if (t.genre || t.vibe || rt) {
-      const tags = document.createElement('span');
-      tags.className = 'tags';
-      if (rt === 'like') { const l = document.createElement('span'); l.className = 'tag tag-like'; l.textContent = '♥ Liked'; tags.appendChild(l); }
-      if (rt === 'less') { const ls = document.createElement('span'); ls.className = 'tag tag-less'; ls.textContent = '↓ Less'; tags.appendChild(ls); }
-      if (rt === 'dislike') { const dl = document.createElement('span'); dl.className = 'tag tag-dislike'; dl.textContent = '⊘ Banned'; tags.appendChild(dl); }
-      if (t.vibe) { const v = document.createElement('span'); v.className = 'tag vibe-' + t.vibe.toLowerCase(); v.textContent = t.vibe; tags.appendChild(v); }
-      if (t.genre) { const g = document.createElement('span'); g.className = 'tag tag-genre'; g.textContent = t.genre; tags.appendChild(g); }
-      name.appendChild(tags);
-    }
+    // Tags live in their own span (a sibling of the name) so the name can
+    // ellipsis-truncate without clipping the tags.
+    const tags = document.createElement('span');
+    tags.className = 'tags';
+    if (rt === 'like') { const l = document.createElement('span'); l.className = 'tag tag-like'; l.textContent = '♥ Liked'; tags.appendChild(l); }
+    if (rt === 'less') { const ls = document.createElement('span'); ls.className = 'tag tag-less'; ls.textContent = '↓ Less'; tags.appendChild(ls); }
+    if (rt === 'dislike') { const dl = document.createElement('span'); dl.className = 'tag tag-dislike'; dl.textContent = '⊘ Banned'; tags.appendChild(dl); }
+    if (t.vibe) { const v = document.createElement('span'); v.className = 'tag vibe-' + t.vibe.toLowerCase(); v.textContent = t.vibe; tags.appendChild(v); }
+    if (t.genre) { const g = document.createElement('span'); g.className = 'tag tag-genre'; g.textContent = t.genre; tags.appendChild(g); }
     const like = document.createElement('button');
     like.textContent = '♥'; like.title = 'Like — plays more often';
     like.className = rt === 'like' ? 'liked' : '';
@@ -852,7 +851,7 @@ function renderEditor() {
       fetch('/api/track?name=' + encodeURIComponent(t.file), { method: 'DELETE' }).then((r) => r.json()).then(() => reloadLibrary());
     });
     const dur = document.createElement('span'); dur.className = 'dur'; dur.textContent = fmtDur(t.duration);
-    li.append(name, dur, like, less, dislike, add, del);
+    li.append(name, ...(tags.children.length ? [tags] : []), dur, like, less, dislike, add, del);
     libUl.appendChild(li);
   });
 }

@@ -139,8 +139,12 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 .ptime { display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.72rem; color: var(--faint); font-variant-numeric: tabular-nums; }
 
 .np-block { color: var(--warn); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; }
-.np-title { font-size: 1.7rem; margin: 7px 0 3px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
-.np-sub { color: var(--muted); font-size: 0.92rem; }
+.np-title { font-size: 1.7rem; margin: 7px 0 3px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; overflow-wrap: break-word; }
+.np-sub { color: var(--muted); font-size: 0.92rem; overflow-wrap: break-word; }
+.np-meta { min-width: 0; } /* let the meta column shrink so long titles wrap, not stretch */
+/* Grid children default to min-width:auto (=content width); force 0 so one
+   long track name can't blow a column — and the whole card — wider. */
+.pl-layout > *, .pl-cols > *, .cols > * { min-width: 0; }
 
 .transport { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 18px 0 14px; }
 .transport button { border: none; cursor: pointer; display: grid; place-items: center; transition: transform 0.1s, background 0.12s, color 0.12s, border-color 0.12s; }
@@ -202,7 +206,7 @@ input[type='range']::-moz-range-thumb { width: 15px; height: 15px; border: none;
 h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--faint); font-weight: 700; }
 .tracklist { list-style: none; padding: 0; margin: 0; max-height: 320px; overflow-y: auto; }
 .tracklist li { display: flex; align-items: center; gap: 8px; padding: 9px 11px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 6px; background: var(--surface-2); font-size: 0.9rem; }
-.tracklist li .name { flex: 1; cursor: pointer; }
+.tracklist li .name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
 .tracklist li .dur { color: var(--faint); font-size: 0.76rem; font-variant-numeric: tabular-nums; flex: none; }
 .tracklist li .name:hover { color: var(--accent); }
 .tracklist li.current { border-color: var(--accent); background: var(--accent-tint); }
@@ -258,7 +262,7 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 #playlist-names { list-style: none; padding: 0; margin: 0 0 12px; }
 #playlist-names li { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 6px; background: var(--surface-2); cursor: pointer; }
 #playlist-names li.active { border-color: var(--accent); background: var(--accent-tint); }
-#playlist-names li span { flex: 1; }
+#playlist-names li span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pl-new { display: flex; gap: 7px; }
 input:not([type]), input[type='text'], .pl-new input { flex: 1; min-width: 0; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 9px; padding: 10px; font: inherit; }
 .ah-row input { min-width: 0; }
@@ -279,7 +283,7 @@ h4 { margin: 0 0 12px; font-size: 0.98rem; display: flex; align-items: center; g
 .auto-vibe:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* genre + vibe tags on library rows */
-.tags { display: inline-flex; gap: 5px; margin-left: 8px; vertical-align: middle; flex-wrap: wrap; }
+.tags { display: inline-flex; gap: 5px; margin-left: 8px; vertical-align: middle; flex-wrap: wrap; flex: none; justify-content: flex-end; }
 .tag { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.02em; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); background: var(--surface); white-space: nowrap; }
 .tag-genre { text-transform: capitalize; }
 .tag.vibe-chill { color: #3a8fb0; border-color: #3a8fb055; background: #3a8fb016; }
