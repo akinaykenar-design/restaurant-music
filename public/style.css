@@ -394,7 +394,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
     overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
   }
   .tabs::-webkit-scrollbar { display: none; }
-  .tab { white-space: nowrap; flex: 0 0 auto; padding: 7px 13px; }
+  .tab { white-space: nowrap; flex: 0 0 auto; padding: 6px 11px; font-size: 0.8rem; }
 }
 
 /* Small phones: shrink the transport row so the five buttons never overflow. */
