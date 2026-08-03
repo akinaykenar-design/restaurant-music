@@ -536,6 +536,7 @@ function updateRateButtons(file) {
 // ---- queue + history lists -------------------------------------------------
 function renderQueue() {
   const ol = $('queue-list');
+  if (!ol) return; // Up-next list removed from Now Playing
   ol.innerHTML = '';
   if (!queue.length) { ol.appendChild(emptyRow('Nothing queued yet.')); return; }
   queue.forEach((file, i) => {
@@ -557,6 +558,7 @@ function pushHistory(file) {
 }
 function renderHistory() {
   const ol = $('history-list');
+  if (!ol) return; // Recently-played list removed from Now Playing
   ol.innerHTML = '';
   const recent = history.slice(1);
   if (!recent.length) { ol.appendChild(emptyRow('Nothing played yet.')); return; }
