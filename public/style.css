@@ -173,6 +173,13 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 15p
 input[type='range']::-moz-range-thumb { width: 15px; height: 15px; border: none; border-radius: 50%; background: var(--accent); cursor: pointer; }
 
 .toggles { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.more-opts { margin-top: 10px; }
+.more-opts > summary { cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--muted); padding: 2px 0; user-select: none; }
+.more-opts > summary::-webkit-details-marker { display: none; }
+.more-opts > summary::before { content: '⌄'; font-size: 0.95rem; line-height: 1; transition: transform 0.15s; }
+.more-opts[open] > summary { color: var(--text); }
+.more-opts[open] > summary::before { transform: rotate(180deg); }
+.more-opts .toggles { margin-top: 10px; }
 .chip { display: inline-flex; align-items: center; gap: 7px; background: var(--surface-2); border: 1px solid var(--border); padding: 7px 12px; border-radius: 999px; font-size: 0.82rem; color: var(--muted); cursor: pointer; }
 .chip input { accent-color: var(--accent); }
 .chip.range input[type=range] { width: 84px; }

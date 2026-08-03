@@ -89,23 +89,28 @@
             <div class="toggles">
               <label class="chip"><input type="checkbox" id="follow" /> <span>Follow schedule</span></label>
               <label class="chip"><input type="checkbox" id="shuffle" /> <span>Shuffle</span></label>
-              <label class="chip range"><span>Crossfade</span>
-                <input type="range" id="crossfade" min="0" max="12" step="1" />
-                <b id="cf-val">4s</b>
-              </label>
-              <label class="chip"><span>Auto-stop in</span>
-                <select id="sleep" aria-label="Auto-stop countdown">
-                  <option value="0">Off</option>
-                  <option value="30">30 min</option>
-                  <option value="60">1 hour</option>
-                  <option value="90">1½ hours</option>
-                  <option value="120">2 hours</option>
-                </select>
-              </label>
-              <label class="chip"><span>Stop at</span>
-                <input type="time" id="stop-at" aria-label="Stop at clock time" />
-              </label>
             </div>
+            <details class="more-opts">
+              <summary>More options</summary>
+              <div class="toggles">
+                <label class="chip range"><span>Crossfade</span>
+                  <input type="range" id="crossfade" min="0" max="12" step="1" />
+                  <b id="cf-val">4s</b>
+                </label>
+                <label class="chip"><span>Auto-stop in</span>
+                  <select id="sleep" aria-label="Auto-stop countdown">
+                    <option value="0">Off</option>
+                    <option value="30">30 min</option>
+                    <option value="60">1 hour</option>
+                    <option value="90">1½ hours</option>
+                    <option value="120">2 hours</option>
+                  </select>
+                </label>
+                <label class="chip"><span>Stop at</span>
+                  <input type="time" id="stop-at" aria-label="Stop at clock time" />
+                </label>
+              </div>
+            </details>
           </div>
         </div>
 
