@@ -104,12 +104,19 @@ const vizEq = (() => {
   function resize() {
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     const r = canvas.getBoundingClientRect();
-    W = Math.max(1, Math.round(r.width)); H = Math.max(1, Math.round(r.height));
+    const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+    if (w === W && h === H && canvas.width) return; // nothing changed
+    W = w; H = h;
     canvas.width = W * dpr; canvas.height = H * dpr;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   resize();
   window.addEventListener('resize', resize);
+  window.addEventListener('load', resize);
+  // Re-measure whenever the art box actually changes size (tab switch,
+  // breakpoint, orientation, late font/layout) so the meter never ends up
+  // drawn to a stale size — which showed as clipped / off-centre.
+  if (window.ResizeObserver) { try { new ResizeObserver(resize).observe(canvas); } catch (e) { /* ignore */ } }
 
   function wireAudio() {
     if (wired) return; // createMediaElementSource is one-shot per element
