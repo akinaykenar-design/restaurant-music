@@ -124,20 +124,13 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 }
 .player.playing .art::before { opacity: 0.6; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.viz { display: flex; gap: 7px; align-items: flex-end; height: 70px; padding-bottom: 32px; position: relative; }
-.viz span { width: 8px; height: 22%; border-radius: 6px; background: linear-gradient(#fff, color-mix(in srgb, var(--warn) 80%, #fff)); box-shadow: 0 0 14px color-mix(in srgb, var(--warn) 70%, transparent); opacity: 0.95; }
-.player.playing .viz span { animation: bounce 1s ease-in-out infinite; }
+.viz-eq { position: absolute; inset: 13px; width: auto; height: auto; border-radius: 9px; display: block; }
 
 /* progress / seek */
 .progress { margin: 14px 0 4px; }
 .pbar { height: 6px; border-radius: 999px; background: var(--border-strong); cursor: pointer; overflow: hidden; }
 .pfill { height: 100%; width: 0%; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--warn)); transition: width 0.2s linear; }
 .ptime { display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.72rem; color: var(--faint); font-variant-numeric: tabular-nums; }
-.viz span:nth-child(2) { animation-delay: 0.2s; }
-.viz span:nth-child(3) { animation-delay: 0.4s; }
-.viz span:nth-child(4) { animation-delay: 0.15s; }
-.viz span:nth-child(5) { animation-delay: 0.32s; }
-@keyframes bounce { 0%, 100% { height: 22%; } 50% { height: 90%; } }
 
 .np-block { color: var(--warn); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; }
 .np-title { font-size: 1.7rem; margin: 7px 0 3px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }

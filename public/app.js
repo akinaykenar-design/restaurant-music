@@ -86,6 +86,128 @@ function setPlayingUI(on) {
   if (mp) mp.classList.toggle('playing', on);
 }
 
+// ---- LED spectrum analyser (old-school hi-fi meter on Now Playing) ----------
+// Glowing green→amber→red LED columns that react to the actual audio level.
+// Taps the live output through a Web Audio AnalyserNode; if that isn't
+// available (or routing is blocked) it falls back to a synthetic animation and
+// never interferes with playback.
+const vizEq = (() => {
+  const canvas = $('viz-eq');
+  if (!canvas || !canvas.getContext) return { onPlay() {} };
+  const g = canvas.getContext('2d');
+  const COLS = 16, ROWS = 12;
+  const levels = new Array(COLS).fill(0); // smoothed column height 0..1
+  const peaks = new Array(COLS).fill(0);  // slow-falling peak-hold caps
+  let W = 1, H = 1;
+  let audioCtx = null, analyser = null, freq = null, wired = false;
+
+  function resize() {
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const r = canvas.getBoundingClientRect();
+    W = Math.max(1, Math.round(r.width)); H = Math.max(1, Math.round(r.height));
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function wireAudio() {
+    if (wired) return; // createMediaElementSource is one-shot per element
+    wired = true;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try {
+      audioCtx = new AC();
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 128;
+      analyser.smoothingTimeConstant = 0.82;
+      freq = new Uint8Array(analyser.frequencyBinCount);
+      analyser.connect(audioCtx.destination);
+      decks.forEach((d) => {
+        try { audioCtx.createMediaElementSource(d).connect(analyser); } catch (e) { /* leave it */ }
+      });
+    } catch (e) { analyser = null; }
+  }
+  function onPlay() {
+    wireAudio();
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+  }
+
+  function sample(playing, t) {
+    if (analyser) {
+      analyser.getByteFrequencyData(freq);
+      const usable = Math.floor(freq.length * 0.72); // skip near-silent top bins
+      const per = Math.max(1, usable / COLS);
+      for (let i = 0; i < COLS; i++) {
+        let s = 0; for (let j = 0; j < per; j++) s += freq[Math.floor(i * per + j)] || 0;
+        const v = Math.min(1, (s / per / 255) * 1.5); // scale up — music rarely maxes
+        levels[i] += (v - levels[i]) * 0.35;
+      }
+    } else if (playing) { // synthetic fallback so it still dances
+      for (let i = 0; i < COLS; i++) {
+        const bell = 1 - Math.abs(i - COLS / 2) / (COLS / 2) * 0.55;
+        const v = (Math.sin(t * 3 + i * 0.7) * 0.3 + Math.sin(t * 7 + i) * 0.2 + 0.45) * bell;
+        levels[i] += (Math.max(0, v) - levels[i]) * 0.25;
+      }
+    } else {
+      for (let i = 0; i < COLS; i++) levels[i] += (0 - levels[i]) * 0.2;
+    }
+    for (let i = 0; i < COLS; i++) peaks[i] = Math.max(peaks[i] - 0.012, levels[i]);
+  }
+
+  function rr(x, y, w, h, r) {
+    g.beginPath();
+    g.moveTo(x + r, y);
+    g.arcTo(x + w, y, x + w, y + h, r);
+    g.arcTo(x + w, y + h, x, y + h, r);
+    g.arcTo(x, y + h, x, y, r);
+    g.arcTo(x, y, x + w, y, r);
+    g.closePath();
+  }
+
+  function draw() {
+    g.clearRect(0, 0, W, H);
+    g.fillStyle = '#05100c'; rr(0, 0, W, H, 9); g.fill(); // dark equipment panel
+    const padX = W * 0.08, padY = H * 0.09, gx = 3, gy = 3;
+    const cw = (W - padX * 2 - gx * (COLS - 1)) / COLS;
+    const chh = (H - padY * 2 - gy * (ROWS - 1)) / ROWS;
+    for (let i = 0; i < COLS; i++) {
+      const lit = Math.round(levels[i] * ROWS);
+      const peakRow = Math.round(peaks[i] * ROWS);
+      const x = padX + i * (cw + gx);
+      for (let r = 0; r < ROWS; r++) {
+        const frac = r / (ROWS - 1);
+        const on = r < lit;
+        const isPeak = peakRow > 0 && r === peakRow - 1;
+        const y = H - padY - (r + 1) * chh - r * gy;
+        const c = frac > 0.82 ? [229, 72, 77] : frac > 0.55 ? [255, 180, 58] : [55, 214, 122];
+        if (on || isPeak) {
+          g.shadowColor = `rgba(${c[0]},${c[1]},${c[2]},0.9)`;
+          g.shadowBlur = isPeak && !on ? 6 : 9;
+          g.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`;
+          g.globalAlpha = isPeak && !on ? 0.85 : 1;
+        } else {
+          g.shadowBlur = 0;
+          g.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},0.10)`; // unlit but tinted
+          g.globalAlpha = 1;
+        }
+        rr(x, y, cw, Math.max(1, chh), Math.min(2, chh / 2)); g.fill();
+      }
+    }
+    g.shadowBlur = 0; g.globalAlpha = 1;
+  }
+
+  function loop(now) {
+    const playing = !!(document.querySelector('.player') || {}).classList &&
+      document.querySelector('.player').classList.contains('playing');
+    sample(playing, now / 1000);
+    draw();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+  return { onPlay };
+})();
+
 const fmt = (s) => (!s || isNaN(s)) ? '0:00' : Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
 function updateProgress(d) {
   const dur = d.duration;
@@ -280,7 +402,7 @@ decks.forEach((d, idx) => {
     if (idx !== active || crossing) return;
     if (queue.length) startTrack((queueIndex + 1) % queue.length, true);
   });
-  d.addEventListener('play', () => { if (idx === active) setPlayingUI(true); });
+  d.addEventListener('play', () => { vizEq.onPlay(); if (idx === active) setPlayingUI(true); });
   d.addEventListener('pause', () => { if (idx === active && !crossing) setPlayingUI(false); });
 });
 
