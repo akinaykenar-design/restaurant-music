@@ -86,6 +86,19 @@ function setPlayingUI(on) {
   if (mp) mp.classList.toggle('playing', on);
 }
 
+// Show the current track's embedded cover art as a soft background behind the
+// player (the meter stays). Only applies if the file actually has art.
+function setNowArt(file) {
+  const bg = $('player-bg'); const player = document.querySelector('.player');
+  if (!bg || !player) return;
+  if (!file) { player.classList.remove('has-art'); bg.style.backgroundImage = ''; return; }
+  const url = '/api/art?file=' + encodeURIComponent(file);
+  const probe = new Image();
+  probe.onload = () => { bg.style.backgroundImage = 'url("' + url + '")'; player.classList.add('has-art'); };
+  probe.onerror = () => { player.classList.remove('has-art'); bg.style.backgroundImage = ''; };
+  probe.src = url;
+}
+
 // ---- LED spectrum analyser (old-school hi-fi meter on Now Playing) ----------
 // Glowing green→amber→red LED columns that react to the actual audio level.
 // Taps the live output through a Web Audio AnalyserNode; if that isn't
@@ -270,6 +283,7 @@ function onTrackChanged(file) {
   $('mini-title').textContent = titleOf(file);
   $('miniplayer').hidden = false;
   document.title = (file ? titleOf(file) + ' · ' : '') + 'Watermans Music';
+  setNowArt(file);
   updateRateButtons(file);
   pushHistory(file);
   renderQueue();
@@ -288,6 +302,7 @@ function loadQueue(files, autoplay) {
     activeDeck().removeAttribute('src');
     $('now-title').textContent = 'Nothing playing';
     $('now-sub').textContent = 'This playlist is empty';
+    setNowArt(null);
     setPlayingUI(false);
     renderQueue();
   }
@@ -720,6 +735,7 @@ function preview(file) {
   d.volume = userVolume;
   d.play().catch(() => {});
   $('now-title').textContent = titleOf(file);
+  setNowArt(file);
   updateRateButtons(file);
   renderQueue();
 }
@@ -816,6 +832,12 @@ function renderEditor() {
   if (!shown.length) { libUl.appendChild(emptyRow('No tracks match those filters.')); return; }
   shown.forEach((t) => {
     const li = document.createElement('li');
+    const art = document.createElement('div');
+    art.className = 'row-art' + (t.vibe ? ' vibe-' + t.vibe.toLowerCase() : '');
+    const aimg = document.createElement('img'); aimg.alt = ''; aimg.loading = 'lazy';
+    aimg.addEventListener('error', () => aimg.remove()); // no embedded art → coloured tile
+    aimg.src = '/api/art?file=' + encodeURIComponent(t.file);
+    art.appendChild(aimg);
     const name = document.createElement('span');
     name.className = 'name'; name.textContent = t.title; name.title = t.title + (t.artist ? ' — ' + t.artist : '');
     name.addEventListener('click', () => preview(t.file));
@@ -851,7 +873,7 @@ function renderEditor() {
       fetch('/api/track?name=' + encodeURIComponent(t.file), { method: 'DELETE' }).then((r) => r.json()).then(() => reloadLibrary());
     });
     const dur = document.createElement('span'); dur.className = 'dur'; dur.textContent = fmtDur(t.duration);
-    li.append(name, ...(tags.children.length ? [tags] : []), dur, like, less, dislike, add, del);
+    li.append(art, name, ...(tags.children.length ? [tags] : []), dur, like, less, dislike, add, del);
     libUl.appendChild(li);
   });
 }

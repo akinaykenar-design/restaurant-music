@@ -216,6 +216,48 @@ function readId3(full) {
   return out;
 }
 
+// Extract embedded cover art (ID3v2 APIC frame) from a file, if present.
+// Returns { mime, data:Buffer } or null. Reads up to 8MB of tag to reach art.
+function readArt(full) {
+  let fd;
+  try {
+    fd = fs.openSync(full, 'r');
+    const head = Buffer.alloc(10);
+    fs.readSync(fd, head, 0, 10, 0);
+    if (head.toString('latin1', 0, 3) !== 'ID3') return null;
+    const ver = head[3];
+    const size = ((head[6] & 0x7f) << 21) | ((head[7] & 0x7f) << 14) | ((head[8] & 0x7f) << 7) | (head[9] & 0x7f);
+    const readLen = Math.min(size, 8 << 20);
+    const buf = Buffer.alloc(readLen);
+    fs.readSync(fd, buf, 0, readLen, 10);
+    let i = 0;
+    while (i + 10 <= buf.length) {
+      const id = buf.toString('latin1', i, i + 4);
+      if (!/^[A-Z0-9]{4}$/.test(id)) break;
+      let fsz;
+      if (ver === 4) fsz = ((buf[i + 4] & 0x7f) << 21) | ((buf[i + 5] & 0x7f) << 14) | ((buf[i + 6] & 0x7f) << 7) | (buf[i + 7] & 0x7f);
+      else fsz = (buf[i + 4] << 24) | (buf[i + 5] << 16) | (buf[i + 6] << 8) | buf[i + 7];
+      if (fsz <= 0 || i + 10 + fsz > buf.length) break;
+      if (id === 'APIC') {
+        const end = i + 10 + fsz;
+        let p = i + 10;
+        const enc = buf[p]; p += 1;
+        let mimeEnd = buf.indexOf(0, p); if (mimeEnd < 0 || mimeEnd >= end) mimeEnd = p;
+        const mime = buf.toString('latin1', p, mimeEnd); p = mimeEnd + 1;
+        p += 1; // picture-type byte
+        if (enc === 1 || enc === 2) { while (p + 1 < end && !(buf[p] === 0 && buf[p + 1] === 0)) p += 2; p += 2; }
+        else { while (p < end && buf[p] !== 0) p += 1; p += 1; }
+        const data = buf.subarray(p, end);
+        if (data.length > 100) return { mime: /^image\//.test(mime) ? mime : 'image/jpeg', data: Buffer.from(data) };
+      }
+      i += 10 + fsz;
+    }
+    return null;
+  } catch { return null; }
+  finally { if (fd !== undefined) try { fs.closeSync(fd); } catch { /* ignore */ } }
+}
+const artCache = new Map(); // file -> { mtime, mime?, data?, none? }
+
 // Bucket a track into a serving "vibe" from its measured energy (RMS, ~0.02–0.30
 // for music) and tempo. Three levels is the reliable ceiling for energy+tempo:
 // Chill (relaxed), Warm (mid), Lively (high). '' = not analysed yet.
@@ -299,6 +341,24 @@ function scanLibrary() {
 // ---- api -------------------------------------------------------------------
 
 app.get('/api/library', (_req, res) => res.json({ tracks: scanLibrary() }));
+
+// Embedded cover art for a track (or 404 if the file has none). Cached by mtime.
+app.get('/api/art', (req, res) => {
+  const file = String(req.query.file || '');
+  if (!file || file.includes('..') || file.includes('/') || file.includes('\\')) return res.status(400).end();
+  const full = path.join(MUSIC_DIR, file);
+  let stat; try { stat = fs.statSync(full); } catch { return res.status(404).end(); }
+  let c = artCache.get(file);
+  if (!c || c.mtime !== stat.mtimeMs) {
+    const art = readArt(full);
+    c = art ? { mtime: stat.mtimeMs, mime: art.mime, data: art.data } : { mtime: stat.mtimeMs, none: true };
+    artCache.set(file, c);
+  }
+  if (c.none) return res.status(404).end();
+  res.set('Content-Type', c.mime);
+  res.set('Cache-Control', 'public, max-age=86400');
+  res.end(c.data);
+});
 
 // QR code (SVG) for a URL — used to open the app on phones/iPads by scanning.
 app.get('/api/qr', (req, res) => {
