@@ -144,8 +144,8 @@ const vizEq = (() => {
     try {
       audioCtx = new AC();
       analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 128;
-      analyser.smoothingTimeConstant = 0.82;
+      analyser.fftSize = 512; // finer bins so the log band-split has resolution
+      analyser.smoothingTimeConstant = 0.8;
       freq = new Uint8Array(analyser.frequencyBinCount);
       analyser.connect(audioCtx.destination);
       decks.forEach((d) => {
@@ -161,17 +161,23 @@ const vizEq = (() => {
   function sample(playing, t) {
     if (analyser) {
       analyser.getByteFrequencyData(freq);
-      const usable = Math.floor(freq.length * 0.72); // skip near-silent top bins
-      const per = Math.max(1, usable / COLS);
+      // Split the spectrum into COLS *logarithmic* bands (like a real graphic
+      // EQ) so bass doesn't hog the left side, and tilt the gain up towards the
+      // treble so every bar stays lively instead of dead on the right.
+      const bins = freq.length;
+      const minBin = 2, maxBin = Math.floor(bins * 0.9);
+      const ratio = maxBin / minBin;
       for (let i = 0; i < COLS; i++) {
-        let s = 0; for (let j = 0; j < per; j++) s += freq[Math.floor(i * per + j)] || 0;
-        const v = Math.min(1, (s / per / 255) * 1.5); // scale up — music rarely maxes
+        const lo = Math.floor(minBin * Math.pow(ratio, i / COLS));
+        const hi = Math.max(lo + 1, Math.floor(minBin * Math.pow(ratio, (i + 1) / COLS)));
+        let s = 0, n = 0; for (let j = lo; j < hi && j < bins; j++) { s += freq[j]; n++; }
+        const tilt = 1 + (i / (COLS - 1)) * 1.7; // boost highs
+        const v = Math.min(1, (n ? s / n / 255 : 0) * 1.35 * tilt);
         levels[i] += (v - levels[i]) * 0.35;
       }
-    } else if (playing) { // synthetic fallback so it still dances
+    } else if (playing) { // synthetic fallback — evenly lively across all bars
       for (let i = 0; i < COLS; i++) {
-        const bell = 1 - Math.abs(i - COLS / 2) / (COLS / 2) * 0.55;
-        const v = (Math.sin(t * 3 + i * 0.7) * 0.3 + Math.sin(t * 7 + i) * 0.2 + 0.45) * bell;
+        const v = 0.45 + Math.sin(t * 2.3 + i * 0.9) * 0.28 + Math.sin(t * 5.1 + i * 1.7) * 0.18;
         levels[i] += (Math.max(0, v) - levels[i]) * 0.25;
       }
     } else {
