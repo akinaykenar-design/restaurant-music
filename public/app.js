@@ -1325,6 +1325,19 @@ async function boot() {
   $('analyze-btn').addEventListener('click', analyzeLibrary);
   $('auto-vibe').addEventListener('click', buildVibePlaylists);
   $('auto-schedule').addEventListener('click', autoScheduleByVibe);
+  const autoAll = $('auto-all');
+  if (autoAll) autoAll.addEventListener('click', async () => {
+    const st = $('analyze-status');
+    if (!library.length) { if (st) st.textContent = 'Add some music first ↑'; return; }
+    autoAll.disabled = true;
+    try {
+      await analyzeLibrary();  // tag every track (skips already-tagged)
+      buildVibePlaylists();    // group into Chill / Warm / Lively playlists
+      autoScheduleByVibe();    // fill the weekly schedule by vibe
+      if (st) st.textContent = 'Done — sorted into vibes and scheduled. ✅';
+    } catch (e) { if (st) st.textContent = 'Something went wrong — try again.'; }
+    finally { autoAll.disabled = false; }
+  });
   setupVenuePlayer();
   setupAdmin();
   refreshAhPlaylists();

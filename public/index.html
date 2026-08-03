@@ -126,67 +126,79 @@
 
       </section>
 
-      <!-- ===== LIBRARY / PLAYLISTS ===== -->
+      <!-- ===== LIBRARY ===== -->
       <section id="tab-playlists" class="tab-panel">
-        <div class="pl-layout">
-          <aside class="pl-side card">
-            <h3>Playlists</h3>
-            <ul id="playlist-names"></ul>
-            <div class="pl-new">
-              <input id="new-playlist" placeholder="New playlist name" />
-              <button id="add-playlist">Add</button>
+        <div class="lib-easy">
+
+          <div class="card lib-steps">
+            <div class="lib-step"><span class="lib-n">1</span><div><b>Add your music</b><div class="hint">Drag a whole folder in, or browse.</div></div></div>
+            <div id="dropzone" class="dropzone">
+              <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0 4 4m-4-4-4 4M4 20h16"/></svg>
+              <p>Drop music — a whole <b>folder</b> works too — or <label for="file-input" class="link">browse files</label> · <label for="folder-input" class="link">a folder</label></p>
+              <input type="file" id="file-input" accept="audio/*,.mp3,.m4a,.aac,.ogg,.wav,.flac" multiple hidden />
+              <input type="file" id="folder-input" webkitdirectory directory multiple hidden />
+              <div id="upload-status" class="upload-status"></div>
             </div>
-            <button id="auto-vibe" class="ghost auto-vibe" title="Group analysed tracks into Chill / Warm / Lively playlists">✨ Build vibe playlists</button>
-          </aside>
-          <div class="pl-main">
-            <div class="pl-cols">
-              <div class="card">
-                <h4 id="editing-name">Select a playlist</h4>
-                <ul id="pl-tracks" class="tracklist"></ul>
-              </div>
-              <div class="card">
-                <h4>Library <span class="count" id="lib-count">0</span></h4>
-                <input id="lib-search" class="lib-search" type="text" placeholder="Search library…" />
-                <div class="lib-tools">
-                  <select id="lib-genre" class="lib-filter" title="Filter by genre"><option value="">All genres</option></select>
-                  <select id="lib-vibe" class="lib-filter" title="Filter by vibe">
-                    <option value="">All vibes</option>
-                    <option value="Chill">Chill</option>
-                    <option value="Warm">Warm</option>
-                    <option value="Lively">Lively</option>
-                  </select>
-                  <select id="lib-rating" class="lib-filter" title="Filter by rating">
-                    <option value="">All ratings</option>
-                    <option value="like">♥ Liked</option>
-                    <option value="less">↓ Less</option>
-                    <option value="dislike">⊘ Banned</option>
-                    <option value="rated">Any rated</option>
-                    <option value="none">Unrated</option>
-                  </select>
-                  <select id="lib-sort" class="lib-filter" title="Sort tracks">
-                    <option value="title">A–Z</option>
-                    <option value="vibe">By vibe</option>
-                    <option value="bpm">By tempo</option>
-                    <option value="genre">By genre</option>
-                    <option value="duration">By length</option>
-                  </select>
-                </div>
-                <div class="lib-analyze">
-                  <button id="analyze-btn" class="ghost" title="Listen to each track and tag its tempo &amp; energy">✨ Analyse audio</button>
-                  <span id="analyze-status" class="upload-status"></span>
-                </div>
-                <button id="add-all" class="ghost add-all" disabled>+ Add all shown to playlist</button>
-                <div id="dropzone" class="dropzone">
-                  <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0 4 4m-4-4-4 4M4 20h16"/></svg>
-                  <p>Drop music — a whole <b>folder</b> works too — or <label for="file-input" class="link">browse files</label> · <label for="folder-input" class="link">a folder</label></p>
-                  <input type="file" id="file-input" accept="audio/*,.mp3,.m4a,.aac,.ogg,.wav,.flac" multiple hidden />
-                  <input type="file" id="folder-input" webkitdirectory directory multiple hidden />
-                  <div id="upload-status" class="upload-status"></div>
-                </div>
-                <ul id="lib-tracks" class="tracklist"></ul>
-              </div>
-            </div>
+
+            <div class="lib-step"><span class="lib-n">2</span><div><b>Auto-sort &amp; schedule</b><div class="hint">Tags every track Chill / Warm / Lively and fills your weekly schedule — chill through the day, livelier into dinner.</div></div></div>
+            <button id="auto-all" class="auto-all-btn">✨ Auto-sort &amp; schedule<small>Analyses everything and sets up the whole week</small></button>
+            <div id="analyze-status" class="upload-status auto-status"></div>
           </div>
+
+          <div class="card lib-main-card">
+            <h4>Your music <span class="count" id="lib-count">0</span></h4>
+            <input id="lib-search" class="lib-search" type="text" placeholder="Search…" />
+            <div class="lib-tools">
+              <select id="lib-genre" class="lib-filter" title="Filter by genre"><option value="">All genres</option></select>
+              <select id="lib-vibe" class="lib-filter" title="Filter by vibe">
+                <option value="">All vibes</option>
+                <option value="Chill">Chill</option>
+                <option value="Warm">Warm</option>
+                <option value="Lively">Lively</option>
+              </select>
+              <select id="lib-rating" class="lib-filter" title="Filter by rating">
+                <option value="">All ratings</option>
+                <option value="like">♥ Liked</option>
+                <option value="less">↓ Less</option>
+                <option value="dislike">⊘ Banned</option>
+                <option value="rated">Any rated</option>
+                <option value="none">Unrated</option>
+              </select>
+              <select id="lib-sort" class="lib-filter" title="Sort tracks">
+                <option value="title">A–Z</option>
+                <option value="vibe">By vibe</option>
+                <option value="bpm">By tempo</option>
+                <option value="genre">By genre</option>
+                <option value="duration">By length</option>
+              </select>
+            </div>
+            <ul id="lib-tracks" class="tracklist"></ul>
+          </div>
+
+          <details class="lib-advanced">
+            <summary>Advanced — build a custom playlist by hand</summary>
+            <p class="hint" style="margin:10px 0 14px">Only if you want a specific hand-picked set (e.g. a Christmas playlist). Pick or create a playlist, then use the <b>+</b> on any track above to add it.</p>
+            <div class="pl-layout">
+              <aside class="pl-side card">
+                <h3>Playlists</h3>
+                <ul id="playlist-names"></ul>
+                <div class="pl-new">
+                  <input id="new-playlist" placeholder="New playlist name" />
+                  <button id="add-playlist">Add</button>
+                </div>
+                <button id="auto-vibe" class="ghost auto-vibe" title="Group analysed tracks into Chill / Warm / Lively playlists">✨ Build vibe playlists</button>
+                <button id="analyze-btn" class="ghost" title="Listen to each track and tag its tempo &amp; energy" style="width:100%;margin-top:8px">✨ Analyse audio only</button>
+              </aside>
+              <div class="pl-main">
+                <div class="card">
+                  <h4 id="editing-name">Select a playlist</h4>
+                  <button id="add-all" class="ghost add-all" disabled>+ Add all shown to playlist</button>
+                  <ul id="pl-tracks" class="tracklist"></ul>
+                </div>
+              </div>
+            </div>
+          </details>
+
         </div>
       </section>
 
