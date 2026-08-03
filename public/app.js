@@ -95,7 +95,7 @@ const vizEq = (() => {
   const canvas = $('viz-eq');
   if (!canvas || !canvas.getContext) return { onPlay() {} };
   const g = canvas.getContext('2d');
-  const COLS = 20;
+  const COLS = 13, ROWS = 16;
   const levels = new Array(COLS).fill(0); // smoothed bar heights 0..1
   let W = 1, H = 1;
   let audioCtx = null, analyser = null, freq = null, wired = false;
@@ -175,33 +175,30 @@ const vizEq = (() => {
 
   function draw() {
     g.clearRect(0, 0, W, H);
-    g.fillStyle = '#0b0f0d'; rr(0, 0, W, H, 9); g.fill(); // dark DJ-deck panel
-    const padX = W * 0.07, padTop = H * 0.10, padBot = H * 0.10;
-    const gap = Math.max(2, W * 0.012);
-    const cw = (W - padX * 2 - gap * (COLS - 1)) / COLS;
-    const baseY = H - padBot, maxH = H - padTop - padBot;
-    const radius = Math.min(cw / 2, 4);
-    // Colour mapped to height: green low, amber mid, red at the top. Fixed to
-    // the panel, so a short bar shows only green and a tall one turns red.
-    const grad = g.createLinearGradient(0, baseY - maxH, 0, baseY);
-    grad.addColorStop(0, '#ff4d4d');
-    grad.addColorStop(0.30, '#ffb43a');
-    grad.addColorStop(0.62, '#4fe08a');
-    grad.addColorStop(1, '#25b95f');
+    g.fillStyle = '#0a0a0a'; rr(0, 0, W, H, 9); g.fill(); // near-black panel
+    const padX = W * 0.06, padTop = H * 0.08, padBot = H * 0.08;
+    const pitchX = (W - padX * 2) / COLS;
+    const barW = pitchX * 0.8;              // wide bars, thin gaps between columns
+    const insetX = (pitchX - barW) / 2;
+    const areaH = H - padTop - padBot;
+    const pitchY = areaH / ROWS;
+    const segH = Math.max(1, pitchY * 0.68); // short segment + thin gap above it
+    const baseY = H - padBot;
     for (let i = 0; i < COLS; i++) {
-      const lvl = Math.max(0.03, levels[i]); // small resting sliver, never empty
-      const barH = Math.max(2, lvl * maxH);
-      const x = padX + i * (cw + gap), y = baseY - barH;
-      const c = lvl > 0.82 ? [255, 77, 77] : lvl > 0.55 ? [255, 180, 58] : [79, 224, 138];
-      g.shadowColor = `rgba(${c[0]},${c[1]},${c[2]},0.55)`;
-      g.shadowBlur = 8;
-      g.fillStyle = grad;
-      rr(x, y, cw, barH, radius); g.fill();     // solid bar, colour by height
-      g.shadowBlur = 0;                           // bright cap on top, DJ-meter style
-      g.fillStyle = 'rgba(255,255,255,0.8)';
-      rr(x, y, cw, Math.min(2.5, barH), radius); g.fill();
+      const lit = Math.round(Math.max(0.06, levels[i]) * ROWS); // >=1 so no dead column
+      const x = padX + i * pitchX + insetX;
+      for (let r = 0; r < ROWS; r++) {
+        const frac = r / (ROWS - 1);
+        const on = r < lit;
+        // fixed colour zones: green low, amber mid, red top; unlit = dim version
+        const c = frac < 0.58 ? (on ? [46, 210, 70] : [12, 44, 18])
+          : frac < 0.82 ? (on ? [245, 224, 20] : [44, 40, 4])
+            : (on ? [255, 46, 46] : [52, 12, 12]);
+        const y = baseY - (r + 1) * pitchY + (pitchY - segH) / 2;
+        g.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`;
+        g.fillRect(x, y, barW, segH);
+      }
     }
-    g.shadowBlur = 0;
   }
 
   function loop(now) {
