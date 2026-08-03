@@ -174,7 +174,7 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 #like.on { color: var(--warn); border-color: var(--warn); background: var(--warn-tint); }
 #dislike.on { color: var(--bad); border-color: var(--bad); background: var(--bad-tint); }
 
-.vol-row { display: flex; align-items: center; gap: 10px; max-width: 320px; margin-bottom: 14px; }
+.vol-row { display: flex; align-items: center; gap: 10px; max-width: 320px; margin: 18px 0 16px; }
 .vic { width: 19px; height: 19px; fill: var(--faint); flex: none; }
 input[type='range'] { -webkit-appearance: none; appearance: none; height: 5px; border-radius: 999px; background: var(--border-strong); outline: none; flex: 1; }
 input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%; background: var(--accent); cursor: pointer; }
@@ -474,9 +474,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
   .play svg { width: 34px; height: 34px; }
   .progress { margin: 22px 0 6px; }
   .pbar { height: 9px; }
-  .scenes { gap: 12px; margin: 24px 0 6px; }
-  .vol-row { max-width: 440px; margin: 12px 0 22px; }
-  .toggles { gap: 12px; margin-top: 4px; }
+  .scenes { gap: 12px; margin: 26px 0 8px; }
+  .vol-row { max-width: 440px; margin: 26px 0 28px; }
+  .toggles { gap: 12px; margin-top: 8px; }
   .np-title { font-size: 2rem; }
   .np-sub { font-size: 1rem; margin-top: 2px; }
   .np-block { font-size: 0.78rem; }
