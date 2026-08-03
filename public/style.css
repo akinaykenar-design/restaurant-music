@@ -150,7 +150,7 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
    long track name can't blow a column — and the whole card — wider. */
 .pl-layout > *, .pl-cols > *, .cols > * { min-width: 0; }
 
-.transport { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 18px 0 14px; }
+.transport { display: flex; align-items: center; justify-content: center; gap: 18px; margin: 18px 0 14px; }
 .transport button { border: none; cursor: pointer; display: grid; place-items: center; transition: transform 0.1s, background 0.12s, color 0.12s, border-color 0.12s; }
 .transport button:active { transform: scale(0.93); }
 .transport svg { width: 26px; height: 26px; fill: currentColor; }
@@ -465,7 +465,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
   .ghost { padding: 13px 20px; font-size: 0.98rem; }
   /* bigger transport + generous spacing on Now Playing for iPad fingers */
   .player { padding: 36px; gap: 34px; }
-  .transport { gap: 22px; margin: 28px 0 22px; }
+  .transport { gap: 32px; margin: 30px 0 24px; }
   .tbtn { width: 68px; height: 68px; }
   .rate { width: 64px; height: 64px; }
   .play { width: 86px; height: 86px; }
