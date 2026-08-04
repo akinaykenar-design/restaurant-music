@@ -473,7 +473,7 @@ $('volume').addEventListener('change', () => saveSettings({ volume: userVolume }
 // Each scene draws from the analysed vibe buckets. Tapping one overrides the
 // schedule and plays appropriate music immediately; "Schedule" returns to auto.
 const SCENES = [
-  { id: 'chill',  icon: '🛏️', label: 'Chill',  vibes: ['Chill'],  desc: 'Relaxed / quiet room' },
+  { id: 'chill',  icon: '🌙', label: 'Chill',  vibes: ['Chill'],  desc: 'Relaxed / quiet room' },
   { id: 'lively', icon: '🔥', label: 'Lively', vibes: ['Lively'], desc: 'Busy / upbeat room' },
 ];
 
