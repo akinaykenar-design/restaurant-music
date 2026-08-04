@@ -524,7 +524,8 @@ app.put('/api/settings', (req, res) => {
 // ---- after-hours staff mode ------------------------------------------------
 app.post('/api/afterhours/unlock', (req, res) => {
   const password = req.body && req.body.password;
-  res.json({ ok: password === data.settings.afterHoursPassword });
+  const ok = !!data.settings.afterHoursPassword && password === data.settings.afterHoursPassword;
+  res.json({ ok });
 });
 
 // Download / restore a full backup of the app's data (playlists, schedule, etc.)

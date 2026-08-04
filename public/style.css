@@ -243,6 +243,7 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .ghost:hover { border-color: var(--accent); }
 /* Admin: uniform spacing between cards (was a mix of ad-hoc margins). */
 #admin-content { display: flex; flex-direction: column; gap: 16px; }
+#admin-content[hidden] { display: none; } /* stay hidden until unlocked (author CSS beats UA) */
 #admin-content > * { margin-top: 0; }
 /* Admin cards are static settings panels — no hover-lift (it read as jitter). */
 #admin-content .card:hover { transform: none; box-shadow: var(--shadow); }
