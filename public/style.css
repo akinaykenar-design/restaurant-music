@@ -244,6 +244,29 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .tracklist .lessed { color: var(--warn); border-color: var(--warn); }
 .tracklist .disliked { color: var(--bad); border-color: var(--bad); }
 
+/* ---------- library rows: title+artist, two actions, a "…" menu ---------- */
+#lib-tracks li { gap: 12px; padding: 10px 12px; }
+#lib-tracks .row-meta { flex: 1; min-width: 0; cursor: pointer; line-height: 1.25; }
+#lib-tracks .row-title { font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#lib-tracks .row-artist { color: var(--muted); font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#lib-tracks .row-meta:hover .row-title { color: var(--accent); }
+#lib-tracks .row-badges { display: flex; gap: 6px; flex: none; }
+#lib-tracks .row-badges .tag { font-size: 0.72rem; font-weight: 600; padding: 4px 9px; border-radius: 999px; white-space: nowrap; }
+#lib-tracks .row-acts { display: flex; gap: 6px; flex: none; align-items: center; }
+.iact { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; display: grid; place-items: center; transition: color .14s, border-color .14s, background .14s; }
+.iact svg { width: 19px; height: 19px; }
+.iact:hover { border-color: var(--border-strong); color: var(--text); }
+.iact.on-like { color: var(--text); background: var(--accent-tint); border-color: transparent; }
+.iact.on-ban { color: var(--bad); background: var(--bad-tint); border-color: transparent; }
+.row-menu-wrap { position: relative; }
+.row-menu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 20; min-width: 200px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 11px; box-shadow: var(--shadow); padding: 6px; display: flex; flex-direction: column; }
+.row-menu[hidden] { display: none; }
+.row-menu-item { text-align: left; background: transparent; border: none; border-radius: 7px; padding: 10px 12px; font: inherit; font-size: 0.88rem; color: var(--text); cursor: pointer; white-space: nowrap; }
+.row-menu-item:hover { background: var(--surface-2); }
+.row-menu-item.danger { color: var(--bad); }
+.row-menu-item.danger:hover { background: var(--bad-tint); }
+@media (max-width: 520px) { #lib-tracks .row-badges .tag.tag-genre { display: none; } }
+
 /* ---------- accent cards ---------- */
 .accent-card { margin-top: 16px; }
 .player-row { display: flex; align-items: center; gap: 10px; }
@@ -542,6 +565,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
   .block-row input, .pl-new input, #add-playlist, #new-playlist { padding: 13px 14px; font-size: 0.98rem; }
   #playlist-names li { padding: 14px 14px; }
   .more-opts > summary { font-size: 0.95rem; padding: 10px 0; }
+  .iact { width: 46px; height: 46px; }
+  .iact svg { width: 21px; height: 21px; }
+  #lib-tracks .row-title { font-size: 1.02rem; }
+  #lib-tracks .row-artist { font-size: 0.86rem; }
+  .row-menu-item { padding: 13px 14px; font-size: 0.95rem; }
 }
 
 /* ---------- printable poster ---------- */

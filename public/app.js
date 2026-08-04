@@ -925,57 +925,84 @@ function renderEditor() {
   if (!shown.length) { libUl.appendChild(emptyRow('No tracks match those filters.')); return; }
   shown.forEach((t) => {
     const li = document.createElement('li');
+    const rt = ratingOf(t.file);
+
     const art = document.createElement('div');
     art.className = 'row-art' + (t.vibe ? ' vibe-' + t.vibe.toLowerCase() : '');
     const aimg = document.createElement('img'); aimg.alt = ''; aimg.loading = 'lazy';
     aimg.addEventListener('error', () => aimg.remove()); // no embedded art → coloured tile
     aimg.src = '/api/art?file=' + encodeURIComponent(t.file);
     art.appendChild(aimg);
-    const name = document.createElement('span');
-    name.className = 'name'; name.textContent = t.title; name.title = t.title + (t.artist ? ' — ' + t.artist : '');
-    name.addEventListener('click', () => { if (!libSelect) preview(t.file); });
+
+    // title + artist always lead the row and truncate before anything else
+    const meta = document.createElement('div');
+    meta.className = 'row-meta';
+    const title = document.createElement('div');
+    title.className = 'row-title'; title.textContent = t.title;
+    const artist = document.createElement('div');
+    artist.className = 'row-artist'; artist.textContent = t.artist || '—';
+    meta.append(title, artist);
+    meta.title = t.title + (t.artist ? ' — ' + t.artist : '');
+    meta.addEventListener('click', () => { if (!libSelect) preview(t.file); });
+
     attachLongPress(li, t.file);
     li.addEventListener('click', () => {
       if (li.__lp) { li.__lp = false; return; } // swallow the click that ends a long-press
       if (libSelect) toggleRow(li, t.file);
     });
     if (libSelected.has(t.file)) li.classList.add('sel');
-    const rt = ratingOf(t.file);
-    // Tags live in their own span (a sibling of the name) so the name can
-    // ellipsis-truncate without clipping the tags.
-    const tags = document.createElement('span');
-    tags.className = 'tags';
-    if (rt === 'like') { const l = document.createElement('span'); l.className = 'tag tag-like'; l.textContent = '♥ Liked'; tags.appendChild(l); }
-    if (rt === 'less') { const ls = document.createElement('span'); ls.className = 'tag tag-less'; ls.textContent = '↓ Less'; tags.appendChild(ls); }
-    if (rt === 'dislike') { const dl = document.createElement('span'); dl.className = 'tag tag-dislike'; dl.textContent = '⊘ Banned'; tags.appendChild(dl); }
-    if (t.vibe) { const v = document.createElement('span'); v.className = 'tag vibe-' + t.vibe.toLowerCase(); v.textContent = t.vibe; tags.appendChild(v); }
-    if (t.genre) { const g = document.createElement('span'); g.className = 'tag tag-genre'; g.textContent = t.genre; tags.appendChild(g); }
+
+    // badges: one vibe chip + one genre chip (rating shows on the buttons)
+    const badges = document.createElement('div');
+    badges.className = 'row-badges';
+    if (t.vibe) { const v = document.createElement('span'); v.className = 'tag vibe-' + t.vibe.toLowerCase(); v.textContent = t.vibe; badges.appendChild(v); }
+    if (t.genre) { const g = document.createElement('span'); g.className = 'tag tag-genre'; g.textContent = t.genre; badges.appendChild(g); }
+
+    // two clear actions up front: like + ban
+    const acts = document.createElement('div');
+    acts.className = 'row-acts';
     const like = document.createElement('button');
-    like.textContent = '♥'; like.title = 'Like — plays more often';
-    like.className = rt === 'like' ? 'liked' : '';
-    like.addEventListener('click', () => rateFile(t.file, 'like'));
-    const less = document.createElement('button');
-    less.textContent = '↓'; less.title = 'Play less — still reappears, just less often';
-    less.className = rt === 'less' ? 'lessed' : '';
-    less.addEventListener('click', () => rateFile(t.file, 'less'));
-    const dislike = document.createElement('button');
-    dislike.textContent = '⊘'; dislike.title = 'Ban — never play this track';
-    dislike.className = rt === 'dislike' ? 'disliked' : '';
-    dislike.addEventListener('click', () => rateFile(t.file, 'dislike'));
-    const add = document.createElement('button');
-    add.textContent = '+'; add.disabled = !editing; add.title = editing ? 'Add to ' + editing : 'Select a playlist first';
-    add.addEventListener('click', () => { if (!editing) return; if (!state.playlists[editing].includes(t.file)) state.playlists[editing].push(t.file); markCustom(editing); savePlaylists(); });
-    const del = document.createElement('button');
-    del.textContent = '🗑'; del.className = 'del'; del.title = 'Delete from library';
-    del.addEventListener('click', () => {
+    like.className = 'iact' + (rt === 'like' ? ' on-like' : ''); like.title = 'Like — plays more often';
+    like.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+    like.addEventListener('click', (e) => { e.stopPropagation(); rateFile(t.file, 'like'); });
+    const ban = document.createElement('button');
+    ban.className = 'iact' + (rt === 'dislike' ? ' on-ban' : ''); ban.title = 'Ban — never play this track';
+    ban.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg>';
+    ban.addEventListener('click', (e) => { e.stopPropagation(); rateFile(t.file, 'dislike'); });
+
+    // everything else behind a "⋯" menu
+    const menuWrap = document.createElement('div');
+    menuWrap.className = 'row-menu-wrap';
+    const more = document.createElement('button');
+    more.className = 'iact'; more.title = 'More'; more.setAttribute('aria-label', 'More actions');
+    more.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>';
+    const menu = document.createElement('div');
+    menu.className = 'row-menu'; menu.hidden = true;
+    const mItem = (label, cls, fn) => { const b = document.createElement('button'); b.className = 'row-menu-item' + (cls ? ' ' + cls : ''); b.textContent = label; b.addEventListener('click', (e) => { e.stopPropagation(); menu.hidden = true; fn(); }); return b; };
+    menu.appendChild(mItem(rt === 'less' ? '✓ Plays less often' : '↓ Play less often', '', () => rateFile(t.file, 'less')));
+    if (editing) menu.appendChild(mItem('+ Add to “' + editing + '”', '', () => { if (!state.playlists[editing].includes(t.file)) state.playlists[editing].push(t.file); markCustom(editing); savePlaylists(); }));
+    if (rt) menu.appendChild(mItem('× Clear rating', '', () => rateFile(t.file, rt)));
+    menu.appendChild(mItem('🗑 Delete from library', 'danger', () => {
       if (!confirm('Delete "' + t.title + '" from the library?')) return;
       fetch('/api/track?name=' + encodeURIComponent(t.file), { method: 'DELETE' }).then((r) => r.json()).then(() => reloadLibrary());
+    }));
+    more.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const willOpen = menu.hidden;
+      closeRowMenus();
+      menu.hidden = !willOpen;
     });
-    const dur = document.createElement('span'); dur.className = 'dur'; dur.textContent = fmtDur(t.duration);
-    li.append(art, name, ...(tags.children.length ? [tags] : []), dur, like, less, dislike, add, del);
+    menuWrap.append(more, menu);
+
+    acts.append(like, ban, menuWrap);
+    li.append(art, meta, badges, acts);
     libUl.appendChild(li);
   });
 }
+
+// close any open row "⋯" menu when clicking elsewhere
+function closeRowMenus() { document.querySelectorAll('.row-menu:not([hidden])').forEach((m) => { m.hidden = true; }); }
+document.addEventListener('click', closeRowMenus);
 
 function reloadLibrary() {
   return api('/api/library').then((lib) => { library = lib.tracks; renderEditor(); renderQueue(); renderHistory(); updateOnboard(); });
