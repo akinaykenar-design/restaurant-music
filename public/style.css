@@ -82,11 +82,12 @@ body {
 .tab:hover { color: var(--text); background: var(--surface-2); }
 .tab.active { color: var(--text); background: var(--surface-2); }
 
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
 .lockbtn {
   border: 1px solid var(--border); background: var(--surface); color: var(--faint);
-  width: 34px; height: 34px; border-radius: 9px; cursor: pointer; display: grid; place-items: center;
+  width: 42px; height: 42px; border-radius: 11px; cursor: pointer; display: grid; place-items: center;
 }
-.lockbtn svg { width: 16px; height: 16px; fill: currentColor; }
+.lockbtn svg { width: 21px; height: 21px; fill: currentColor; }
 .lockbtn:hover { color: var(--text); border-color: var(--border-strong); }
 .lockbtn.on { color: var(--accent); border-color: var(--accent); background: var(--accent-tint); }
 #header-power:hover { color: var(--bad); border-color: var(--bad); background: var(--bad-tint); }
@@ -450,13 +451,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
 @media (max-width: 600px) {
   .topbar {
     display: grid; justify-content: stretch;
-    grid-template-columns: 1fr auto auto; gap: 10px 8px;
-    grid-template-areas: "brand theme lock" "tabs tabs tabs";
+    grid-template-columns: 1fr auto; gap: 10px 8px;
+    grid-template-areas: "brand actions" "tabs tabs";
     padding: 10px 16px;
   }
   .brand { grid-area: brand; }
-  #theme { grid-area: theme; }
-  #lock { grid-area: lock; }
+  .topbar-actions { grid-area: actions; }
   .tabs {
     grid-area: tabs; width: 100%; flex-wrap: nowrap; gap: 6px;
     overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
