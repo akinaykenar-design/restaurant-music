@@ -426,11 +426,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
 
 #poster { display: none; }
 
-/* Desktop: let the player sit near the top with a little breathing room —
-   no forced full-height centring, so there's no floating dead space. */
+/* Desktop: let the player card fill the screen so there's no empty
+   background band above or below it. Content stays vertically centred
+   inside the card (the card already uses align-items: center). */
 @media (min-width: 821px) {
-  #tab-now.active { padding-top: clamp(16px, 4vh, 44px); }
-  #tab-now .player { width: 100%; }
+  #tab-now.active { min-height: calc(100dvh - 130px); display: flex; }
+  #tab-now .player { width: 100%; flex: 1; }
   .art { width: 200px; height: 200px; }
   .player { grid-template-columns: 200px 1fr; gap: 30px; padding: 30px; }
 }
