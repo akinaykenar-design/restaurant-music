@@ -1247,12 +1247,12 @@ function setupAdmin() {
   const showLocked = () => {
     adminUnlocked = false; adminPass = '';
     $('admin-content').hidden = true; $('admin-lock').hidden = false;
-    $('admin-pass').value = ''; $('lock').classList.remove('on');
+    $('admin-pass').value = '';
   };
   const showUnlocked = () => {
     adminUnlocked = true;
     $('admin-lock').hidden = true; $('admin-content').hidden = false;
-    $('lock').classList.add('on'); refreshAhPlaylists();
+    refreshAhPlaylists();
   };
   const tryUnlock = () => {
     const password = $('admin-pass').value;
@@ -1260,10 +1260,6 @@ function setupAdmin() {
       .then((r) => r.json()).then((d) => { if (d.ok) { adminPass = password; showUnlocked(); } else alert('Wrong password.'); });
   };
 
-  $('lock').addEventListener('click', () => {
-    document.querySelector('.tab[data-tab="admin"]').click();
-    if (!adminUnlocked) setTimeout(() => $('admin-pass').focus(), 60);
-  });
   $('admin-unlock').addEventListener('click', tryUnlock);
   $('admin-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUnlock(); });
   $('admin-relock').addEventListener('click', showLocked);
