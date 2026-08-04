@@ -1274,14 +1274,23 @@ function setupAdmin() {
       ? 'Shut down the music box now? It goes silent until someone powers it back on.'
       : 'Restart the music box now? Music stops for about 30 seconds.';
     if (!confirm(msg)) return;
+    // Use the unlocked admin password, or ask for it (the header button works
+    // without opening the Admin tab first).
+    let pass = adminPass;
+    if (!pass) { pass = prompt('Enter the admin password to ' + (action === 'shutdown' ? 'shut down' : 'restart') + ' the box:'); if (!pass) return; }
     if (st) st.textContent = action === 'shutdown' ? 'Shutting down…' : 'Restarting…';
-    fetch('/api/power', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: adminPass, action }) })
+    fetch('/api/power', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pass, action }) })
       .then((r) => r.json())
-      .then((d) => { if (st) st.textContent = d.error ? 'Failed: ' + d.error : (action === 'shutdown' ? 'Shutting down — you can close this now.' : 'Restarting — reconnect in ~30s.'); })
+      .then((d) => {
+        const ok = action === 'shutdown' ? 'Shutting down — you can close this now.' : 'Restarting — reconnect in ~30s.';
+        if (st) st.textContent = d.error ? 'Failed: ' + d.error : ok;
+        if (d.error) alert(d.error === 'wrong password' ? 'Wrong admin password.' : d.error);
+      })
       .catch(() => { if (st) st.textContent = action === 'shutdown' ? 'Shutting down…' : 'Restarting — reconnect in ~30s.'; });
   }
   const powerOff = $('power-off'); if (powerOff) powerOff.addEventListener('click', () => powerAction('shutdown'));
   const powerRestart = $('power-restart'); if (powerRestart) powerRestart.addEventListener('click', () => powerAction('reboot'));
+  const headerPower = $('header-power'); if (headerPower) headerPower.addEventListener('click', () => powerAction('shutdown'));
 
   const updateBtn = $('app-update');
   if (updateBtn) updateBtn.addEventListener('click', () => {

@@ -89,6 +89,7 @@ body {
 .lockbtn svg { width: 16px; height: 16px; fill: currentColor; }
 .lockbtn:hover { color: var(--text); border-color: var(--border-strong); }
 .lockbtn.on { color: var(--accent); border-color: var(--accent); background: var(--accent-tint); }
+#header-power:hover { color: var(--bad); border-color: var(--bad); background: var(--bad-tint); }
 
 main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60px; }
 .tab-panel { display: none; animation: fade 0.22s ease; }
