@@ -581,6 +581,27 @@ app.post('/api/update', (req, res) => {
   });
 });
 
+// Safely power the box off or restart it (better than pulling the plug).
+// Admin-gated. Needs a one-time sudoers grant — see scripts/enable-power.sh.
+app.post('/api/power', (req, res) => {
+  const password = req.body && req.body.password;
+  const action = req.body && req.body.action;
+  if (!data.settings.afterHoursPassword || password !== data.settings.afterHoursPassword) {
+    return res.status(403).json({ error: 'wrong password' });
+  }
+  if (action !== 'shutdown' && action !== 'reboot') return res.status(400).json({ error: 'bad action' });
+  const args = action === 'reboot' ? ['-n', 'reboot'] : ['-n', 'shutdown', '-h', 'now'];
+  const proc = spawn('sudo', args);
+  let err = '';
+  proc.stderr.on('data', (d) => { err += d; });
+  proc.on('error', (e) => { if (!res.headersSent) res.status(500).json({ error: 'cannot run power command: ' + e.message }); });
+  proc.on('close', (code) => {
+    if (res.headersSent) return;
+    if (code === 0) res.json({ ok: true, action });
+    else res.status(500).json({ error: 'Not permitted yet — run "bash scripts/enable-power.sh" on the Pi once. ' + err.trim() });
+  });
+});
+
 // ---- audio streaming (HTTP range) -----------------------------------------
 
 app.get('/audio/:file', (req, res) => {

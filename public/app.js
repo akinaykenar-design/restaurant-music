@@ -1268,6 +1268,21 @@ function setupAdmin() {
   $('admin-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUnlock(); });
   $('admin-relock').addEventListener('click', showLocked);
 
+  function powerAction(action) {
+    const st = $('power-status');
+    const msg = action === 'shutdown'
+      ? 'Shut down the music box now? It goes silent until someone powers it back on.'
+      : 'Restart the music box now? Music stops for about 30 seconds.';
+    if (!confirm(msg)) return;
+    if (st) st.textContent = action === 'shutdown' ? 'Shutting down…' : 'Restarting…';
+    fetch('/api/power', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: adminPass, action }) })
+      .then((r) => r.json())
+      .then((d) => { if (st) st.textContent = d.error ? 'Failed: ' + d.error : (action === 'shutdown' ? 'Shutting down — you can close this now.' : 'Restarting — reconnect in ~30s.'); })
+      .catch(() => { if (st) st.textContent = action === 'shutdown' ? 'Shutting down…' : 'Restarting — reconnect in ~30s.'; });
+  }
+  const powerOff = $('power-off'); if (powerOff) powerOff.addEventListener('click', () => powerAction('shutdown'));
+  const powerRestart = $('power-restart'); if (powerRestart) powerRestart.addEventListener('click', () => powerAction('reboot'));
+
   const updateBtn = $('app-update');
   if (updateBtn) updateBtn.addEventListener('click', () => {
     const st = $('update-status'); const b = updateBtn;
