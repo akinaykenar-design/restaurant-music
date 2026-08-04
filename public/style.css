@@ -426,10 +426,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
 
 #poster { display: none; }
 
-/* Desktop: with the lists gone, centre the player so it doesn't float at
-   the top of a tall screen. */
+/* Desktop: let the player sit near the top with a little breathing room —
+   no forced full-height centring, so there's no floating dead space. */
 @media (min-width: 821px) {
-  #tab-now.active { min-height: calc(100vh - 160px); display: flex; flex-direction: column; justify-content: center; }
+  #tab-now.active { padding-top: clamp(16px, 4vh, 44px); }
   #tab-now .player { width: 100%; }
   .art { width: 200px; height: 200px; }
   .player { grid-template-columns: 200px 1fr; gap: 30px; padding: 30px; }
