@@ -300,6 +300,7 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .lib-advanced .pl-layout { margin-bottom: 16px; }
 .sel-hint { font-size: 0.76rem; margin: 0 0 10px; color: var(--faint); }
 .lib-selbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+.lib-selbar[hidden] { display: none; } /* honour the hidden attribute (author CSS beats UA) */
 .lib-selbar #lib-selcount { font-weight: 600; font-size: 0.9rem; }
 .selbar-actions { display: flex; gap: 8px; }
 .lib-selbar .del { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, transparent); }
