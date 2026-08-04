@@ -622,18 +622,29 @@ function applySchedule(force) {
   const key = dk + '/' + bk;
   if (!force && key === currentBlockKey) return;
   currentBlockKey = key;
-  const plName = (state.schedule[dk] && state.schedule[dk][bk]) || '';
+  const val = (state.schedule[dk] && state.schedule[dk][bk]) || '';
   const block = state.blocks.find((b) => b.id === bk);
   $('now-block').textContent = block ? `${dk} · ${block.label}` : dk;
-  if (plName && state.playlists[plName] && state.playlists[plName].length) {
-    $('now-sub').textContent = 'Playlist: ' + plName;
-    loadQueue(state.playlists[plName], true);
+  const r = resolveScheduled(val);
+  if (r && r.files.length) {
+    $('now-sub').textContent = r.label;
+    loadQueue(r.files, true);
   } else {
-    const any = Object.keys(state.playlists).some((n) => (state.playlists[n] || []).length);
+    const any = Object.keys(state.playlists).some((n) => (state.playlists[n] || []).length) || library.some((t) => t.vibe || t.genre);
     $('now-sub').textContent = any
       ? 'Nothing scheduled now — press Play or set one on the Schedule tab.'
       : 'No music yet — add tracks on the Library tab, then press Play.';
   }
+}
+
+// Resolve a schedule cell value to a playable track list. Values are one of:
+// "style:Chill", "genre:Deep House", or a custom playlist name.
+function resolveScheduled(value) {
+  if (!value) return null;
+  if (value.slice(0, 6) === 'style:') { const s = value.slice(6); return { label: 'Style · ' + s, files: library.filter((t) => t.vibe === s).map((t) => t.file) }; }
+  if (value.slice(0, 6) === 'genre:') { const g = value.slice(6); return { label: 'Genre · ' + g, files: library.filter((t) => (t.genre || '') === g).map((t) => t.file) }; }
+  const pl = state.playlists[value];
+  return pl ? { label: 'Playlist: ' + value, files: pl } : null;
 }
 setInterval(applySchedule, 30 * 1000);
 
@@ -674,16 +685,23 @@ $('add-block').addEventListener('click', () => {
 function renderSchedule() {
   const table = $('schedule-table');
   const names = Object.keys(state.playlists);
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const styles = ['Chill', 'Warm', 'Lively'].filter((s) => library.some((t) => t.vibe === s));
+  const genres = [...new Set(library.map((t) => t.genre).filter(Boolean))].sort();
+  const optionsFor = (sel) => {
+    let o = `<option value="">—</option>`;
+    if (styles.length) { o += '<optgroup label="By style">'; for (const s of styles) o += `<option value="style:${s}"${'style:' + s === sel ? ' selected' : ''}>${s}</option>`; o += '</optgroup>'; }
+    if (genres.length) { o += '<optgroup label="By genre">'; for (const g of genres) o += `<option value="genre:${esc(g)}"${'genre:' + g === sel ? ' selected' : ''}>${esc(g)}</option>`; o += '</optgroup>'; }
+    if (names.length) { o += '<optgroup label="Playlists">'; for (const n of names) o += `<option value="${esc(n)}"${n === sel ? ' selected' : ''}>${esc(n)}</option>`; o += '</optgroup>'; }
+    return o;
+  };
   let html = '<thead><tr><th></th>';
   for (const b of state.blocks) html += `<th>${b.label}<br><small>${b.start}</small></th>`;
   html += '</tr></thead><tbody>';
   for (const d of state.days) {
     html += `<tr><th><span class="d-name">${d}</span> <button class="copy-row" data-day="${d}" title="Copy ${d} to every day" aria-label="Copy ${d} to every day">⎘</button></th>`;
     for (const b of state.blocks) {
-      const sel = state.schedule[d][b.id] || '';
-      let opts = `<option value="">—</option>`;
-      for (const n of names) opts += `<option value="${n}"${n === sel ? ' selected' : ''}>${n}</option>`;
-      html += `<td><select data-day="${d}" data-block="${b.id}">${opts}</select></td>`;
+      html += `<td><select data-day="${d}" data-block="${b.id}">${optionsFor(state.schedule[d][b.id] || '')}</select></td>`;
     }
     html += '</tr>';
   }
@@ -1038,49 +1056,26 @@ function buildVibePlaylists() {
   toast(made ? `Built ${made} vibe playlist${made === 1 ? '' : 's'}${kept ? ` · kept ${kept} custom` : ''}` : `Kept your ${kept} custom playlist${kept === 1 ? '' : 's'}`);
 }
 
-// Fill the whole schedule from analysed music: builds Chill/Warm/Lively lists,
-// then assigns each block a vibe by its start time — chill through the day,
-// warmer in the afternoon, upbeat into dinner. Falls back to the nearest
-// available vibe if a bucket is empty.
+// Fill the schedule with STYLE tokens by time of day — chill through the day,
+// warmer in the afternoon, livelier into dinner. Tokens are resolved to
+// matching tracks live, so no playlists get built.
 function autoScheduleByVibe() {
   const analysed = library.filter((t) => t.vibe);
-  if (!analysed.length) { toast('Run “✨ Analyse audio” in the Library first'); return; }
-  const buckets = { Chill: [], Warm: [], Lively: [] };
-  analysed.forEach((t) => { if (buckets[t.vibe]) buckets[t.vibe].push(t.file); });
-  state.autoPlaylists = state.autoPlaylists || [];
-  for (const v of ['Chill', 'Warm', 'Lively']) {
-    if (!buckets[v].length) continue;
-    if (state.playlists[v] && !state.autoPlaylists.includes(v)) continue; // keep your custom version
-    state.playlists[v] = buckets[v];
-    if (!state.autoPlaylists.includes(v)) state.autoPlaylists.push(v);
-  }
-
-  const avail = (v) => state.playlists[v] && state.playlists[v].length;
+  if (!analysed.length) { toast('Categorise your music in the Library first'); return; }
+  const has = { Chill: 0, Warm: 0, Lively: 0 };
+  analysed.forEach((t) => { if (has[t.vibe] != null) has[t.vibe]++; });
   const pref = { Chill: ['Chill', 'Warm', 'Lively'], Warm: ['Warm', 'Chill', 'Lively'], Lively: ['Lively', 'Warm', 'Chill'] };
-  const pick = (want) => { for (const v of pref[want]) if (avail(v)) return v; return ''; };
-  const wantFor = (h) => (h < 11 ? 'Chill' : h < 15 ? 'Chill' : h < 18 ? 'Warm' : 'Lively');
-
-  // Save the new vibe playlists first (schedule refs must point at real lists),
-  // then assign every block × day and save the schedule.
-  api('/api/playlists', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ playlists: state.playlists, auto: state.autoPlaylists || [] }) })
-    .then((res) => {
-      if (res.schedule) state.schedule = res.schedule;
-      if (res.autoPlaylists) state.autoPlaylists = res.autoPlaylists;
-      let filled = 0;
-      for (const d of state.days) {
-        for (const b of state.blocks) {
-          const h = parseInt((b.start || '0:0').split(':')[0], 10) || 0;
-          const pl = pick(wantFor(h));
-          if (pl) { state.schedule[d][b.id] = pl; filled++; }
-        }
-      }
-      return api('/api/schedule', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ schedule: state.schedule }) })
-        .then(() => {
-          renderPlaylistNames(); renderEditor(); renderSchedule(); refreshAhPlaylists();
-          applySchedule(true);
-          toast(filled ? 'Schedule filled by vibe' : 'No blocks to fill');
-        });
-    });
+  const pick = (want) => { for (const s of pref[want]) if (has[s]) return s; return ''; };
+  const wantFor = (h) => (h < 15 ? 'Chill' : h < 18 ? 'Warm' : 'Lively');
+  for (const d of state.days) {
+    for (const b of state.blocks) {
+      const h = parseInt((b.start || '0:0').split(':')[0], 10) || 0;
+      const s = pick(wantFor(h));
+      if (s) state.schedule[d][b.id] = 'style:' + s;
+    }
+  }
+  api('/api/schedule', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ schedule: state.schedule }) })
+    .then(() => { renderSchedule(); applySchedule(true); });
 }
 
 $('add-playlist').addEventListener('click', () => {
@@ -1392,7 +1387,7 @@ async function boot() {
     const st = $('sched-status');
     const categorised = library.filter((t) => t.vibe).length;
     if (!categorised) { if (st) st.textContent = 'Categorise your music first — tap “✨ Auto-categorise” on the Library tab.'; return; }
-    autoScheduleByVibe(); // build style buckets + assign them across the week
+    autoScheduleByVibe(); // assign style tokens across the week by time of day
     if (st) st.textContent = `Scheduled by style — ${categorised} track${categorised === 1 ? '' : 's'} spread across the week. ✅`;
   });
   const autoAll = $('auto-all');
