@@ -16,8 +16,8 @@
   --play: #10917b;
   --play-press: #0b7362;
   --play-tint: #10917b14;
-  --warn: #b5731a;
-  --warn-tint: #b5731a14;
+  --warn: #6d6863;
+  --warn-tint: #6d68631f;
   --bad: #c0392b;
   --bad-tint: #c0392b14;
   --shadow-sm: 0 1px 2px rgba(20, 22, 26, 0.05);
@@ -35,7 +35,7 @@
     --border: #2e2b27; --border-strong: #403b35;
     --accent: #a49c92; --accent-press: #b8b0a6; --accent-tint: #a49c921f;
     --play: #2bb89c; --play-press: #45c7ad; --play-tint: #2bb89c1f;
-    --warn: #e0a752; --warn-tint: #e0a75218; --bad: #ef8377; --bad-tint: #ef83771f;
+    --warn: #a29c94; --warn-tint: #a29c941f; --bad: #ef8377; --bad-tint: #ef83771f;
     --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
     --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 14px 32px -18px rgba(0,0,0,0.6);
   }
@@ -44,8 +44,8 @@
   --bg: #121110; --surface: #1c1a18; --surface-2: #221f1c;
   --text: #edeef0; --muted: #9ba0a6; --faint: #71767c;
   --border: #2a2d31; --border-strong: #3a3e44;
-  --accent: #2bb89c; --accent-press: #45c7ad; --accent-tint: #2bb89c1f;
-  --warn: #e0a752; --warn-tint: #e0a75218; --bad: #ef8377; --bad-tint: #ef83771f;
+  --accent: #a3a8ae; --accent-press: #b6babf; --accent-tint: #a3a8ae1f;
+  --warn: #9ba0a6; --warn-tint: #9ba0a61f; --bad: #ef8377; --bad-tint: #ef83771f;
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
   --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 14px 32px -18px rgba(0,0,0,0.6);
 }
@@ -159,13 +159,13 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 .transport svg { width: 27px; height: 27px; fill: currentColor; }
 .tbtn { width: 60px; height: 60px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border-strong); color: var(--text); }
 .tbtn:hover { border-color: var(--accent); color: var(--accent); }
-.play { width: 76px; height: 76px; border-radius: 50%; background: var(--play); color: #fff; box-shadow: 0 10px 26px -8px var(--play); }
-.play svg { width: 31px; height: 31px; }
+.play { width: 92px; height: 92px; border-radius: 50%; background: var(--play); color: #fff; box-shadow: 0 12px 30px -10px var(--play); }
+.play svg { width: 38px; height: 38px; }
 .play:hover { background: var(--play-press); transform: scale(1.05); }
 .player.playing .play { animation: pulse 2.6s ease-in-out infinite; }
 @keyframes pulse {
-  0%, 100% { box-shadow: 0 10px 26px -8px var(--play), 0 0 0 0 var(--play-tint); }
-  50% { box-shadow: 0 10px 26px -8px var(--play), 0 0 0 12px transparent; }
+  0%, 100% { box-shadow: 0 12px 30px -10px var(--play), 0 0 0 0 var(--play-tint); }
+  50% { box-shadow: 0 12px 30px -10px var(--play), 0 0 0 14px transparent; }
 }
 .ic-pause { display: none; }
 .player.playing .ic-play { display: none; }
@@ -185,7 +185,7 @@ input[type='range']::-moz-range-thumb { width: 20px; height: 20px; border: none;
 
 .toggles { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; max-width: var(--ctl, 460px); margin-top: 8px; }
 /* shuffle / in-order toggle (Spotify-style icon button, neutral not teal) */
-.modebtn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--muted); font: inherit; font-size: 0.84rem; font-weight: 600; cursor: pointer; transition: color 0.14s, border-color 0.14s, background 0.14s; }
+.modebtn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 150px; padding: 9px 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--muted); font: inherit; font-size: 0.84rem; font-weight: 600; cursor: pointer; transition: color 0.14s, border-color 0.14s, background 0.14s; }
 .modebtn svg { width: 18px; height: 18px; }
 .modebtn .ic-shuffle, .modebtn .ic-order { display: none; }
 .modebtn.on .ic-shuffle { display: inline; }
@@ -318,8 +318,8 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .tracklist.selecting li { cursor: pointer; }
 .tracklist.selecting li button, .tracklist.selecting li .dur { display: none; }
 .tracklist.selecting li::after { content: '○'; color: var(--faint); font-size: 1.2rem; flex: none; margin-left: 4px; }
-.tracklist.selecting li.sel { border-color: var(--play); background: var(--play-tint); }
-.tracklist.selecting li.sel::after { content: '✓'; color: var(--play); font-weight: 700; }
+.tracklist.selecting li.sel { border-color: var(--accent); background: var(--accent-tint); }
+.tracklist.selecting li.sel::after { content: '✓'; color: var(--accent); font-weight: 700; }
 
 .pl-layout { display: grid; grid-template-columns: 244px 1fr; gap: 16px; align-items: start; }
 #playlist-names { list-style: none; padding: 0; margin: 0 0 12px; }
@@ -427,7 +427,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
 }
 .mini-info { flex: 1; min-width: 0; }
 .mini-title { display: block; font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mini-btn { border: none; background: var(--play); color: #fff; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; flex: none; }
+.mini-btn { border: none; background: var(--text); color: var(--bg); width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; flex: none; }
 .mini-btn svg { width: 20px; height: 20px; fill: currentColor; }
 #mini-next { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
 #miniplayer.playing .ic-play { display: none; }
@@ -492,7 +492,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
   .transport { gap: 9px; }
   .tbtn { width: 50px; height: 50px; }
   .rate { width: 46px; height: 46px; }
-  .play { width: 60px; height: 60px; }
+  .play { width: 74px; height: 74px; }
   .transport svg { width: 23px; height: 23px; }
   .rate svg { width: 22px; height: 22px; }
   .play svg { width: 25px; height: 25px; }
@@ -526,7 +526,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
   .transport { gap: 20px; margin: 32px 0 28px; }
   .tbtn { width: 70px; height: 70px; }
   .rate { width: 66px; height: 66px; }
-  .play { width: 88px; height: 88px; }
+  .play { width: 104px; height: 104px; }
   .transport svg { width: 33px; height: 33px; }
   .rate svg { width: 29px; height: 29px; }
   .play svg { width: 35px; height: 35px; }
@@ -555,6 +555,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
   #poster h1 { font-size: 34px; margin: 16px 0 4px; letter-spacing: -0.02em; }
   #poster p { color: #555; font-size: 16px; margin: 4px 0; }
   #poster img { width: 340px; height: 340px; margin: 20px 0; }
-  #poster .poster-addr { font-size: 24px; font-weight: 800; color: #10917b; }
+  #poster .poster-addr { font-size: 24px; font-weight: 800; color: #2b2723; }
   #poster .poster-foot { margin-top: 18px; color: #777; font-size: 14px; }
 }
