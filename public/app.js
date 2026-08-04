@@ -467,19 +467,14 @@ $('dislike').addEventListener('click', () => rate('dislike'));
 $('volume').addEventListener('input', (e) => { userVolume = Number(e.target.value); if (!crossing) activeDeck().volume = userVolume; updateMuteIcon(); });
 $('volume').addEventListener('change', () => saveSettings({ volume: userVolume }));
 
-$('follow').addEventListener('change', (e) => {
-  if (e.target.checked) activeScene = null;
-  saveSettings({ followSchedule: e.target.checked, scene: e.target.checked ? '' : (activeScene || '') });
-  if (e.target.checked) applySchedule(true);
-  renderScenes();
-});
+// (Follow-schedule is now the "Schedule" scene button — no separate toggle.)
 
 // ---- scenes (one-tap "crowd" modes for the manager) ------------------------
 // Each scene draws from the analysed vibe buckets. Tapping one overrides the
 // schedule and plays appropriate music immediately; "Schedule" returns to auto.
 const SCENES = [
-  { id: 'lively',   icon: '🔥', label: 'Lively',    vibes: ['Lively', 'Warm'], desc: 'Young / busy crowd' },
-  { id: 'winddown', icon: '🌙', label: 'Wind-down', vibes: ['Chill', 'Warm'],  desc: 'Relaxed / closing' },
+  { id: 'chill',  icon: '🌿', label: 'Chill',  vibes: ['Chill', 'Warm'],  desc: 'Relaxed / quiet room' },
+  { id: 'lively', icon: '🔥', label: 'Lively', vibes: ['Lively', 'Warm'], desc: 'Busy / upbeat room' },
 ];
 
 function renderScenes() {
@@ -499,13 +494,22 @@ function renderScenes() {
   sched.innerHTML = '<span class="scene-ic">🗓️</span>Schedule';
   sched.addEventListener('click', () => {
     activeScene = null;
-    $('follow').checked = true;
     saveSettings({ followSchedule: true, scene: '' });
     applySchedule(true);
     renderScenes();
     toast('Following the schedule');
   });
   box.appendChild(sched);
+  // available genres → one-tap play by genre, straight from Now Playing
+  const genres = [...new Set(library.map((t) => t.genre).filter(Boolean))].sort();
+  genres.forEach((g) => {
+    const b = document.createElement('button');
+    b.className = 'scene scene-genre' + (activeScene === 'genre:' + g ? ' on' : '');
+    b.title = 'Play ' + g + ' tracks';
+    b.innerHTML = `<span class="scene-ic">♪</span>${g}`;
+    b.addEventListener('click', () => playGenre(g));
+    box.appendChild(b);
+  });
 }
 
 function playScene(id) {
@@ -514,11 +518,10 @@ function playScene(id) {
   const files = library.filter((t) => s.vibes.includes(t.vibe)).map((t) => t.file);
   if (!files.length) {
     const anyAnalysed = library.some((t) => t.vibe);
-    toast(anyAnalysed ? `No ${s.label} tracks yet — add or analyse more music` : 'Analyse your music first: Library → ✨ Analyse audio');
+    toast(anyAnalysed ? `No ${s.label} tracks yet — add or categorise more music` : 'Categorise your music first: Library → ✨ Auto-categorise');
     return;
   }
   activeScene = id;
-  $('follow').checked = false;
   saveSettings({ followSchedule: false, scene: id });
   $('now-block').textContent = s.icon + ' ' + s.label + ' scene';
   $('now-sub').textContent = s.desc + ' · ' + files.length + ' track' + (files.length === 1 ? '' : 's');
@@ -527,8 +530,33 @@ function playScene(id) {
   toast('Scene: ' + s.label);
 }
 
+function playGenre(g) {
+  const files = library.filter((t) => (t.genre || '') === g).map((t) => t.file);
+  if (!files.length) { toast('No ' + g + ' tracks yet'); return; }
+  activeScene = 'genre:' + g;
+  saveSettings({ followSchedule: false, scene: activeScene });
+  $('now-block').textContent = '♪ ' + g;
+  $('now-sub').textContent = g + ' · ' + files.length + ' track' + (files.length === 1 ? '' : 's');
+  loadQueue(files, true);
+  renderScenes();
+  toast('Genre: ' + g);
+}
 
-$('shuffle').addEventListener('change', (e) => { state.settings.shuffle = e.target.checked; saveSettings({ shuffle: e.target.checked }); });
+
+function updateShuffleBtn() {
+  const on = state.settings.shuffle !== false;
+  const btn = $('shuffle-btn'); if (!btn) return;
+  btn.classList.toggle('on', on);
+  btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  btn.title = on ? 'Shuffling — tap to play in order' : 'Playing in order — tap to shuffle';
+  const t = btn.querySelector('.modebtn-txt'); if (t) t.textContent = on ? 'Shuffle' : 'In order';
+}
+$('shuffle-btn').addEventListener('click', () => {
+  const on = state.settings.shuffle !== false;
+  state.settings.shuffle = !on;
+  saveSettings({ shuffle: state.settings.shuffle });
+  updateShuffleBtn();
+});
 $('crossfade').addEventListener('input', (e) => { state.settings.crossfade = Number(e.target.value); $('cf-val').textContent = e.target.value + 's'; });
 $('crossfade').addEventListener('change', (e) => saveSettings({ crossfade: Number(e.target.value) }));
 
@@ -1301,7 +1329,7 @@ function setupAdmin() {
   $('ah-play').addEventListener('click', () => {
     const name = $('ah-playlist').value;
     if (!name || !state.playlists[name] || !state.playlists[name].length) return alert('That playlist is empty.');
-    $('follow').checked = false; saveSettings({ followSchedule: false });
+    activeScene = null; saveSettings({ followSchedule: false, scene: '' }); renderScenes();
     $('now-block').textContent = 'After hours'; $('now-sub').textContent = 'Staff: ' + name;
     loadQueue(state.playlists[name], true);
     toast('Playing (after hours): ' + name);
@@ -1360,8 +1388,7 @@ async function boot() {
   decks.forEach((d) => { d.volume = userVolume; });
   $('volume').value = userVolume;
   updateMuteIcon();
-  $('follow').checked = !!state.settings.followSchedule;
-  $('shuffle').checked = state.settings.shuffle !== false;
+  updateShuffleBtn();
   const cf = state.settings.crossfade ?? 4;
   $('crossfade').value = cf; $('cf-val').textContent = cf + 's';
   $('stop-at').value = state.settings.stopAt || '';
