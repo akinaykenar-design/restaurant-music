@@ -12,7 +12,7 @@ let currentBlockKey = null;
 let activeScene = null;   // active manager "scene" override (or null = schedule/manual)
 let libFilter = '';       // library search term
 let libGenre = '';        // library genre filter
-let libVibe = '';         // library vibe filter (Chill/Warm/Lively)
+let libVibe = '';         // library vibe filter (Chill/Lively)
 let libRating = '';       // library rating filter (like/dislike/rated/none)
 let libSort = 'title';    // library sort key
 let libSelect = false;    // multi-select (long-press) mode in the library
@@ -473,8 +473,8 @@ $('volume').addEventListener('change', () => saveSettings({ volume: userVolume }
 // Each scene draws from the analysed vibe buckets. Tapping one overrides the
 // schedule and plays appropriate music immediately; "Schedule" returns to auto.
 const SCENES = [
-  { id: 'chill',  icon: '🌿', label: 'Chill',  vibes: ['Chill', 'Warm'],  desc: 'Relaxed / quiet room' },
-  { id: 'lively', icon: '🔥', label: 'Lively', vibes: ['Lively', 'Warm'], desc: 'Busy / upbeat room' },
+  { id: 'chill',  icon: '🛏️', label: 'Chill',  vibes: ['Chill'],  desc: 'Relaxed / quiet room' },
+  { id: 'lively', icon: '🔥', label: 'Lively', vibes: ['Lively'], desc: 'Busy / upbeat room' },
 ];
 
 function renderScenes() {
@@ -714,7 +714,7 @@ function renderSchedule() {
   const table = $('schedule-table');
   const names = Object.keys(state.playlists);
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const styles = ['Chill', 'Warm', 'Lively'].filter((s) => library.some((t) => t.vibe === s));
+  const styles = ['Chill', 'Lively'].filter((s) => library.some((t) => t.vibe === s));
   const genres = [...new Set(library.map((t) => t.genre).filter(Boolean))].sort();
   const optionsFor = (sel) => {
     let o = `<option value="">—</option>`;
@@ -757,7 +757,7 @@ function emptyRow(text) { const li = document.createElement('li'); li.className 
 // The library filtered by the search box + genre / vibe / rating filters and
 // ordered by the current sort. Shared by the list render and "add all shown".
 function filteredLibrary() {
-  const vibeRank = { Chill: 0, Warm: 1, Lively: 2 };
+  const vibeRank = { Chill: 0, Lively: 1 };
   const ratingMatch = (t) => {
     if (!libRating) return true;
     const r = ratingOf(t.file);
@@ -993,7 +993,7 @@ function syncGenreOptions() {
 
 // ---- audio analysis (genre is read server-side; tempo + energy here) --------
 // Decode each track in the browser and measure loudness (RMS) and tempo, then
-// POST the result so the server can bucket it into a Chill / Warm / Lively vibe.
+// POST the result so the server can bucket it into a Chill / Lively vibe.
 async function analyzeLibrary() {
   const AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) { toast('This browser can’t analyse audio'); return; }
@@ -1063,15 +1063,15 @@ function estimateBpm(ch, sr) {
   return Math.round(bpm);
 }
 
-// Group every analysed track into Chill / Warm / Lively playlists in one click.
+// Group every analysed track into Chill / Lively playlists in one click.
 function buildVibePlaylists() {
   const analysed = library.filter((t) => t.vibe);
   if (!analysed.length) { toast('Run “✨ Analyse audio” first'); return; }
-  const buckets = { Chill: [], Warm: [], Lively: [] };
+  const buckets = { Chill: [], Lively: [] };
   analysed.forEach((t) => { if (buckets[t.vibe]) buckets[t.vibe].push(t.file); });
   state.autoPlaylists = state.autoPlaylists || [];
   let made = 0; let kept = 0;
-  for (const v of ['Chill', 'Warm', 'Lively']) {
+  for (const v of ['Chill', 'Lively']) {
     if (!buckets[v].length) continue;
     // Don't overwrite a same-named playlist you've customised.
     if (state.playlists[v] && !state.autoPlaylists.includes(v)) { kept++; continue; }
@@ -1090,11 +1090,11 @@ function buildVibePlaylists() {
 function autoScheduleByVibe() {
   const analysed = library.filter((t) => t.vibe);
   if (!analysed.length) { toast('Categorise your music in the Library first'); return; }
-  const has = { Chill: 0, Warm: 0, Lively: 0 };
+  const has = { Chill: 0, Lively: 0 };
   analysed.forEach((t) => { if (has[t.vibe] != null) has[t.vibe]++; });
-  const pref = { Chill: ['Chill', 'Warm', 'Lively'], Warm: ['Warm', 'Chill', 'Lively'], Lively: ['Lively', 'Warm', 'Chill'] };
+  const pref = { Chill: ['Chill', 'Lively'], Lively: ['Lively', 'Chill'] };
   const pick = (want) => { for (const s of pref[want]) if (has[s]) return s; return ''; };
-  const wantFor = (h) => (h < 15 ? 'Chill' : h < 18 ? 'Warm' : 'Lively');
+  const wantFor = (h) => (h < 17 ? 'Chill' : 'Lively');
   for (const d of state.days) {
     for (const b of state.blocks) {
       const h = parseInt((b.start || '0:0').split(':')[0], 10) || 0;

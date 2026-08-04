@@ -260,20 +260,19 @@ const artCache = new Map(); // file -> { mtime, mime?, data?, none? }
 
 // Bucket a track into a serving "vibe" from its measured energy (RMS, ~0.02–0.30
 // for music) and tempo. Three levels is the reliable ceiling for energy+tempo:
-// Chill (relaxed), Warm (mid), Lively (high). '' = not analysed yet.
+// Two vibes: Chill (calm/slower) and Lively (upbeat/faster). '' = not analysed.
 function vibeFor(energy, bpm) {
   if (energy == null || !isFinite(energy)) return '';
   const e = Math.max(0, Math.min(1, (energy - 0.03) / 0.20));      // loudness/density
   const b = bpm ? Math.max(0, Math.min(1, (bpm - 72) / (128 - 72))) : e; // tempo
   const s = 0.6 * e + 0.4 * b;
-  if (s < 0.34) return 'Chill';
-  if (s < 0.62) return 'Warm';
-  return 'Lively';
+  return s < 0.5 ? 'Chill' : 'Lively';
 }
 
-// Migrate the old 'Upbeat' label to 'Lively' so libraries analysed before the
-// rename keep working without re-analysis.
-const normalizeVibe = (v) => (v === 'Upbeat' ? 'Lively' : v || '');
+// Migrate old labels to the current two-vibe scheme so libraries analysed
+// before this change keep working without a re-scan: Upbeat and the old
+// middle 'Warm' tier both fold into Lively (Chill stays for truly calm tracks).
+const normalizeVibe = (v) => (v === 'Upbeat' || v === 'Warm' ? 'Lively' : v || '');
 
 let metaDirty = false;
 
