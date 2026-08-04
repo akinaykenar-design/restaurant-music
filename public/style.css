@@ -426,14 +426,19 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
 
 #poster { display: none; }
 
-/* Desktop: let the player card fill the screen so there's no empty
-   background band above or below it. Content stays vertically centred
-   inside the card (the card already uses align-items: center). */
+/* Desktop: a centred single-column hero — meter, title and controls
+   stacked and centred as one balanced column, sitting in the middle of
+   the screen. Fills the space symmetrically, no empty side or bottom bands. */
 @media (min-width: 821px) {
-  #tab-now.active { min-height: calc(100dvh - 130px); display: flex; }
-  #tab-now .player { width: 100%; flex: 1; }
-  .art { width: 200px; height: 200px; }
-  .player { grid-template-columns: 200px 1fr; gap: 30px; padding: 30px; }
+  #tab-now.active { min-height: calc(100dvh - 130px); display: flex;
+    align-items: center; justify-content: center; padding: 24px 0; }
+  #tab-now .player { width: 100%; max-width: 560px; flex: none;
+    grid-template-columns: 1fr; justify-items: center; text-align: center;
+    gap: 22px; padding: 40px 40px 44px; }
+  .art { width: 250px; height: 250px; }
+  .progress, .transport, .vol-row, .scenes, .toggles {
+    margin-left: auto; margin-right: auto; }
+  .scenes, .toggles { justify-content: center; }
 }
 
 /* Tablet + phone: stack and centre. */
