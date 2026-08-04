@@ -141,9 +141,10 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 /* progress / seek — all controls share one width (--ctl) so the play-time bar,
    transport, scenes and volume line up to the same length. */
 .progress { margin: 24px 0 8px; max-width: var(--ctl, 460px); }
-.pbar { height: 9px; border-radius: 999px; background: var(--border-strong); cursor: pointer; overflow: hidden; }
-.pfill { height: 100%; width: 0%; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--warn)); transition: width 0.2s linear; }
-.ptime { display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.72rem; color: var(--faint); font-variant-numeric: tabular-nums; }
+/* display-only progress bar (no seeking) — larger and easy to read across a room */
+.pbar { height: 14px; border-radius: 999px; background: var(--border-strong); cursor: default; overflow: hidden; }
+.pfill { height: 100%; width: 0%; border-radius: 999px; background: var(--accent); transition: width 0.2s linear; }
+.ptime { display: flex; justify-content: space-between; margin-top: 7px; font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 
 .np-block { color: var(--warn); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; }
 .np-title { font-size: 1.7rem; margin: 7px 0 3px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; overflow-wrap: break-word; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; min-height: 2.4em; } /* reserve 2 lines so the layout never shifts with title length */
@@ -177,11 +178,11 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 #like.on { color: var(--warn); border-color: var(--warn); background: var(--warn-tint); }
 #dislike.on { color: var(--bad); border-color: var(--bad); background: var(--bad-tint); }
 
-.vol-row { display: flex; align-items: center; gap: 12px; max-width: var(--ctl, 460px); margin: 26px 0 24px; }
-.vic { width: 21px; height: 21px; fill: var(--faint); flex: none; }
-input[type='range'] { -webkit-appearance: none; appearance: none; height: 8px; border-radius: 999px; background: var(--border-strong); outline: none; flex: 1; }
-input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); cursor: pointer; }
-input[type='range']::-moz-range-thumb { width: 20px; height: 20px; border: none; border-radius: 50%; background: var(--accent); cursor: pointer; }
+.vol-row { display: flex; align-items: center; gap: 14px; max-width: var(--ctl, 460px); margin: 26px 0 24px; }
+.vic { width: 24px; height: 24px; fill: var(--muted); flex: none; }
+input[type='range'] { -webkit-appearance: none; appearance: none; height: 12px; border-radius: 999px; background: var(--border-strong); outline: none; flex: 1; }
+input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 3px solid var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
+input[type='range']::-moz-range-thumb { width: 28px; height: 28px; border: 3px solid var(--surface); border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
 
 .toggles { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; max-width: var(--ctl, 460px); margin-top: 8px; }
 /* shuffle / in-order toggle (Spotify-style icon button, neutral not teal) */
@@ -523,10 +524,17 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
   .rate svg { width: 29px; height: 29px; }
   .play svg { width: 35px; height: 35px; }
   .progress { margin: 28px 0 8px; }
-  .pbar { height: 12px; }
+  .pbar { height: 18px; }
+  .ptime { font-size: 0.9rem; }
   .scenes { gap: 12px; margin: 30px 0 8px; }
-  .vol-row { margin: 30px 0 30px; }
+  .vol-row { margin: 30px 0 30px; gap: 16px; }
+  .vic { width: 28px; height: 28px; }
+  .vol-row input[type='range'] { height: 18px; }
+  .vol-row input[type='range']::-webkit-slider-thumb { width: 34px; height: 34px; }
+  .vol-row input[type='range']::-moz-range-thumb { width: 34px; height: 34px; }
   .toggles { gap: 12px; margin-top: 10px; }
+  .modebtn { width: 172px; padding: 13px 18px; font-size: 0.95rem; }
+  .modebtn svg { width: 21px; height: 21px; }
   .np-title { font-size: 2rem; }
   .np-sub { font-size: 1rem; margin-top: 2px; }
   .np-block { font-size: 0.78rem; }

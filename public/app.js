@@ -256,12 +256,8 @@ function updateProgress(d) {
   $('t-cur').textContent = fmt(d.currentTime);
   $('t-dur').textContent = fmt(dur);
 }
-$('pbar').addEventListener('click', (e) => {
-  const d = activeDeck();
-  if (!d.duration || crossing) return;
-  const r = $('pbar').getBoundingClientRect();
-  d.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * d.duration;
-});
+// The progress bar is display-only — no seeking. This plays to a room full
+// of guests, so staff can't accidentally scrub or jump the current track.
 
 // Toast pop-ups disabled — kept as a no-op so call sites stay harmless.
 function toast(_msg) { /* popups removed */ }
@@ -589,7 +585,14 @@ function rateFile(file, kind) {
       renderQueue();
       renderEditor();
       toast(next === 'like' ? '♥ Liked — plays more often' : next === 'less' ? '↓ Plays less often (still reappears)' : next === 'dislike' ? '⊘ Banned — won\'t play' : 'Rating cleared');
-      if ((next === 'dislike' || next === 'less') && file === cur) skip(1);
+      if (next === 'dislike' && file === cur) {
+        // Banned the track that's playing to the room — don't hard-cut it;
+        // gently fade across to the next track so guests hear a smooth change.
+        const cf = Math.max(3, Number(state.settings.crossfade ?? 4));
+        if (queue.length > 1 && !crossing) beginCrossfade(cf); else skip(1);
+      } else if (next === 'less' && file === cur) {
+        skip(1);
+      }
       return next;
     });
 }
