@@ -1388,17 +1388,21 @@ async function boot() {
   setupUpload();
   $('analyze-btn').addEventListener('click', analyzeLibrary);
   $('auto-vibe').addEventListener('click', buildVibePlaylists);
-  $('auto-schedule').addEventListener('click', autoScheduleByVibe);
+  $('auto-schedule').addEventListener('click', () => {
+    const st = $('sched-status');
+    const categorised = library.filter((t) => t.vibe).length;
+    if (!categorised) { if (st) st.textContent = 'Categorise your music first — tap “✨ Auto-categorise” on the Library tab.'; return; }
+    autoScheduleByVibe(); // build style buckets + assign them across the week
+    if (st) st.textContent = `Scheduled by style — ${categorised} track${categorised === 1 ? '' : 's'} spread across the week. ✅`;
+  });
   const autoAll = $('auto-all');
   if (autoAll) autoAll.addEventListener('click', async () => {
     const st = $('analyze-status');
     if (!library.length) { if (st) st.textContent = 'Add some music first ↑'; return; }
     autoAll.disabled = true;
     try {
-      await analyzeLibrary();  // tag every track (skips already-tagged)
-      buildVibePlaylists();    // group into Chill / Warm / Lively playlists
-      autoScheduleByVibe();    // fill the weekly schedule by vibe
-      if (st) st.textContent = 'Done — sorted into vibes and scheduled. ✅';
+      await analyzeLibrary();  // categorise only: tag each track's style (vibe)
+      if (st) st.textContent = 'Done — every track tagged by style. ✅ Now set up the Schedule tab.';
     } catch (e) { if (st) st.textContent = 'Something went wrong — try again.'; }
     finally { autoAll.disabled = false; }
   });
