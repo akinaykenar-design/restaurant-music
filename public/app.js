@@ -465,25 +465,14 @@ $('volume').addEventListener('change', () => saveSettings({ volume: userVolume }
 
 // (Follow-schedule is now the "Schedule" scene button — no separate toggle.)
 
-// ---- scenes (one-tap "crowd" modes for the manager) ------------------------
-// Each scene draws from the analysed vibe buckets. Tapping one overrides the
-// schedule and plays appropriate music immediately; "Schedule" returns to auto.
-const SCENES = [
-  { id: 'chill',  icon: '🌙', label: 'Chill',  vibes: ['Chill'],  desc: 'Relaxed / quiet room' },
-  { id: 'lively', icon: '🔥', label: 'Lively', vibes: ['Lively'], desc: 'Busy / upbeat room' },
-];
+// ---- quick blocks (one-tap schedule overrides for the manager) -------------
 
+// The Now Playing quick buttons are the schedule's own time blocks. Tapping
+// one plays that block's set for today; "Schedule" hands control back to the
+// weekly clock. (Vibe still organises the Library — this is just the override.)
 function renderScenes() {
   const box = $('scenes'); if (!box) return;
   box.innerHTML = '';
-  SCENES.forEach((s) => {
-    const b = document.createElement('button');
-    b.className = 'scene' + (activeScene === s.id ? ' on' : '');
-    b.title = s.desc;
-    b.innerHTML = `<span class="scene-ic">${s.icon}</span>${s.label}`;
-    b.addEventListener('click', () => playScene(s.id));
-    box.appendChild(b);
-  });
   const sched = document.createElement('button');
   sched.className = 'scene scene-auto' + (!activeScene && state.settings.followSchedule ? ' on' : '');
   sched.title = 'Follow the weekly schedule automatically';
@@ -493,49 +482,44 @@ function renderScenes() {
     saveSettings({ followSchedule: true, scene: '' });
     applySchedule(true);
     renderScenes();
-    toast('Following the schedule');
   });
   box.appendChild(sched);
-  // available genres → one-tap play by genre, straight from Now Playing
-  const genres = [...new Set(library.map((t) => t.genre).filter(Boolean))].sort();
-  genres.forEach((g) => {
+
+  const now = new Date();
+  const dk = dayKey(now);
+  const nowBlk = currentBlock(now);
+  (state.blocks || []).forEach((blk) => {
+    const val = (state.schedule[dk] && state.schedule[dk][blk.id]) || '';
+    const r = resolveScheduled(val);
+    const has = !!(r && r.files.length);
+    // Highlight only a manual override — in auto mode the "Schedule" button is
+    // lit and the eyebrow shows the current block, so blocks stay un-selected.
+    const isActive = activeScene === 'block:' + blk.id;
     const b = document.createElement('button');
-    b.className = 'scene scene-genre' + (activeScene === 'genre:' + g ? ' on' : '');
-    b.title = 'Play ' + g + ' tracks';
-    b.innerHTML = `<span class="scene-ic">♪</span>${g}`;
-    b.addEventListener('click', () => playGenre(g));
+    b.className = 'scene' + (isActive ? ' on' : '');
+    b.textContent = blk.label;
+    b.disabled = !has;
+    b.title = has ? 'Play the ' + blk.label + ' set now' : 'Nothing set for ' + blk.label + ' — set it on the Schedule tab';
+    if (has) b.addEventListener('click', () => playBlock(blk.id));
     box.appendChild(b);
   });
 }
 
-function playScene(id) {
-  const s = SCENES.find((x) => x.id === id);
-  if (!s) return;
-  const files = library.filter((t) => s.vibes.includes(t.vibe)).map((t) => t.file);
-  if (!files.length) {
-    const anyAnalysed = library.some((t) => t.vibe);
-    toast(anyAnalysed ? `No ${s.label} tracks yet — add or categorise more music` : 'Categorise your music first: Library → ✨ Auto-categorise');
-    return;
-  }
-  activeScene = id;
-  saveSettings({ followSchedule: false, scene: id });
-  $('now-block').textContent = s.icon + ' ' + s.label + ' scene';
-  $('now-sub').textContent = s.desc + ' · ' + files.length + ' track' + (files.length === 1 ? '' : 's');
-  loadQueue(files, true);
-  renderScenes();
-  toast('Scene: ' + s.label);
-}
-
-function playGenre(g) {
-  const files = library.filter((t) => (t.genre || '') === g).map((t) => t.file);
-  if (!files.length) { toast('No ' + g + ' tracks yet'); return; }
-  activeScene = 'genre:' + g;
+// Play a specific time block's music on demand (overrides the schedule until
+// the manager taps "Schedule" again).
+function playBlock(blockId) {
+  const now = new Date();
+  const dk = dayKey(now);
+  const blk = (state.blocks || []).find((b) => b.id === blockId);
+  const val = (state.schedule[dk] && state.schedule[dk][blockId]) || '';
+  const r = resolveScheduled(val);
+  if (!r || !r.files.length) return;
+  activeScene = 'block:' + blockId;
   saveSettings({ followSchedule: false, scene: activeScene });
-  $('now-block').textContent = '♪ ' + g;
-  $('now-sub').textContent = g + ' · ' + files.length + ' track' + (files.length === 1 ? '' : 's');
-  loadQueue(files, true);
+  $('now-block').textContent = (blk ? blk.label : 'Block') + ' · playing now';
+  $('now-sub').textContent = r.label + ' · ' + r.files.length + ' track' + (r.files.length === 1 ? '' : 's');
+  loadQueue(r.files, true);
   renderScenes();
-  toast('Genre: ' + g);
 }
 
 
@@ -1432,9 +1416,10 @@ async function boot() {
   renderHistory();
   renderScenes();
   applySchedule(true);
-  // Re-apply a saved scene override (e.g. the venue box rebooted mid-service).
-  if (!state.settings.followSchedule && state.settings.scene && SCENES.some((s) => s.id === state.settings.scene)) {
-    playScene(state.settings.scene);
+  // Re-apply a saved block override (e.g. the venue box rebooted mid-service).
+  if (!state.settings.followSchedule && String(state.settings.scene || '').slice(0, 6) === 'block:') {
+    const bid = state.settings.scene.slice(6);
+    if ((state.blocks || []).some((b) => b.id === bid)) playBlock(bid);
   }
   loadStreamInfo();
   setupUpload();

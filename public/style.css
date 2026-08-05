@@ -208,7 +208,8 @@ input[type='range']::-moz-range-thumb { width: 28px; height: 28px; border: 3px s
 /* scenes — one-tap crowd modes */
 .scenes { display: flex; flex-wrap: wrap; gap: 10px; margin: 26px 0 8px; max-width: var(--ctl, 460px); }
 .scene { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.14s ease; }
-.scene:hover { border-color: var(--accent); transform: translateY(-1px); }
+.scene:hover:not(:disabled) { border-color: var(--accent); transform: translateY(-1px); }
+.scene:disabled { opacity: 0.4; cursor: not-allowed; }
 .scene.on { color: var(--bg); background: var(--accent); border-color: var(--accent); box-shadow: 0 8px 18px -8px var(--accent); }
 .scene-ic { font-size: 0.98rem; line-height: 1; }
 .scene-auto.on { background: var(--warn); border-color: var(--warn); box-shadow: 0 8px 18px -8px var(--warn); }
