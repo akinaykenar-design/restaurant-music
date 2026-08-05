@@ -503,6 +503,18 @@ function renderScenes() {
     if (has) b.addEventListener('click', () => playBlock(blk.id));
     box.appendChild(b);
   });
+
+  // genre quick-picks — every genre present in the library (tag or set by hand)
+  const genres = [...new Set(library.map((t) => t.genre).filter(Boolean))].sort();
+  genres.forEach((g) => {
+    const b = document.createElement('button');
+    b.className = 'scene scene-genre' + (activeScene === 'genre:' + g ? ' on' : '');
+    b.title = 'Play ' + g + ' tracks now';
+    b.innerHTML = '<span class="scene-ic">♪</span>';
+    b.appendChild(document.createTextNode(g));
+    b.addEventListener('click', () => playGenre(g));
+    box.appendChild(b);
+  });
 }
 
 // Play a specific time block's music on demand (overrides the schedule until
@@ -522,6 +534,17 @@ function playBlock(blockId) {
   renderScenes();
 }
 
+// Play every track of one genre on demand (overrides the schedule).
+function playGenre(g) {
+  const files = library.filter((t) => (t.genre || '') === g).map((t) => t.file);
+  if (!files.length) return;
+  activeScene = 'genre:' + g;
+  saveSettings({ followSchedule: false, scene: activeScene });
+  $('now-block').textContent = '♪ ' + g + ' · playing now';
+  $('now-sub').textContent = g + ' · ' + files.length + ' track' + (files.length === 1 ? '' : 's');
+  loadQueue(files, true);
+  renderScenes();
+}
 
 function updateShuffleBtn() {
   const on = state.settings.shuffle !== false;
@@ -964,6 +987,7 @@ function renderEditor() {
     menu.className = 'row-menu'; menu.hidden = true;
     const mItem = (label, cls, fn) => { const b = document.createElement('button'); b.className = 'row-menu-item' + (cls ? ' ' + cls : ''); b.textContent = label; b.addEventListener('click', (e) => { e.stopPropagation(); menu.hidden = true; fn(); }); return b; };
     menu.appendChild(mItem(rt === 'less' ? '✓ Plays less often' : '↓ Play less often', '', () => rateFile(t.file, 'less')));
+    menu.appendChild(mItem(t.genre ? '♪ Genre: ' + t.genre : '♪ Set genre…', '', () => setTrackGenre(t)));
     if (editing) menu.appendChild(mItem('+ Add to “' + editing + '”', '', () => { if (!state.playlists[editing].includes(t.file)) state.playlists[editing].push(t.file); markCustom(editing); savePlaylists(); }));
     if (rt) menu.appendChild(mItem('× Clear rating', '', () => rateFile(t.file, rt)));
     menu.appendChild(mItem('🗑 Delete from library', 'danger', () => {
@@ -989,7 +1013,16 @@ function closeRowMenus() { document.querySelectorAll('.row-menu:not([hidden])').
 document.addEventListener('click', closeRowMenus);
 
 function reloadLibrary() {
-  return api('/api/library').then((lib) => { library = lib.tracks; renderEditor(); renderQueue(); renderHistory(); updateOnboard(); });
+  return api('/api/library').then((lib) => { library = lib.tracks; renderEditor(); renderQueue(); renderHistory(); updateOnboard(); renderScenes(); });
+}
+
+// Manually set (or clear) a track's genre — for tracks with no embedded tag
+// (e.g. Pixabay downloads). Stored server-side; drives the genre buttons.
+function setTrackGenre(t) {
+  const g = prompt('Genre for “' + t.title + '” (leave blank to clear):', t.genre || '');
+  if (g === null) return; // cancelled
+  fetch('/api/genre', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file: t.file, genre: g.trim() }) })
+    .then((r) => r.json()).then(() => reloadLibrary());
 }
 
 // Keep the genre filter dropdown in sync with the genres present in the library,
@@ -1416,10 +1449,13 @@ async function boot() {
   renderHistory();
   renderScenes();
   applySchedule(true);
-  // Re-apply a saved block override (e.g. the venue box rebooted mid-service).
-  if (!state.settings.followSchedule && String(state.settings.scene || '').slice(0, 6) === 'block:') {
-    const bid = state.settings.scene.slice(6);
+  // Re-apply a saved override (e.g. the venue box rebooted mid-service).
+  const savedScene = String(state.settings.scene || '');
+  if (!state.settings.followSchedule && savedScene.slice(0, 6) === 'block:') {
+    const bid = savedScene.slice(6);
     if ((state.blocks || []).some((b) => b.id === bid)) playBlock(bid);
+  } else if (!state.settings.followSchedule && savedScene.slice(0, 6) === 'genre:') {
+    playGenre(savedScene.slice(6));
   }
   loadStreamInfo();
   setupUpload();

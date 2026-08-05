@@ -318,7 +318,9 @@ function scanLibrary() {
         file: f,
         title: (m.title && m.title.trim()) || prettyTitle(f),
         duration: m.duration || 0,
-        genre: m.genre || '',
+        // a manually-set genre wins over the file's tag (Pixabay tracks
+        // often ship with no genre, so staff can set one that sticks)
+        genre: (data.genres && data.genres[f]) || m.genre || '',
         artist: m.artist || '',
         bpm: m.analyzedBpm || m.bpm || null,
         energy: m.energy != null ? m.energy : null,
@@ -430,6 +432,20 @@ app.post('/api/rate', (req, res) => {
   else delete data.ratings[file];
   saveData(data);
   res.json({ ok: true, ratings: data.ratings });
+});
+
+// Manually set (or clear) a track's genre — overrides the file's tag and
+// survives re-scans, so tracks with no embedded genre (e.g. many Pixabay
+// downloads) can still be scheduled and picked by genre.
+app.post('/api/genre', (req, res) => {
+  const file = req.body && req.body.file;
+  const genre = ((req.body && req.body.genre) || '').trim();
+  if (!file) return res.status(400).json({ error: 'file required' });
+  data.genres = data.genres || {};
+  if (genre) data.genres[file] = genre;
+  else delete data.genres[file];
+  saveData(data);
+  res.json({ ok: true, genres: data.genres });
 });
 
 // Store audio-analysis results (energy + tempo) for a track, computed in the
