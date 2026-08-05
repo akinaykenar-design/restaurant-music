@@ -1016,10 +1016,18 @@ function reloadLibrary() {
   return api('/api/library').then((lib) => { library = lib.tracks; renderEditor(); renderQueue(); renderHistory(); updateOnboard(); renderScenes(); });
 }
 
+// Prompt for a genre, listing the genres already in use so you can reuse the
+// exact spelling instead of remembering or looking it up.
+function promptGenre(message, current) {
+  const existing = [...new Set(library.map((t) => t.genre).filter(Boolean))].sort();
+  const hint = existing.length ? '\n\nGenres you already use:\n' + existing.join('   ·   ') : '';
+  return prompt(message + hint, current || '');
+}
+
 // Manually set (or clear) a track's genre — for tracks with no embedded tag
 // (e.g. Pixabay downloads). Stored server-side; drives the genre buttons.
 function setTrackGenre(t) {
-  const g = prompt('Genre for “' + t.title + '” (leave blank to clear):', t.genre || '');
+  const g = promptGenre('Genre for “' + t.title + '” (leave blank to clear):', t.genre || '');
   if (g === null) return; // cancelled
   fetch('/api/genre', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file: t.file, genre: g.trim() }) })
     .then((r) => r.json()).then(() => reloadLibrary());
@@ -1501,6 +1509,17 @@ async function boot() {
     if (last && last.ratings) state.ratings = last.ratings;
     exitSelect();
     renderEditor();
+  });
+  const selGenre = $('lib-selgenre');
+  if (selGenre) selGenre.addEventListener('click', async () => {
+    const files = [...libSelected]; if (!files.length) return;
+    const g = promptGenre('Set genre for ' + files.length + ' track' + (files.length === 1 ? '' : 's') + ' (leave blank to clear):', '');
+    if (g === null) return;
+    selGenre.disabled = true;
+    for (const f of files) { try { await fetch('/api/genre', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file: f, genre: g.trim() }) }); } catch (e) { /* ignore */ } }
+    selGenre.disabled = false;
+    exitSelect();
+    reloadLibrary();
   });
   setupVenuePlayer();
   setupAdmin();
