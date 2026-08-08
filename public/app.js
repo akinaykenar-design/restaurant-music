@@ -161,6 +161,10 @@ const vizEq = (() => {
   }
 
   function sample(playing, t) {
+    // Scale the meter by the actual output volume — the analyser reads the raw
+    // spectrum (which the volume control doesn't touch), so without this the
+    // bars sit near full even when the room is quiet. Mute -> flat.
+    const volScale = Math.max(0, Math.min(1, userVolume));
     if (analyser) {
       analyser.getByteFrequencyData(freq);
       // Split the spectrum into COLS *logarithmic* bands (like a real graphic
@@ -174,12 +178,12 @@ const vizEq = (() => {
         const hi = Math.max(lo + 1, Math.floor(minBin * Math.pow(ratio, (i + 1) / COLS)));
         let s = 0, n = 0; for (let j = lo; j < hi && j < bins; j++) { s += freq[j]; n++; }
         const tilt = 1 + (i / (COLS - 1)) * 1.7; // boost highs
-        const v = Math.min(1, (n ? s / n / 255 : 0) * 1.35 * tilt);
+        const v = Math.min(1, (n ? s / n / 255 : 0) * 1.35 * tilt) * volScale;
         levels[i] += (v - levels[i]) * 0.35;
       }
     } else if (playing) { // synthetic fallback — evenly lively across all bars
       for (let i = 0; i < COLS; i++) {
-        const v = 0.45 + Math.sin(t * 2.3 + i * 0.9) * 0.28 + Math.sin(t * 5.1 + i * 1.7) * 0.18;
+        const v = (0.45 + Math.sin(t * 2.3 + i * 0.9) * 0.28 + Math.sin(t * 5.1 + i * 1.7) * 0.18) * volScale;
         levels[i] += (Math.max(0, v) - levels[i]) * 0.25;
       }
     } else {

@@ -573,6 +573,23 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
   .row-menu-item { padding: 13px 14px; font-size: 0.95rem; }
 }
 
+/* Big screens: scale the whole player up so it fills the space and the
+   controls spread out, instead of floating narrow in the middle. Everything
+   grows smoothly with the viewport (clamp), capped so it never gets silly. */
+@media (min-width: 1100px) {
+  main { max-width: 1180px; }
+  #tab-now .np-meta { --ctl: clamp(520px, 46vw, 720px); }
+  .art { width: clamp(220px, 20vw, 300px); height: clamp(220px, 20vw, 300px); }
+  /* grow the meter's grid column with it so it can't overlap the controls */
+  #tab-now .player { grid-template-columns: clamp(220px, 20vw, 300px) 1fr; gap: 42px; padding: 40px; }
+}
+@media (min-width: 1500px) {
+  main { max-width: 1380px; }
+  #tab-now .np-meta { --ctl: clamp(680px, 44vw, 860px); }
+  .art { width: clamp(280px, 18vw, 340px); height: clamp(280px, 18vw, 340px); }
+  #tab-now .player { grid-template-columns: clamp(280px, 18vw, 340px) 1fr; }
+}
+
 /* ---------- printable poster ---------- */
 @media print {
   .topbar, main, .miniplayer, .toast { display: none !important; }
