@@ -53,6 +53,7 @@ function defaultData() {
   return {
     blocks, days, schedule, playlists: {}, autoPlaylists: [], ratings: {}, meta: {},
     settings: {
+      venueName: 'Watermans',
       volume: 0.8, followSchedule: true, shuffle: true, crossfade: 4,
       afterHoursPassword: 'staff', // change it in the unlocked panel
     },

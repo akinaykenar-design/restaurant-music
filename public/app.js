@@ -1016,6 +1016,30 @@ function reloadLibrary() {
   return api('/api/library').then((lib) => { library = lib.tracks; renderEditor(); renderQueue(); renderHistory(); updateOnboard(); renderScenes(); });
 }
 
+// ---- venue name (editable, shown in the header + poster) -------------------
+function applyVenueName() {
+  const name = ((state.settings && state.settings.venueName) || 'Watermans').trim() || 'Watermans';
+  const el = $('brand-name'); if (el) el.textContent = name;
+  const pn = $('poster-name'); if (pn) pn.textContent = name;
+  document.title = name + ' Music';
+  const inp = $('venue-name'); if (inp && document.activeElement !== inp) inp.value = name;
+}
+(function wireVenueName() {
+  const save = $('venue-save'); const inp = $('venue-name'); const status = $('venue-status');
+  if (!save || !inp) return;
+  const doSave = () => {
+    const v = (inp.value || '').trim();
+    if (!v) { if (status) status.textContent = 'Name can’t be empty'; return; }
+    state.settings = state.settings || {};
+    state.settings.venueName = v;
+    saveSettings({ venueName: v });
+    applyVenueName();
+    if (status) { status.textContent = 'Saved ✓'; setTimeout(() => { status.textContent = ''; }, 2000); }
+  };
+  save.addEventListener('click', doSave);
+  inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSave(); });
+})();
+
 // Prompt for a genre, listing the genres already in use so you can reuse the
 // exact spelling instead of remembering or looking it up.
 function promptGenre(message, current) {
@@ -1444,6 +1468,7 @@ async function boot() {
   $('volume').value = userVolume;
   updateMuteIcon();
   updateShuffleBtn();
+  applyVenueName();
   const cf = state.settings.crossfade ?? 4;
   $('crossfade').value = cf; $('cf-val').textContent = cf + 's';
   $('stop-at').value = state.settings.stopAt || '';

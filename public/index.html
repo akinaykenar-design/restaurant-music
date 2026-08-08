@@ -23,7 +23,7 @@
           <circle cx="50" cy="50" r="15.5" fill="none" stroke="#ff8a34" stroke-width="8" />
         </svg>
         <div class="brand-text">
-          <span class="brand-name">Watermans</span>
+          <span class="brand-name" id="brand-name">Watermans</span>
           <span class="brand-sub">MUSIC</span>
         </div>
       </div>
@@ -228,6 +228,16 @@
         <div id="admin-content" hidden>
           <p class="hint">Technical settings for connecting to the venue sound system and the box.</p>
 
+          <div class="card">
+            <h3>Venue name</h3>
+            <p class="hint">Shown in the header and on the printed poster.</p>
+            <div class="ah-row" style="margin-top: 10px;">
+              <input type="text" id="venue-name" placeholder="Venue name" maxlength="40" autocomplete="off" />
+              <button id="venue-save" class="ghost">Save</button>
+              <span id="venue-status" class="hint"></span>
+            </div>
+          </div>
+
           <div class="card share-card" id="share-card" hidden>
             <h3>Open on staff phones &amp; iPads</h3>
             <p class="hint">On the <b>same WiFi</b>, scan this code (or type the address) in a browser, then tap <b>Add to Home Screen</b> for an app icon.</p>
@@ -352,7 +362,7 @@
       <p>Connect to the venue WiFi, then scan with your phone camera.</p>
       <img id="poster-qr" alt="Scan to open Watermans Music" />
       <div class="poster-addr" id="poster-addr">—</div>
-      <p class="poster-foot">Watermans Music · Add to Home Screen for an app icon</p>
+      <p class="poster-foot"><span id="poster-name">Watermans</span> Music · Add to Home Screen for an app icon</p>
     </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
