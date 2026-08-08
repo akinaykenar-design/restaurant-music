@@ -114,7 +114,7 @@ const vizEq = (() => {
   const levels = new Array(COLS).fill(0); // smoothed audio target 0..1
   const shown = new Array(COLS).fill(0);  // integer segments currently lit
   const nextAt = new Array(COLS).fill(0); // when this column may step again
-  const RISE_MS = 45, FALL_MS = 120;      // climb one segment, then wait; fall slower
+  const RISE_MS = 28, FALL_MS = 70;       // climb one segment, then wait; fall slower
   let W = 1, H = 1;
   let audioCtx = null, analyser = null, freq = null, wired = false;
 
@@ -147,7 +147,7 @@ const vizEq = (() => {
       audioCtx = new AC();
       analyser = audioCtx.createAnalyser();
       analyser.fftSize = 512; // finer bins so the log band-split has resolution
-      analyser.smoothingTimeConstant = 0.8;
+      analyser.smoothingTimeConstant = 0.6; // less smoothing = snappier, more alive
       freq = new Uint8Array(analyser.frequencyBinCount);
       analyser.connect(audioCtx.destination);
       decks.forEach((d) => {
@@ -164,7 +164,9 @@ const vizEq = (() => {
     // Scale the meter by the actual output volume — the analyser reads the raw
     // spectrum (which the volume control doesn't touch), so without this the
     // bars sit near full even when the room is quiet. Mute -> flat.
-    const volScale = Math.max(0, Math.min(1, userVolume));
+    // gentle curve: stays lively at normal listening levels but still drops
+    // right down when the volume is low (and flat at mute).
+    const volScale = Math.pow(Math.max(0, Math.min(1, userVolume)), 0.6);
     if (analyser) {
       analyser.getByteFrequencyData(freq);
       // Split the spectrum into COLS *logarithmic* bands (like a real graphic
@@ -179,7 +181,7 @@ const vizEq = (() => {
         let s = 0, n = 0; for (let j = lo; j < hi && j < bins; j++) { s += freq[j]; n++; }
         const tilt = 1 + (i / (COLS - 1)) * 1.7; // boost highs
         const v = Math.min(1, (n ? s / n / 255 : 0) * 1.35 * tilt) * volScale;
-        levels[i] += (v - levels[i]) * 0.35;
+        levels[i] += (v - levels[i]) * 0.5;
       }
     } else if (playing) { // synthetic fallback — evenly lively across all bars
       for (let i = 0; i < COLS; i++) {
