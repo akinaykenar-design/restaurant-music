@@ -171,7 +171,6 @@
                 <button id="lib-selcancel" class="ghost">Cancel</button>
               </span>
             </div>
-            <p class="hint sel-hint">Tip: press &amp; hold a track to select several, then delete them together.</p>
             <ul id="lib-tracks" class="tracklist"></ul>
           </div>
 
@@ -206,19 +205,16 @@
       <section id="tab-schedule" class="tab-panel">
         <div class="card" style="margin-bottom:16px">
           <h3>Time blocks</h3>
-          <p class="hint">Add, rename, delete, or re-time the parts of your day. Sorted automatically.</p>
           <div id="blocks-editor" class="blocks-editor"></div>
           <button id="add-block" class="ghost" style="margin-top:10px">+ Add time block</button>
         </div>
         <div class="card" style="margin-bottom:16px">
           <h3>Fill the week automatically</h3>
-          <p class="hint">One tap: sorts your music by style, then spreads it across the week — chill through the day, livelier into dinner. That's it.</p>
-          <button id="auto-schedule" class="auto-all-btn">✨ Auto-schedule<small>Sorts your music and fills the week</small></button>
+          <button id="auto-schedule" class="auto-all-btn">✨ Auto-schedule<small>Sorts your music by style, chill by day and livelier at dinner</small></button>
           <div id="sched-status" class="upload-status"></div>
         </div>
         <div class="card">
           <h3>Or set the week by hand</h3>
-          <p class="hint">Pick a style, a genre, or one of your playlists for each block × day. The music switches automatically when a block begins.</p>
           <div class="table-wrap">
             <table id="schedule-table"></table>
           </div>
@@ -229,7 +225,6 @@
       <section id="tab-admin" class="tab-panel">
         <div id="admin-lock" class="card admin-lock">
           <h3>🔒 Admin — password required</h3>
-          <p class="hint">Enter the admin password to view technical settings and staff controls.</p>
           <div class="ah-row">
             <input type="text" id="admin-pass" class="maskpw" placeholder="Admin password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" name="wm-admin-code" data-lpignore="true" data-1p-ignore data-form-type="other" />
             <button id="admin-unlock" class="warnbtn">Unlock</button>
@@ -237,11 +232,9 @@
         </div>
 
         <div id="admin-content" hidden>
-          <p class="hint">Technical settings for connecting to the venue sound system and the box.</p>
 
           <div class="card">
             <h3>Venue name</h3>
-            <p class="hint">Shown in the header and on the printed poster.</p>
             <div class="ah-row" style="margin-top: 10px;">
               <input type="text" id="venue-name" placeholder="Venue name" maxlength="40" autocomplete="off" />
               <button id="venue-save" class="ghost">Save</button>
@@ -273,19 +266,18 @@
 
           <div class="card accent-card" id="player-card" hidden>
             <h3>Venue output (this box)</h3>
-            <p class="hint">Playing the scheduled music out this device into your sound system.</p>
             <div class="player-row">
               <span id="player-now">—</span>
               <button id="player-pause" class="ghost">Pause</button>
               <button id="player-skip" class="ghost">Skip</button>
             </div>
-            <p class="hint" style="margin-top:14px">Which output the music plays out of (the cable into your Q-SYS). Pick the 3.5mm jack, HDMI, or a USB audio adapter if you've added one.</p>
+            <p class="hint" style="margin-top:14px">Output cable into your Q-SYS — 3.5mm jack, HDMI, or a USB adapter.</p>
             <div class="ah-row">
               <select id="audio-out" aria-label="Audio output device"></select>
               <button id="audio-out-save" class="ghost">Set output</button>
               <span id="audio-out-status" class="hint"></span>
             </div>
-            <p class="hint" style="margin-top:14px">Where the music plays from. Normally the box plays out its own jack into your sound system. Switch to this browser only to test on a laptop/phone away from the venue.</p>
+            <p class="hint" style="margin-top:14px">Play from the box (normal) or this browser (testing only).</p>
             <div class="playmode-switch" id="playmode-switch">
               <button class="pm-opt" id="pm-venue" type="button">The box (jack)</button>
               <button class="pm-opt" id="pm-device" type="button">This browser</button>
@@ -361,7 +353,6 @@
 
           <div class="card" id="update-card">
             <h3>App updates</h3>
-            <p class="hint">Pull the latest version and restart — over WiFi, no computer or terminal needed.</p>
             <div class="ah-row">
               <button id="app-update" class="ghost">⤓ Update &amp; restart</button>
               <span id="update-status" class="upload-status"></span>
@@ -377,7 +368,6 @@
             <h3>Security &amp; backup</h3>
             <label class="ah-toggle"><input type="checkbox" id="admin-lock-toggle" /> <span>Require password to open Admin</span></label>
             <p class="hint" style="margin:4px 0 14px">Turn off if this box is somewhere only staff reach — Admin will open without asking.</p>
-            <p class="hint">Change the admin password:</p>
             <div class="ah-row">
               <input type="text" id="admin-newpass" class="maskpw" placeholder="New admin password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" name="wm-admin-newcode" data-lpignore="true" data-1p-ignore data-form-type="other" />
               <button id="admin-setpass" class="ghost">Change password</button>

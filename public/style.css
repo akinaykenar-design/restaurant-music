@@ -560,6 +560,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
   }
   .tabs::-webkit-scrollbar { display: none; }
   .tab { white-space: nowrap; flex: 0 0 auto; padding: 6px 11px; font-size: 0.8rem; }
+  /* Library "Your music" header: on phones stack the title above the buttons so
+     the count badge doesn't get squeezed onto its own line mid-heading. */
+  .lib-main-head { flex-wrap: wrap; }
+  .lib-main-head h3 { flex: 1 0 100%; }
+  .lib-head-btns { width: 100%; }
+  .lib-head-btns .ghost { flex: 1; }
 }
 
 /* Small phones: shrink the transport row so the five buttons never overflow. */
