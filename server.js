@@ -52,6 +52,10 @@ function defaultData() {
   }
   return {
     blocks, days, schedule, playlists: {}, autoPlaylists: [], ratings: {}, meta: {},
+    // licensed = commercial/copyrighted tracks staff added for AFTER-HOURS only
+    // (no guests). Kept out of the trading-hours rotation; only the "afterhours"
+    // play token (admin-gated) ever plays them.
+    licensed: {},
     settings: {
       venueName: 'Watermans',
       volume: 0.8, venueVolume: 80, followSchedule: true, shuffle: true, crossfade: 4,
@@ -326,6 +330,8 @@ function scanLibrary() {
         bpm: m.analyzedBpm || m.bpm || null,
         energy: m.energy != null ? m.energy : null,
         vibe: normalizeVibe(m.vibe),
+        // commercial/licensed track added for after-hours (no guests) only
+        licensed: !!(data.licensed && data.licensed[f]),
       };
     });
     // Drop cache entries for files that no longer exist.
@@ -386,7 +392,14 @@ app.post('/api/upload', express.raw({ type: '*/*', limit: '300mb' }), (req, res)
   try {
     fs.mkdirSync(MUSIC_DIR, { recursive: true });
     fs.writeFileSync(path.join(MUSIC_DIR, name), req.body);
-    res.json({ ok: true, file: name, title: prettyTitle(name) });
+    // Uploaded from the after-hours panel? Flag it licensed so it stays out of
+    // the trading-hours rotation.
+    if (String(req.query.licensed || '') === '1') {
+      data.licensed = data.licensed || {};
+      data.licensed[name] = true;
+      saveData(data);
+    }
+    res.json({ ok: true, file: name, title: prettyTitle(name), licensed: isLicensed(name) });
   } catch (e) {
     res.status(500).json({ error: 'could not save file' });
   }
@@ -404,6 +417,7 @@ app.delete('/api/track', (req, res) => {
     for (const pl of Object.keys(data.playlists)) {
       data.playlists[pl] = data.playlists[pl].filter((f) => f !== name);
     }
+    if (data.licensed) delete data.licensed[name];
     saveData(data);
     res.json({ ok: true });
   } catch (e) {
@@ -542,6 +556,22 @@ app.post('/api/afterhours/unlock', (req, res) => {
   const password = req.body && req.body.password;
   const ok = !!data.settings.afterHoursPassword && password === data.settings.afterHoursPassword;
   res.json({ ok });
+});
+
+const adminOk = (req) => {
+  const password = req.body && req.body.password;
+  return !!data.settings.afterHoursPassword && password === data.settings.afterHoursPassword;
+};
+
+// Flag / un-flag a track as licensed (after-hours only). Admin-gated.
+app.post('/api/afterhours/track', (req, res) => {
+  if (!adminOk(req)) return res.status(403).json({ error: 'wrong password' });
+  const file = path.basename(String((req.body && req.body.file) || ''));
+  if (!file) return res.status(400).json({ error: 'file required' });
+  data.licensed = data.licensed || {};
+  if (req.body.on) data.licensed[file] = true; else delete data.licensed[file];
+  saveData(data);
+  res.json({ ok: true, licensed: !!data.licensed[file] });
 });
 
 // Download / restore a full backup of the app's data (playlists, schedule, etc.)
@@ -720,12 +750,18 @@ function buildQueue(tracks) {
 
 // Resolve a schedule cell / token to a list of files. Tokens: "style:Chill",
 // "genre:Deep House", or a playlist name.
+const isLicensed = (f) => !!(data.licensed && data.licensed[f]);
 function resolveTokenFiles(val) {
   if (!val) return [];
-  if (val.slice(0, 6) === 'style:') { const s = val.slice(6); return scanLibrary().filter((t) => t.vibe === s).map((t) => t.file); }
-  if (val.slice(0, 6) === 'genre:') { const g = val.slice(6); return scanLibrary().filter((t) => (t.genre || '') === g).map((t) => t.file); }
+  // The after-hours set is ONLY the licensed tracks.
+  if (val === 'afterhours') return scanLibrary().filter((t) => t.licensed).map((t) => t.file);
+  // Everything else is trading-hours music — licensed tracks are excluded so
+  // they can never reach guests, no matter how the schedule is set up.
+  const noLic = (files) => files.filter((f) => !isLicensed(f));
+  if (val.slice(0, 6) === 'style:') { const s = val.slice(6); return noLic(scanLibrary().filter((t) => t.vibe === s).map((t) => t.file)); }
+  if (val.slice(0, 6) === 'genre:') { const g = val.slice(6); return noLic(scanLibrary().filter((t) => (t.genre || '') === g).map((t) => t.file)); }
   const pl = data.playlists[val];
-  return pl ? pl.slice() : [];
+  return pl ? noLic(pl.slice()) : [];
 }
 
 // Resolve a "play this now on the venue" token from the app into files + label.
@@ -740,6 +776,7 @@ function resolvePlayToken(token) {
     const blk = data.blocks.find((b) => b.id === bid);
     return { files: resolveTokenFiles(val), label: (blk && blk.label) || 'Block' };
   }
+  if (token === 'afterhours') return { files: resolveTokenFiles('afterhours'), label: 'After hours (licensed)' };
   if (token.slice(0, 6) === 'genre:') return { files: resolveTokenFiles(token), label: 'Genre · ' + token.slice(6) };
   if (token.slice(0, 6) === 'style:') return { files: resolveTokenFiles(token), label: token.slice(6) };
   return { files: resolveTokenFiles(token), label: token };
@@ -761,9 +798,10 @@ const station = {
     let tracks = resolveTokenFiles(data.schedule[dk] && data.schedule[dk][bk]);
     if (!tracks.length) {
       const pn = Object.keys(data.playlists).find((n) => (data.playlists[n] || []).length);
-      if (pn) tracks = data.playlists[pn].slice();
+      if (pn) tracks = data.playlists[pn].filter((f) => !isLicensed(f));
     }
-    if (!tracks.length) tracks = scanLibrary().map((t) => t.file); // fall back to whole library
+    // fall back to the whole library — but never the licensed after-hours tracks
+    if (!tracks.length) tracks = scanLibrary().filter((t) => !t.licensed).map((t) => t.file);
     this.queue = buildQueue(tracks);
     if (this.idx >= this.queue.length) this.idx = 0;
   },
@@ -1026,6 +1064,13 @@ app.post('/api/player/play', (req, res) => {
   const token = (req.body && req.body.token) || '';
   if (token === 'schedule' || token === 'block:schedule') {
     station.followSchedule();
+  } else if (token === 'afterhours') {
+    // Licensed music — only ever after close, and only with the admin password,
+    // so it can never be triggered to a room full of guests.
+    if (!adminOk(req)) return res.status(403).json({ ok: false, error: 'admin password required' });
+    const { files, label } = resolvePlayToken(token);
+    if (!files.length) return res.status(400).json({ ok: false, error: 'no licensed tracks added yet' });
+    station.playFiles(files, label);
   } else {
     const { files, label } = resolvePlayToken(token);
     if (!files.length) return res.status(400).json({ ok: false, error: 'nothing to play for ' + token });

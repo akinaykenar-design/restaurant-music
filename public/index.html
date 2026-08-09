@@ -311,6 +311,20 @@
             </div>
           </div>
 
+          <div class="card ah-card" id="licensed-card">
+            <h3>After-hours licensed music</h3>
+            <p class="hint">Add your own <b>commercial / licensed</b> tracks (Spotify rips, purchased MP3s, chart music) to play <b>after close, when there are no guests</b>. These are kept out of the trading-hours rotation, so they <b>never play to customers</b> — no APRA/PPCA risk. Only play them once the venue is closed.</p>
+            <div class="ah-row" style="margin-top:10px">
+              <label class="ghost restore-label">➕ Add licensed tracks<input type="file" id="licensed-file" accept="audio/*" multiple hidden /></label>
+              <span id="licensed-status" class="upload-status"></span>
+            </div>
+            <ul id="licensed-list" class="licensed-list"></ul>
+            <div class="ah-row" style="margin-top:12px">
+              <button id="licensed-play" class="warnbtn">▶ Play licensed music now</button>
+              <button id="licensed-schedule" class="ghost">↩ Back to schedule</button>
+            </div>
+          </div>
+
           <div class="card" id="update-card">
             <h3>App updates</h3>
             <p class="hint">Pull the latest version and restart — over WiFi, no computer or terminal needed.</p>

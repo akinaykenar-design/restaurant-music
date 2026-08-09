@@ -588,7 +588,7 @@ function renderScenes() {
   });
 
   // genre quick-picks — every genre present in the library (tag or set by hand)
-  const genres = [...new Set(library.map((t) => t.genre).filter(Boolean))].sort();
+  const genres = [...new Set(library.filter((t) => !t.licensed).map((t) => t.genre).filter(Boolean))].sort();
   genres.forEach((g) => {
     const b = document.createElement('button');
     b.className = 'scene scene-genre' + (activeScene === 'genre:' + g ? ' on' : '');
@@ -820,7 +820,7 @@ function renderSchedule() {
   const names = Object.keys(state.playlists);
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const styles = ['Chill', 'Lively'].filter((s) => library.some((t) => t.vibe === s));
-  const genres = [...new Set(library.map((t) => t.genre).filter(Boolean))].sort();
+  const genres = [...new Set(library.filter((t) => !t.licensed).map((t) => t.genre).filter(Boolean))].sort();
   const optionsFor = (sel) => {
     let o = `<option value="">—</option>`;
     if (styles.length) { o += '<optgroup label="By style">'; for (const s of styles) o += `<option value="style:${s}"${'style:' + s === sel ? ' selected' : ''}>${s}</option>`; o += '</optgroup>'; }
@@ -871,6 +871,7 @@ function filteredLibrary() {
     return r === libRating;
   };
   const shown = library.filter((t) =>
+    !t.licensed && // licensed after-hours tracks live only in the Admin card, never the trading-hours library
     (!libFilter || t.title.toLowerCase().includes(libFilter) || (t.genre || '').toLowerCase().includes(libFilter) || (t.artist || '').toLowerCase().includes(libFilter)) &&
     (!libGenre || t.genre === libGenre) &&
     (!libVibe || t.vibe === libVibe) &&
@@ -988,7 +989,7 @@ function renderEditor() {
   } else $('editing-name').textContent = 'Select a playlist';
   const plUl = $('pl-tracks');
   const libUl = $('lib-tracks');
-  $('lib-count').textContent = library.length;
+  $('lib-count').textContent = library.filter((t) => !t.licensed).length;
   $('add-all').disabled = !editing || !library.length;
   $('add-all').textContent = editing ? '+ Add all shown to ' + editing : '+ Add all shown to playlist';
   plUl.innerHTML = '';
@@ -1108,7 +1109,7 @@ function closeRowMenus() { document.querySelectorAll('.row-menu:not([hidden])').
 document.addEventListener('click', closeRowMenus);
 
 function reloadLibrary() {
-  return api('/api/library').then((lib) => { library = lib.tracks; renderEditor(); renderQueue(); renderHistory(); updateOnboard(); renderScenes(); });
+  return api('/api/library').then((lib) => { library = lib.tracks; renderEditor(); renderQueue(); renderHistory(); updateOnboard(); renderScenes(); renderLicensed(); });
 }
 
 // ---- venue name (editable, shown in the header + poster) -------------------
@@ -1431,6 +1432,75 @@ function setupVenuePlayer() {
   refresh(); setInterval(refresh, 5000);
 }
 
+// ---- after-hours licensed music (staff, off-schedule) ----------------------
+// Commercial/licensed tracks staff add for after close. Kept out of the
+// trading-hours rotation on the server; only played via the admin-gated
+// "afterhours" token so they never reach guests.
+function renderLicensed() {
+  const ul = $('licensed-list'); if (!ul) return;
+  const items = library.filter((t) => t.licensed);
+  if (!items.length) { ul.innerHTML = '<li class="hint">No licensed tracks yet — add some above.</li>'; return; }
+  ul.innerHTML = '';
+  items.forEach((t) => {
+    const li = document.createElement('li');
+    const span = document.createElement('span');
+    span.className = 'lic-name';
+    span.textContent = t.title + (t.artist ? ' — ' + t.artist : '');
+    const rm = document.createElement('button');
+    rm.className = 'ghost';
+    rm.textContent = 'Remove';
+    rm.addEventListener('click', () => {
+      if (!confirm('Remove “' + t.title + '” from the box?')) return;
+      fetch('/api/track?name=' + encodeURIComponent(t.file), { method: 'DELETE' })
+        .then((r) => r.json()).then(() => reloadLibrary());
+    });
+    li.appendChild(span);
+    li.appendChild(rm);
+    ul.appendChild(li);
+  });
+}
+
+function setupLicensed() {
+  const input = $('licensed-file');
+  if (input) input.addEventListener('change', async (e) => {
+    const files = Array.from(e.target.files || []);
+    const st = $('licensed-status');
+    if (!files.length) return;
+    let done = 0;
+    if (st) st.textContent = 'Adding…';
+    for (const f of files) {
+      try {
+        await fetch('/api/upload?licensed=1&name=' + encodeURIComponent(f.name), { method: 'POST', body: f });
+        done += 1;
+        if (st) st.textContent = 'Adding ' + done + '/' + files.length + '…';
+      } catch { /* skip this file */ }
+    }
+    if (st) st.textContent = 'Added ' + done + ' track' + (done === 1 ? '' : 's') + '.';
+    input.value = '';
+    await reloadLibrary();
+  });
+
+  const play = $('licensed-play');
+  if (play) play.addEventListener('click', () => {
+    const st = $('licensed-status');
+    if (!library.some((t) => t.licensed)) { if (st) st.textContent = 'Add some licensed tracks first.'; return; }
+    if (!confirm('Play licensed music now?\n\nOnly do this AFTER CLOSE — it must not play while guests are in.')) return;
+    venuePost('/api/player/play', { token: 'afterhours', password: adminPass }).then((r) => {
+      if (!r || r.ok === false) { if (st) st.textContent = (r && r.error) || 'Could not start.'; return; }
+      if (st) st.textContent = 'Playing licensed music (after hours).';
+      pollVenueSoon();
+    });
+  });
+
+  const sched = $('licensed-schedule');
+  if (sched) sched.addEventListener('click', () => {
+    venuePost('/api/player/play', { token: 'schedule' }).then(() => {
+      const st = $('licensed-status'); if (st) st.textContent = 'Back on the schedule.';
+      pollVenueSoon();
+    });
+  });
+}
+
 // ---- after-hours staff mode ------------------------------------------------
 function refreshAhPlaylists() {
   const sel = $('ah-playlist'); if (!sel) return;
@@ -1450,6 +1520,7 @@ function setupAdmin() {
     adminUnlocked = true;
     $('admin-lock').hidden = true; $('admin-content').hidden = false;
     refreshAhPlaylists();
+    renderLicensed();
   };
   const tryUnlock = () => {
     const password = $('admin-pass').value;
@@ -1653,6 +1724,7 @@ async function boot() {
   });
   setupVenuePlayer();
   setupAdmin();
+  setupLicensed();
   refreshAhPlaylists();
 }
 boot();
