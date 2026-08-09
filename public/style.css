@@ -311,6 +311,10 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .ah-row .warnbtn { background: var(--warn); color: #fff; border: none; border-radius: 9px; padding: 9px 14px; cursor: pointer; font-weight: 600; }
 .restore-label { display: inline-flex; align-items: center; cursor: pointer; }
 
+/* Admin code fields: masked like a password but NOT a real password input, so
+   the browser never offers to save/autofill it. */
+.maskpw { -webkit-text-security: disc; text-security: disc; letter-spacing: 0.12em; }
+
 .licensed-list { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .licensed-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; padding: 8px 11px; }
 .licensed-list li.hint { display: block; background: none; border: none; padding: 4px 0; }

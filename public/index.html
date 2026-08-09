@@ -224,7 +224,7 @@
           <h3>🔒 Admin — password required</h3>
           <p class="hint">Enter the admin password to view technical settings and staff controls.</p>
           <div class="ah-row">
-            <input type="password" id="admin-pass" placeholder="Admin password" autocomplete="off" data-lpignore="true" data-1p-ignore />
+            <input type="text" id="admin-pass" class="maskpw" placeholder="Admin password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" name="wm-admin-code" data-lpignore="true" data-1p-ignore data-form-type="other" />
             <button id="admin-unlock" class="warnbtn">Unlock</button>
           </div>
         </div>
@@ -353,7 +353,7 @@
             <h3>Security &amp; backup</h3>
             <p class="hint">Change the admin password:</p>
             <div class="ah-row">
-              <input type="password" id="admin-newpass" placeholder="New admin password" autocomplete="new-password" data-lpignore="true" data-1p-ignore />
+              <input type="text" id="admin-newpass" class="maskpw" placeholder="New admin password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" name="wm-admin-newcode" data-lpignore="true" data-1p-ignore data-form-type="other" />
               <button id="admin-setpass" class="ghost">Change password</button>
             </div>
             <p class="hint" style="margin-top:14px">Back up or restore everything (playlists, schedule, ratings, time blocks):</p>
