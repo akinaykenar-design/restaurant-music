@@ -721,14 +721,18 @@ app.get('/api/find', async (req, res) => {
   if (!q) return res.json({ results: [], count: 0 });
   const page = Math.max(1, Math.min(20, Number(req.query.page) || 1));
   const base = process.env.OPENVERSE_BASE || 'https://api.openverse.org/v1/audio/';
-  // CC0 + Public-Domain-Mark only (no attribution, like Pixabay), and
-  // category=music so we get songs, not Freesound sound-effects.
-  const url = base + '?format=json&license=cc0,pdm&category=music&page_size=24'
+  // CC0 + Public-Domain-Mark only (no attribution, like Pixabay). NB: the
+  // `category=music` query param makes Openverse 401 for anonymous requests,
+  // so we filter out sound-effects from the results below instead.
+  const url = base + '?license=cc0,pdm&page_size=40'
     + '&page=' + page + '&q=' + encodeURIComponent(q);
   try {
     const j = await fetchJson(url);
     const noStrings = (t) => /^(cc0|pdm)$/i.test(String(t.license || '')); // belt-and-braces: attribution-free only
-    const results = (j.results || []).filter(noStrings).map((t) => ({
+    // Drop sound-effects/audiobooks — keep music (or untagged). Freesound is
+    // mostly effects, so treat its untagged items as non-music too.
+    const isMusic = (t) => t.category ? t.category === 'music' : String(t.source || '').toLowerCase() !== 'freesound';
+    const results = (j.results || []).filter((t) => noStrings(t) && isMusic(t)).map((t) => ({
       title: t.title || 'Untitled',
       artist: t.creator || '',
       license: ((t.license || '') + (t.license_version ? ' ' + t.license_version : '')).trim().toUpperCase(),
