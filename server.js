@@ -748,24 +748,25 @@ app.get('/api/find', async (req, res) => {
     // Drop sound-effects/audiobooks — keep music (or untagged). Freesound is
     // mostly effects, so treat its untagged items as non-music too.
     const isMusic = (t) => t.category ? t.category === 'music' : String(t.source || '').toLowerCase() !== 'freesound';
-    // Match by genre tags (default) or by title, per the ?by= toggle.
+    // Rank (don't hard-filter) by how well each result matches — so a genre
+    // search floats tag-matches to the top but still shows everything the
+    // search found, rather than throwing away results that just aren't tagged.
     const by = String(req.query.by || 'genre').toLowerCase();
     const qWords = q.toLowerCase().split(/[\s/,&|-]+/).filter((w) => w.length > 2);
     const tagText = (t) => (
       (Array.isArray(t.genres) ? t.genres.join(' ') : '') + ' ' +
       (Array.isArray(t.tags) ? t.tags.map((x) => (x && x.name) || x || '').join(' ') : '')
     ).toLowerCase();
+    const hits = (txt) => qWords.reduce((s, w) => s + (txt.includes(w) ? 1 : 0), 0);
+    const scoreOf = (t) => {
+      const tagS = hits(tagText(t));
+      const titleS = hits((t.title || '').toLowerCase());
+      return by === 'title' ? titleS * 3 + tagS : tagS * 3 + titleS; // weight the chosen field
+    };
     let pool = (j.results || []).filter((t) => venueOk(t) && isMusic(t));
-    if (by === 'title') {
-      // title match; fall back to the full pool if too strict
-      const byTitle = pool.filter((t) => qWords.every((w) => (t.title || '').toLowerCase().includes(w)));
-      if (byTitle.length) pool = byTitle;
-    } else {
-      // genre/tags match; fall back to title+tags, then the full pool
-      const tagged = pool.filter((t) => qWords.length === 0 || qWords.every((w) => tagText(t).includes(w)));
-      if (tagged.length) pool = tagged;
-      else pool = pool.filter((t) => qWords.every((w) => (tagText(t) + ' ' + (t.title || '').toLowerCase()).includes(w)));
-    }
+    pool = pool.map((t, i) => ({ t, s: scoreOf(t), i }))
+      .sort((a, b) => b.s - a.s || a.i - b.i) // best match first, stable otherwise
+      .map((x) => x.t);
     const results = pool.map((t) => ({
       title: t.title || 'Untitled',
       artist: t.creator || '',
