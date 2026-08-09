@@ -679,8 +679,13 @@ function findRow(t) {
     if (findPreviewEl && !findPreviewEl.paused && findPreviewEl.src === t.preview) { findPreviewEl.pause(); prev.textContent = '▶'; return; }
     document.querySelectorAll('.find-prev').forEach((b) => { b.textContent = '▶'; });
     if (!findPreviewEl) findPreviewEl = new Audio();
-    findPreviewEl.src = t.preview; findPreviewEl.play().then(() => { prev.textContent = '⏸'; }).catch(() => {});
-    findPreviewEl.onended = () => { prev.textContent = '▶'; };
+    findPreviewEl.src = t.preview;
+    findPreviewEl.play().then(() => {
+      prev.textContent = '⏸';
+      const player = $('find-player'); if (player) player.hidden = false;
+      const np = $('find-np'); if (np) np.textContent = t.title + (t.artist ? ' · ' + t.artist : '');
+    }).catch(() => {});
+    findPreviewEl.onended = () => { prev.textContent = '▶'; const player = $('find-player'); if (player) player.hidden = true; };
   });
 
   const add = document.createElement('button');
@@ -706,6 +711,14 @@ function setupFind() {
   const input = $('find-q'); const go = $('find-go');
   if (!input || !go) return;
   findPreviewEl = new Audio();
+  // scrub bar for the preview, so you can jump into a track to test it fast
+  const seek = $('find-seek'), tEl = $('find-time');
+  findPreviewEl.addEventListener('timeupdate', () => {
+    if (!findPreviewEl.duration || !seek) return;
+    if (document.activeElement !== seek) seek.value = Math.round((findPreviewEl.currentTime / findPreviewEl.duration) * 1000);
+    if (tEl) tEl.textContent = fmtDur(Math.floor(findPreviewEl.currentTime));
+  });
+  if (seek) seek.addEventListener('input', () => { if (findPreviewEl.duration) findPreviewEl.currentTime = (seek.value / 1000) * findPreviewEl.duration; });
   const run = () => runFind(input.value);
   renderFindChips();
   go.addEventListener('click', run);
