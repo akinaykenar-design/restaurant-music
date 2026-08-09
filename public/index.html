@@ -250,14 +250,12 @@
               <button id="player-pause" class="ghost">Pause</button>
               <button id="player-skip" class="ghost">Skip</button>
             </div>
-            <p class="hint" style="margin-top:14px">Output cable into your Q-SYS — 3.5mm jack, HDMI, or a USB adapter.</p>
-            <div class="ah-row">
+            <div class="ah-row" style="margin-top:14px">
               <select id="audio-out" aria-label="Audio output device"></select>
               <button id="audio-out-save" class="ghost">Set output</button>
               <span id="audio-out-status" class="hint"></span>
             </div>
-            <p class="hint" style="margin-top:14px">Play from the box (normal) or this browser (testing only).</p>
-            <div class="playmode-switch" id="playmode-switch">
+            <div class="playmode-switch" id="playmode-switch" style="margin-top:14px">
               <button class="pm-opt" id="pm-venue" type="button">The box (jack)</button>
               <button class="pm-opt" id="pm-device" type="button">This browser</button>
             </div>
@@ -265,7 +263,6 @@
 
           <div class="card" id="power-card">
             <h3>Power</h3>
-            <p class="hint">Safely shut down or restart the music box — do this before unplugging it, so the SD card doesn't get corrupted.</p>
             <div class="ah-row">
               <button id="power-restart" class="ghost">↻ Restart the box</button>
               <button id="power-off" class="warnbtn">⏻ Shut down the box</button>
@@ -275,7 +272,7 @@
 
           <div class="card ah-card" id="licensed-card">
             <h3>After-hours licensed music</h3>
-            <p class="hint">Add your own <b>commercial / licensed</b> tracks (Spotify rips, purchased MP3s, chart music) to play <b>after close, when there are no guests</b>. These are kept out of the trading-hours rotation, so they <b>never play to customers</b> — no APRA/PPCA risk. Only play them once the venue is closed.</p>
+            <p class="hint">Commercial tracks for after close only — never played to guests.</p>
             <div id="licensed-drop" class="dropzone" role="button" tabindex="0" title="Drop licensed tracks here, or click to add">
               <svg class="dz-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4m0 0 4 4m-4-4-4 4"/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg>
               <input type="file" id="licensed-file" accept="audio/*" multiple hidden />
@@ -301,7 +298,6 @@
 
           <div class="card ah-card" id="ah-card">
             <h3>After-hours staff music</h3>
-            <p class="hint">Play a playlist off-schedule (e.g. after close). Turns off Follow-schedule.</p>
             <div class="ah-row">
               <select id="ah-playlist"></select>
               <button id="ah-play" class="warnbtn">Play (after hours)</button>
@@ -332,7 +328,7 @@
 
           <div class="card share-card" id="share-card" hidden>
             <h3>Open on staff phones &amp; iPads</h3>
-            <p class="hint">On the <b>same WiFi</b>, scan this code (or type the address) in a browser, then tap <b>Add to Home Screen</b> for an app icon.</p>
+            <p class="hint">Scan on the <b>same WiFi</b>.</p>
             <div class="share-row">
               <div class="qr-box"><img id="qr-img" alt="Scan to open the app" /></div>
               <div class="share-addr">
@@ -357,20 +353,17 @@
 
           <div class="card accent-card" id="stream-card" hidden>
             <h3>Venue stream (for Q-SYS)</h3>
-            <p class="hint">Give this address to whoever programs your Q-SYS Core, or test it in VLC:</p>
             <div id="stream-urls"></div>
           </div>
 
           <div class="card" id="security-card">
             <h3>Security &amp; backup</h3>
-            <label class="ah-toggle"><input type="checkbox" id="admin-lock-toggle" /> <span>Require password to open Admin</span></label>
-            <p class="hint" style="margin:4px 0 14px">Turn off if this box is somewhere only staff reach — Admin will open without asking.</p>
+            <label class="ah-toggle" style="margin-bottom:14px"><input type="checkbox" id="admin-lock-toggle" /> <span>Require password to open Admin</span></label>
             <div class="ah-row">
               <input type="text" id="admin-newpass" class="maskpw" placeholder="New admin password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" name="wm-admin-newcode" data-lpignore="true" data-1p-ignore data-form-type="other" />
               <button id="admin-setpass" class="ghost">Change password</button>
             </div>
-            <p class="hint" style="margin-top:14px">Back up or restore everything (playlists, schedule, ratings, time blocks):</p>
-            <div class="ah-row">
+            <div class="ah-row" style="margin-top:14px">
               <button id="backup-dl" class="ghost">⬇ Download backup</button>
               <label class="ghost restore-label">↩ Restore from file<input type="file" id="restore-file" accept="application/json,.json" hidden /></label>
             </div>
