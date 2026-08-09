@@ -25,6 +25,9 @@
   --radius: 16px;
   --radius-sm: 11px;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* the two "vibe" accents, centralised (were scattered hex literals) */
+  --chill: #3a8fb0; --chill-deep: #1c4a5c;
+  --lively: #d9704e; --lively-deep: #6e2f1c;
 }
 /* dark tokens — applied when the OS is dark (and the user hasn't forced light),
    or when the user manually picks dark via the toggle. */
@@ -51,10 +54,13 @@
 }
 
 * { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
-html { -webkit-text-size-adjust: 100%; }
+/* Fluid base size: everything is sized in rem, so scaling the root scales the
+   whole UI with the screen — 16px on a phone up to ~21px on a big monitor, so
+   it never looks tiny on a desktop. */
+html { -webkit-text-size-adjust: 100%; font-size: clamp(16px, 13.5px + 0.5vw, 21px); }
 body {
   margin: 0; background: var(--bg); color: var(--text);
-  font-family: var(--font); font-size: 16px; line-height: 1.5;
+  font-family: var(--font); font-size: 1rem; line-height: 1.5;
   -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
 }
 
@@ -229,9 +235,9 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .row-art { width: 38px; height: 38px; flex: none; border-radius: 8px; overflow: hidden; background: linear-gradient(150deg, var(--border-strong), var(--surface-2)); display: grid; place-items: center; position: relative; }
 .row-art::after { content: '♪'; color: var(--faint); font-size: 0.9rem; }
 .row-art img { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; }
-.row-art.vibe-chill { background: linear-gradient(150deg, #3a8fb0, #1c4a5c); }
-.row-art.vibe-warm { background: linear-gradient(150deg, var(--warn), #5a3a12); }
-.row-art.vibe-lively { background: linear-gradient(150deg, #d9704e, #6e2f1c); }
+.row-art.vibe-chill { background: linear-gradient(150deg, var(--chill), var(--chill-deep)); }
+.row-art.vibe-warm { background: linear-gradient(150deg, var(--warn), var(--lively-deep)); }
+.row-art.vibe-lively { background: linear-gradient(150deg, var(--lively), var(--lively-deep)); }
 .tracklist li .dur { color: var(--faint); font-size: 0.76rem; font-variant-numeric: tabular-nums; flex: none; }
 .tracklist li .name:hover { color: var(--accent); }
 .tracklist li.current { border-color: var(--accent); background: var(--accent-tint); }
@@ -400,9 +406,9 @@ h4 { margin: 0 0 12px; font-size: 0.98rem; display: flex; align-items: center; g
 .tags { display: inline-flex; gap: 5px; margin-left: 8px; vertical-align: middle; flex-wrap: wrap; flex: none; justify-content: flex-end; }
 .tag { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.02em; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); background: var(--surface); white-space: nowrap; }
 .tag-genre { text-transform: capitalize; }
-.tag.vibe-chill { color: #3a8fb0; border-color: #3a8fb055; background: #3a8fb016; }
+.tag.vibe-chill { color: var(--chill); border-color: color-mix(in srgb, var(--chill) 40%, transparent); background: color-mix(in srgb, var(--chill) 10%, transparent); }
 .tag.vibe-warm { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); background: var(--warn-tint); }
-.tag.vibe-lively { color: #d9704e; border-color: #d9704e66; background: #d9704e1f; }
+.tag.vibe-lively { color: var(--lively); border-color: color-mix(in srgb, var(--lively) 40%, transparent); background: color-mix(in srgb, var(--lively) 12%, transparent); }
 .tag.tag-like { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); background: var(--accent-tint); }
 .tag.tag-less { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); background: var(--warn-tint); }
 .tag.tag-dislike { color: var(--bad, #c0392b); border-color: color-mix(in srgb, var(--bad, #c0392b) 45%, transparent); background: var(--bad-tint, #c0392b14); }
