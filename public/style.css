@@ -221,15 +221,10 @@ input[type='range']::-moz-range-thumb { width: 28px; height: 28px; border: 3px s
 .chip select, .chip input[type='time'] { background: transparent; border: none; color: var(--text); font: inherit; font-size: 0.82rem; cursor: pointer; padding: 0; }
 .chip select:focus, .chip input[type='time']:focus { outline: none; }
 /* scenes = time blocks (own row); genres = a second, scrollable row below */
-.scenes { display: flex; flex-wrap: wrap; gap: 10px; margin: 32px 0 12px; max-width: var(--ctl, 460px); }
-/* mood filter (All / Chill / Lively) that stacks on the genre pick */
-.vibe-filter { display: inline-flex; gap: 4px; padding: 4px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; margin: 0 0 12px; }
-.vf-opt { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 16px; border: none; background: transparent; color: var(--muted); border-radius: 8px; font: inherit; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: color 0.14s ease, background 0.14s ease; }
-.vf-opt:hover { color: var(--text); }
-.vf-opt.on { background: var(--play-tint); color: var(--play); box-shadow: inset 0 0 0 1px var(--play); }
-.genres { display: flex; flex-wrap: nowrap; gap: 10px; margin: 0 0 6px; max-width: var(--ctl, 460px); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-.genres::-webkit-scrollbar { display: none; }
-.genres .scene { flex: 0 0 auto; }
+.scenes { display: flex; flex-wrap: wrap; gap: 10px; margin: 32px 0 18px; max-width: var(--ctl, 460px); }
+/* "Browse genres" section heading + a wrapping row (no more cut-off) */
+.genre-head { color: var(--faint); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 10px; max-width: var(--ctl, 460px); }
+.genres { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 6px; max-width: var(--ctl, 460px); }
 .scene { display: inline-flex; align-items: center; gap: 7px; padding: 12px 20px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: inherit; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: border-color 0.14s ease, color 0.14s ease, background 0.14s ease; }
 .scene-ic { font-size: 1.05rem; }
 .scene:hover:not(:disabled) { border-color: var(--play); }

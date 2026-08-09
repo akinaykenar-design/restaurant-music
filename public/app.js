@@ -683,35 +683,33 @@ $('volume').addEventListener('change', () => { if (!venueMode) saveSettings({ vo
 function renderScenes() {
   const box = $('scenes'); if (!box) return;
   box.innerHTML = '';
-  const sched = document.createElement('button');
-  sched.className = 'scene scene-auto' + (!activeScene && state.settings.followSchedule ? ' on' : '');
-  sched.title = 'Follow the weekly schedule automatically';
-  sched.innerHTML = '<span class="scene-ic">🗓️</span>Schedule';
-  sched.addEventListener('click', () => {
-    activeScene = null;
-    saveSettings({ followSchedule: true, scene: '' });
-    if (venueMode) { venuePost('/api/player/play', { token: 'schedule' }).then(() => pollVenueSoon()); renderScenes(); return; }
-    applySchedule(true);
-    renderScenes();
-  });
-  box.appendChild(sched);
-
   const now = new Date();
   const dk = dayKey(now);
-  const nowBlk = currentBlock(now);
+  const nowBlk = currentBlock(now); // the block the schedule is on right now
+  const following = !activeScene && state.settings.followSchedule !== false;
   (state.blocks || []).forEach((blk) => {
     const val = (state.schedule[dk] && state.schedule[dk][blk.id]) || '';
     const r = resolveScheduled(val);
     const has = !!(r && r.files.length);
-    // Highlight only a manual override — in auto mode the "Schedule" button is
-    // lit and the eyebrow shows the current block, so blocks stay un-selected.
-    const isActive = activeScene === 'block:' + blk.id;
+    // No more "Schedule" button: when we're following the schedule, the block
+    // that matches the clock is auto-highlighted; a manual pick highlights that.
+    const isActive = activeScene === 'block:' + blk.id || (following && nowBlk && blk.id === nowBlk.id);
     const b = document.createElement('button');
     b.className = 'scene' + (isActive ? ' on' : '');
     b.textContent = blk.label;
     b.disabled = !has;
     b.title = has ? 'Play the ' + blk.label + ' set now' : 'Nothing set for ' + blk.label + ' — set it on the Schedule tab';
-    if (has) b.addEventListener('click', () => playBlock(blk.id));
+    if (has) b.addEventListener('click', () => {
+      // Tapping the current-clock block resumes auto (keeps switching by time);
+      // tapping any other block is a manual override.
+      if (nowBlk && blk.id === nowBlk.id) {
+        activeScene = null; saveSettings({ followSchedule: true, scene: '' });
+        if (venueMode) { venuePost('/api/player/play', { token: 'schedule' }).then(() => pollVenueSoon()); renderScenes(); return; }
+        applySchedule(true); renderScenes();
+      } else {
+        playBlock(blk.id);
+      }
+    });
     box.appendChild(b);
   });
 
@@ -836,6 +834,7 @@ function updateColHead() {
 updateColHead();
 $('lib-playall').addEventListener('click', () => {
   playVibeAll();
+  activeScene = 'all'; renderScenes(); // "All" is the active pick — clear block/genre highlights
   const nowTab = document.querySelector('.tab[data-tab="now"]'); if (nowTab) nowTab.click();
 });
 
