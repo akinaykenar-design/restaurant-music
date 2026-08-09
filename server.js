@@ -737,26 +737,34 @@ app.get('/api/find', async (req, res) => {
   // Pixabay, so it's fully safe to play without crediting anyone. page_size is
   // capped at 20 for anonymous requests (more returns 401), so pull the first
   // few pages and combine them for a decent set.
-  const PAGES = 4;
+  const PAGES = 6;
   const mkUrl = (pg) => base + '?license=cc0,pdm&page_size=20&page=' + pg + '&q=' + encodeURIComponent(q);
   try {
     const pages = await Promise.all(
       Array.from({ length: PAGES }, (_, i) => fetchJson(mkUrl(i + 1)).catch(() => null))
     );
     if (!pages.some(Boolean)) throw new Error('no pages');
+    // De-dupe by id AND by title+artist (the same track shows up from several
+    // providers), so the list isn't padded with duplicates.
     const seenId = new Set();
+    const seenKey = new Set();
     const combined = [];
     for (const pj of pages) {
       for (const t of (pj && pj.results) || []) {
-        if (t && t.id && !seenId.has(t.id)) { seenId.add(t.id); combined.push(t); }
+        if (!t || !t.id || seenId.has(t.id)) continue;
+        const key = (String(t.title || '') + '|' + String(t.creator || '')).toLowerCase().replace(/\s+/g, ' ').trim();
+        if (key && seenKey.has(key)) continue;
+        seenId.add(t.id); if (key) seenKey.add(key);
+        combined.push(t);
       }
     }
-    const j = { results: combined, result_count: (pages.find(Boolean) || {}).result_count };
+    const j = { results: combined };
     // Attribution-free only (CC0 / public domain) — belt-and-braces.
     const venueOk = (t) => /^(cc0|pdm)$/i.test(String(t.license || ''));
-    // Drop sound-effects/audiobooks — keep music (or untagged). Freesound is
-    // mostly effects, so treat its untagged items as non-music too.
-    const isMusic = (t) => t.category ? t.category === 'music' : String(t.source || '').toLowerCase() !== 'freesound';
+    // Keep music, not sound-effects/audiobooks (Freesound is mostly effects),
+    // and drop anything under 45s — those are loops/stingers, not venue tracks.
+    const isMusic = (t) => (t.category ? t.category === 'music' : String(t.source || '').toLowerCase() !== 'freesound')
+      && !(t.duration && t.duration < 45000);
     // Rank (don't hard-filter) by how well each result matches — so a genre
     // search floats tag-matches to the top but still shows everything the
     // search found, rather than throwing away results that just aren't tagged.
@@ -772,10 +780,13 @@ app.get('/api/find', async (req, res) => {
       const titleS = hits((t.title || '').toLowerCase());
       return by === 'title' ? titleS * 3 + tagS : tagS * 3 + titleS; // weight the chosen field
     };
-    let pool = (j.results || []).filter((t) => venueOk(t) && isMusic(t));
-    pool = pool.map((t, i) => ({ t, s: scoreOf(t), i }))
-      .sort((a, b) => b.s - a.s || a.i - b.i) // best match first, stable otherwise
-      .map((x) => x.t);
+    let ranked = (j.results || []).filter((t) => venueOk(t) && isMusic(t))
+      .map((t, i) => ({ t, s: scoreOf(t), i }))
+      .sort((a, b) => b.s - a.s || a.i - b.i); // best match first, stable otherwise
+    // Drop zero-match noise only when there are enough relevant hits, so we
+    // stay relevant without ever emptying the list on a sparse CC0 term.
+    const relevant = ranked.filter((x) => x.s > 0);
+    let pool = (relevant.length >= 8 ? relevant : ranked).map((x) => x.t);
     const results = pool.map((t) => ({
       title: t.title || 'Untitled',
       artist: t.creator || '',
