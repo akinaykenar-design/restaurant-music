@@ -616,6 +616,8 @@ function nowPlayingSeed() {
   else { file = queue[queueIndex]; }
   const t = file && library.find((x) => x.file === file);
   if (t) { genre = genre || t.genre || ''; vibe = t.vibe || ''; }
+  // clean up genre strings like "Rap/Hip Hop" into a searchable phrase
+  genre = genre.replace(/[/,&|]+/g, ' ').replace(/\s+/g, ' ').trim();
   if (genre) return genre;
   const words = (venueState && venueState.title) || (t && t.title) || '';
   const kw = words.replace(/[^a-z0-9 ]/gi, ' ').split(/\s+/).filter((w) => w.length > 3).slice(0, 2).join(' ');
