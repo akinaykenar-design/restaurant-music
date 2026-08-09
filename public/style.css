@@ -127,8 +127,8 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 .player > * { position: relative; z-index: 1; }
 .player-bg { position: absolute; inset: 0; z-index: 0; background-size: cover; background-position: center; filter: blur(26px) saturate(1.25) brightness(0.62); opacity: 0; transform: scale(1.15); transition: opacity 0.5s ease; pointer-events: none; }
 .player.has-art .player-bg { opacity: 0.96; filter: blur(7px) saturate(1.4) brightness(0.78); }
-/* colour wash for tracks with no cover art — a soft blurred gradient */
-.player.has-wash .player-bg { opacity: 0.5; filter: blur(34px) saturate(1.2) brightness(0.85); }
+/* colour wash for tracks with no cover art — a vivid blurred gradient */
+.player.has-wash .player-bg { opacity: 0.82; filter: blur(36px) saturate(1.6) brightness(1.15); }
 /* light scrim only behind the text so the cover/wash shows yet stays legible */
 .player.has-art::after, .player.has-wash::after { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(130% 100% at 50% 60%, color-mix(in srgb, var(--surface) 55%, transparent) 0%, color-mix(in srgb, var(--surface) 18%, transparent) 72%); }
 .art {
