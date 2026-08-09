@@ -54,7 +54,7 @@ function defaultData() {
     blocks, days, schedule, playlists: {}, autoPlaylists: [], ratings: {}, meta: {},
     settings: {
       venueName: 'Watermans',
-      volume: 0.8, followSchedule: true, shuffle: true, crossfade: 4,
+      volume: 0.8, venueVolume: 80, followSchedule: true, shuffle: true, crossfade: 4,
       afterHoursPassword: 'staff', // change it in the unlocked panel
     },
   };
@@ -699,43 +699,85 @@ function mp3ByteRate(buf) {
   return 20000; // sensible default (160 kbps)
 }
 
+// Build a weighted, shuffled play order from a track list: banned tracks never
+// play, "less" tracks appear less, liked tracks more.
+function buildQueue(tracks) {
+  tracks = (tracks || []).filter((f) => fs.existsSync(path.join(MUSIC_DIR, f)));
+  const ratings = data.ratings || {};
+  const weightOf = (r) => (r === 'like' ? 3 : r === 'less' ? 1 : 2);
+  let pool = tracks.filter((f) => ratings[f] !== 'dislike');
+  if (!pool.length) pool = tracks.slice();
+  const weighted = [];
+  for (const f of pool) { const w = weightOf(ratings[f]); for (let k = 0; k < w; k++) weighted.push(f); }
+  if (data.settings.shuffle !== false) {
+    for (let i = weighted.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [weighted[i], weighted[j]] = [weighted[j], weighted[i]];
+    }
+  }
+  return weighted;
+}
+
+// Resolve a schedule cell / token to a list of files. Tokens: "style:Chill",
+// "genre:Deep House", or a playlist name.
+function resolveTokenFiles(val) {
+  if (!val) return [];
+  if (val.slice(0, 6) === 'style:') { const s = val.slice(6); return scanLibrary().filter((t) => t.vibe === s).map((t) => t.file); }
+  if (val.slice(0, 6) === 'genre:') { const g = val.slice(6); return scanLibrary().filter((t) => (t.genre || '') === g).map((t) => t.file); }
+  const pl = data.playlists[val];
+  return pl ? pl.slice() : [];
+}
+
+// Resolve a "play this now on the venue" token from the app into files + label.
+// Tokens: "block:ID", "style:X", "genre:X", or a playlist name.
+function resolvePlayToken(token) {
+  if (!token) return { files: [], label: '' };
+  if (token.slice(0, 6) === 'block:') {
+    const bid = token.slice(6);
+    const now = new Date();
+    const dk = dayKey(now);
+    const val = data.schedule[dk] && data.schedule[dk][bid];
+    const blk = data.blocks.find((b) => b.id === bid);
+    return { files: resolveTokenFiles(val), label: (blk && blk.label) || 'Block' };
+  }
+  if (token.slice(0, 6) === 'genre:') return { files: resolveTokenFiles(token), label: 'Genre · ' + token.slice(6) };
+  if (token.slice(0, 6) === 'style:') return { files: resolveTokenFiles(token), label: token.slice(6) };
+  return { files: resolveTokenFiles(token), label: token };
+}
+
 const station = {
   queue: [],
   idx: 0,
   blockKey: null,
+  override: null, // {label} while a manual override is active; null = follow schedule
   // Recompute the queue from the schedule; never leave the venue silent.
   refresh(force) {
+    if (this.override) return; // a manual override holds until "Schedule" is tapped
     const now = new Date();
     const key = dayKey(now) + '/' + currentBlockId(now);
     if (!force && key === this.blockKey && this.queue.length) return;
     this.blockKey = key;
     const [dk, bk] = key.split('/');
-    let tracks = [];
-    const name = data.schedule[dk] && data.schedule[dk][bk];
-    if (name && data.playlists[name] && data.playlists[name].length) tracks = data.playlists[name].slice();
+    let tracks = resolveTokenFiles(data.schedule[dk] && data.schedule[dk][bk]);
     if (!tracks.length) {
       const pn = Object.keys(data.playlists).find((n) => (data.playlists[n] || []).length);
       if (pn) tracks = data.playlists[pn].slice();
     }
     if (!tracks.length) tracks = scanLibrary().map((t) => t.file); // fall back to whole library
-    tracks = tracks.filter((f) => fs.existsSync(path.join(MUSIC_DIR, f)));
-
-    // Smart rotation: banned (disliked) tracks never play; "less" tracks play
-    // less often but still reappear; liked tracks play more. Then shuffle.
-    const ratings = data.ratings || {};
-    const weightOf = (r) => (r === 'like' ? 3 : r === 'less' ? 1 : 2);
-    let pool = tracks.filter((f) => ratings[f] !== 'dislike');
-    if (!pool.length) pool = tracks.slice();
-    const weighted = [];
-    for (const f of pool) { const w = weightOf(ratings[f]); for (let k = 0; k < w; k++) weighted.push(f); }
-    if (data.settings.shuffle !== false) {
-      for (let i = weighted.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [weighted[i], weighted[j]] = [weighted[j], weighted[i]];
-      }
-    }
-    this.queue = weighted;
+    this.queue = buildQueue(tracks);
     if (this.idx >= this.queue.length) this.idx = 0;
+  },
+  // Play a specific set now (scene / block / genre override).
+  playFiles(files, label) {
+    this.override = { label: label || 'Playing now' };
+    this.queue = buildQueue(files);
+    this.idx = 0;
+  },
+  // Hand control back to the weekly schedule.
+  followSchedule() {
+    this.override = null;
+    this.blockKey = null;
+    this.refresh(true);
   },
   current() {
     return this.queue[this.idx];
@@ -746,6 +788,10 @@ const station = {
       this.idx = 0;
       this.refresh(true);
     }
+  },
+  prev() {
+    if (!this.queue.length) return;
+    this.idx = (this.idx - 1 + this.queue.length) % this.queue.length;
   },
 };
 
@@ -825,6 +871,37 @@ const HEADLESS_PLAYER = process.env.PLAYER === '1';
 let playerProc = null;
 let playerPaused = false;
 let playerBroken = false;
+// When we kill the current track to jump somewhere specific (play a scene /
+// go to previous), the exit handler must NOT auto-advance to the next track —
+// the queue has already been repositioned. This flag suppresses that advance
+// for exactly one exit.
+let playerNoAdvance = false;
+
+// Title / artist / genre for the venue "now playing" readout.
+function trackInfo(file) {
+  if (!file) return { title: null, artist: null, genre: null };
+  let m = {};
+  try { m = trackMeta(file) || {}; } catch { m = {}; }
+  return {
+    title: (m.title && m.title.trim()) || prettyTitle(file),
+    artist: (m.artist && m.artist.trim()) || null,
+    genre: (data.genres && data.genres[file]) || m.genre || null,
+  };
+}
+
+// Push the venue volume to the sound card. On the Pi the 3.5mm jack is card 2
+// (bcm2835 Headphones); amixer's control there is "PCM". Best-effort: if amixer
+// or the control name differs, we just skip — the app volume still tracks it.
+function applyVenueVolume(level) {
+  if (!HEADLESS_PLAYER) return;
+  const pct = Math.max(0, Math.min(100, Math.round(level)));
+  try {
+    const card = process.env.AUDIO_CARD || '2';
+    const ctrl = process.env.AUDIO_CONTROL || 'PCM';
+    const amix = spawn('amixer', ['-c', card, 'sset', ctrl, pct + '%', 'unmute']);
+    amix.on('error', () => { /* amixer missing / control differs — ignore */ });
+  } catch { /* ignore */ }
+}
 
 function playerPlayCurrent() {
   if (!HEADLESS_PLAYER || playerPaused || playerBroken || playerProc) return;
@@ -844,20 +921,36 @@ function playerPlayCurrent() {
   playerProc.on('exit', () => {
     playerProc = null;
     if (!HEADLESS_PLAYER || playerPaused || playerBroken) return;
+    if (playerNoAdvance) { playerNoAdvance = false; playerPlayCurrent(); return; }
     station.advance();
     playerPlayCurrent();
   });
 }
 
+// Repoint the venue player to whatever station.current() now is, killing the
+// track in progress without letting the exit handler skip forward.
+function playerRestart() {
+  if (!HEADLESS_PLAYER || playerBroken) return;
+  playerPaused = false;
+  if (playerProc) { playerNoAdvance = true; playerProc.kill('SIGTERM'); }
+  else playerPlayCurrent();
+}
+
 app.get('/api/player/state', (_req, res) => {
   const track = station.current() || null;
+  const info = trackInfo(track);
   res.json({
     enabled: HEADLESS_PLAYER,
     broken: playerBroken,
     paused: playerPaused,
     playing: !!playerProc && !playerPaused,
     track,
-    title: track ? prettyTitle(track) : null,
+    title: info.title,
+    artist: info.artist,
+    genre: info.genre,
+    mode: station.override ? station.override.label : 'Schedule',
+    onSchedule: !station.override,
+    volume: data.settings.venueVolume != null ? data.settings.venueVolume : 80,
   });
 });
 
@@ -869,9 +962,40 @@ app.post('/api/player/skip', (_req, res) => {
   res.json({ ok: true, track: station.current() || null });
 });
 
+app.post('/api/player/prev', (_req, res) => {
+  station.prev();
+  playerRestart();
+  res.json({ ok: true, track: station.current() || null });
+});
+
+// Play a scene / block / genre now, or hand back to the weekly schedule when
+// token === 'schedule'.
+app.post('/api/player/play', (req, res) => {
+  const token = (req.body && req.body.token) || '';
+  if (token === 'schedule' || token === 'block:schedule') {
+    station.followSchedule();
+  } else {
+    const { files, label } = resolvePlayToken(token);
+    if (!files.length) return res.status(400).json({ ok: false, error: 'nothing to play for ' + token });
+    station.playFiles(files, label);
+  }
+  playerRestart();
+  res.json({ ok: true, track: station.current() || null, mode: station.override ? station.override.label : 'Schedule' });
+});
+
+app.post('/api/player/volume', (req, res) => {
+  let level = Number(req.body && req.body.level);
+  if (!Number.isFinite(level)) return res.status(400).json({ ok: false, error: 'bad level' });
+  level = Math.max(0, Math.min(100, Math.round(level)));
+  data.settings.venueVolume = level;
+  saveData(data);
+  applyVenueVolume(level);
+  res.json({ ok: true, volume: level });
+});
+
 app.post('/api/player/pause', (_req, res) => {
   playerPaused = !playerPaused;
-  if (playerPaused) { if (playerProc) playerProc.kill('SIGTERM'); }
+  if (playerPaused) { if (playerProc) { playerNoAdvance = true; playerProc.kill('SIGTERM'); } }
   else playerPlayCurrent();
   res.json({ ok: true, paused: playerPaused });
 });
@@ -886,6 +1010,7 @@ app.listen(PORT, HOST, () => {
   startBroadcast();
   if (HEADLESS_PLAYER) {
     console.log('Headless player ON — playing scheduled music out this device.');
+    applyVenueVolume(data.settings.venueVolume != null ? data.settings.venueVolume : 80);
     station.refresh(true);
     playerPlayCurrent();
   }

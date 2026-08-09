@@ -25,6 +25,21 @@ let active = 0;
 let crossing = false;
 let userVolume = 0.8;
 
+// ---- venue mode ------------------------------------------------------------
+// When the server runs the headless player (PLAYER=1 on the venue box), this
+// app IS the remote control for the room — every device that opens it drives
+// the one player on the box, not a local browser deck. venueMode is turned on
+// once at boot from /api/player/state.enabled; while it's on, transport,
+// scenes, volume and ratings all talk to the box and the local decks stay
+// silent (so an iPad in the room never echoes the speakers).
+let venueMode = false;
+let venueState = null;
+let venuePollTimer = null;
+let venueVolPending = null; // debounce for volume writes to the box
+const venuePost = (path, body) =>
+  fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) })
+    .then((r) => r.json()).catch(() => null);
+
 const $ = (id) => document.getElementById(id);
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v); // HTMLMediaElement.volume must be in [0,1]
 const api = (url, opts) => fetch(url, opts).then((r) => r.json());
@@ -279,9 +294,10 @@ function updateMuteIcon() {
 $('mute').addEventListener('click', () => {
   if (userVolume > 0) { preMuteVol = userVolume; userVolume = 0; }
   else userVolume = preMuteVol || 0.8;
-  if (!crossing) activeDeck().volume = userVolume;
   $('volume').value = userVolume;
   updateMuteIcon();
+  if (venueMode) { setVenueVolume(userVolume); return; }
+  if (!crossing) activeDeck().volume = userVolume;
   saveSettings({ volume: userVolume });
 });
 
@@ -425,6 +441,7 @@ function beginCrossfade(cf) {
 }
 
 function skip(dir) {
+  if (venueMode) { venuePost(dir < 0 ? '/api/player/prev' : '/api/player/skip').then(() => setTimeout(pollVenueOnce, 300)); return; }
   if (!queue.length) return;
   crossing = false;
   otherDeck().pause();
@@ -450,8 +467,59 @@ decks.forEach((d, idx) => {
   d.addEventListener('pause', () => { if (idx === active && !crossing) setPlayingUI(false); });
 });
 
+// ---- venue remote: reflect the box's player in the Now Playing UI ----------
+function updateVenueUI(s) {
+  venueState = s;
+  const file = s.track;
+  $('now-title').textContent = s.title || (file ? titleOf(file) : 'Nothing playing');
+  const bits = [];
+  if (s.artist) bits.push(s.artist);
+  if (s.genre) bits.push(s.genre);
+  $('now-sub').textContent = bits.join(' · ') || (s.enabled ? 'Playing to the room' : '');
+  $('now-block').textContent = s.onSchedule ? 'On schedule' : (s.mode || 'Playing now');
+  if (file) { $('mini-title').textContent = s.title || titleOf(file); $('miniplayer').hidden = false; }
+  document.title = (s.title ? s.title + ' · ' : '') + 'Watermans Music';
+  setNowArt(file || null);
+  if (file) updateRateButtons(file);
+  setPlayingUI(!!s.playing);
+  // No per-track scrubbing to a live room — show a "live" marker, not a frozen 0:00.
+  $('pfill').style.width = s.playing ? '100%' : '0%';
+  $('t-cur').textContent = s.playing ? 'Live' : 'Paused';
+  $('t-dur').textContent = '';
+  // keep the volume slider in step with the box (without writing back)
+  if (s.volume != null && document.activeElement !== $('volume') && venueVolPending == null) {
+    userVolume = Math.max(0, Math.min(1, s.volume / 100));
+    $('volume').value = userVolume;
+    updateMuteIcon();
+  }
+  // Highlight the active scene button to match the box.
+  activeScene = s.onSchedule ? null : activeScene;
+}
+
+function pollVenueOnce() {
+  return api('/api/player/state').then((s) => {
+    if (s && s.enabled) { venueMode = true; updateVenueUI(s); }
+    return s;
+  }).catch(() => null);
+}
+
+function pollVenue() {
+  pollVenueOnce().finally(() => { venuePollTimer = setTimeout(pollVenue, 3000); });
+}
+
+// Volume in venue mode: write the level (0–100) to the box, debounced.
+function setVenueVolume(v01) {
+  const pct = Math.round(Math.max(0, Math.min(1, v01)) * 100);
+  venueVolPending = pct;
+  clearTimeout(setVenueVolume._t);
+  setVenueVolume._t = setTimeout(() => {
+    venuePost('/api/player/volume', { level: venueVolPending }).finally(() => { venueVolPending = null; });
+  }, 250);
+}
+
 // ---- transport + toggles ---------------------------------------------------
 $('playpause').addEventListener('click', () => {
+  if (venueMode) { venuePost('/api/player/pause').then((r) => { if (r) setPlayingUI(!r.paused); }); return; }
   if (!activeDeck().src || !queue.length) {
     const first = Object.keys(state.playlists).find((n) => (state.playlists[n] || []).length);
     if (first) { $('now-block').textContent = 'Playing now'; $('now-sub').textContent = 'Playlist: ' + first; loadQueue(state.playlists[first], true); }
@@ -466,8 +534,13 @@ $('prev').addEventListener('click', () => skip(-1));
 $('like').addEventListener('click', () => rate('like'));
 $('dislike').addEventListener('click', () => rate('dislike'));
 
-$('volume').addEventListener('input', (e) => { userVolume = Number(e.target.value); if (!crossing) activeDeck().volume = userVolume; updateMuteIcon(); });
-$('volume').addEventListener('change', () => saveSettings({ volume: userVolume }));
+$('volume').addEventListener('input', (e) => {
+  userVolume = Number(e.target.value);
+  updateMuteIcon();
+  if (venueMode) { setVenueVolume(userVolume); return; }
+  if (!crossing) activeDeck().volume = userVolume;
+});
+$('volume').addEventListener('change', () => { if (!venueMode) saveSettings({ volume: userVolume }); });
 
 // (Follow-schedule is now the "Schedule" scene button — no separate toggle.)
 
@@ -486,6 +559,7 @@ function renderScenes() {
   sched.addEventListener('click', () => {
     activeScene = null;
     saveSettings({ followSchedule: true, scene: '' });
+    if (venueMode) { venuePost('/api/player/play', { token: 'schedule' }).then(() => setTimeout(pollVenueOnce, 300)); renderScenes(); return; }
     applySchedule(true);
     renderScenes();
   });
@@ -536,6 +610,7 @@ function playBlock(blockId) {
   saveSettings({ followSchedule: false, scene: activeScene });
   $('now-block').textContent = (blk ? blk.label : 'Block') + ' · playing now';
   $('now-sub').textContent = r.label + ' · ' + r.files.length + ' track' + (r.files.length === 1 ? '' : 's');
+  if (venueMode) { venuePost('/api/player/play', { token: 'block:' + blockId }).then(() => setTimeout(pollVenueOnce, 300)); renderScenes(); return; }
   loadQueue(r.files, true);
   renderScenes();
 }
@@ -548,6 +623,7 @@ function playGenre(g) {
   saveSettings({ followSchedule: false, scene: activeScene });
   $('now-block').textContent = '♪ ' + g + ' · playing now';
   $('now-sub').textContent = g + ' · ' + files.length + ' track' + (files.length === 1 ? '' : 's');
+  if (venueMode) { venuePost('/api/player/play', { token: 'genre:' + g }).then(() => setTimeout(pollVenueOnce, 300)); renderScenes(); return; }
   loadQueue(files, true);
   renderScenes();
 }
@@ -598,6 +674,15 @@ function rateFile(file, kind) {
       renderQueue();
       renderEditor();
       toast(next === 'like' ? '♥ Liked — plays more often' : next === 'less' ? '↓ Plays less often (still reappears)' : next === 'dislike' ? '⊘ Banned — won\'t play' : 'Rating cleared');
+      if (venueMode) {
+        // On the box, a ban/less on the playing track fades off to another one
+        // (the box rebuilds its queue without the banned track on the next skip).
+        const cur2 = venueState && venueState.track;
+        if ((next === 'dislike' || next === 'less') && file === cur2) {
+          venuePost('/api/player/skip').then(() => setTimeout(pollVenueOnce, 300));
+        }
+        return next;
+      }
       if (next === 'dislike' && file === cur) {
         // Banned the track that's playing to the room — don't hard-cut it;
         // gently fade across to the next track so guests hear a smooth change.
@@ -609,7 +694,7 @@ function rateFile(file, kind) {
       return next;
     });
 }
-function rate(kind) { const f = queue[queueIndex]; if (f) rateFile(f, kind); }
+function rate(kind) { const f = venueMode ? (venueState && venueState.track) : queue[queueIndex]; if (f) rateFile(f, kind); }
 function updateRateButtons(file) {
   const r = ratingOf(file);
   $('like').classList.toggle('on', r === 'like');
@@ -658,6 +743,7 @@ function renderHistory() {
 
 // ---- schedule engine -------------------------------------------------------
 function applySchedule(force) {
+  if (venueMode) return; // the box follows the schedule server-side; UI is fed by pollVenue
   if (!state.settings.followSchedule) return;
   const now = new Date();
   const dk = dayKey(now);
@@ -1487,14 +1573,24 @@ async function boot() {
   renderQueue();
   renderHistory();
   renderScenes();
-  applySchedule(true);
-  // Re-apply a saved override (e.g. the venue box rebooted mid-service).
-  const savedScene = String(state.settings.scene || '');
-  if (!state.settings.followSchedule && savedScene.slice(0, 6) === 'block:') {
-    const bid = savedScene.slice(6);
-    if ((state.blocks || []).some((b) => b.id === bid)) playBlock(bid);
-  } else if (!state.settings.followSchedule && savedScene.slice(0, 6) === 'genre:') {
-    playGenre(savedScene.slice(6));
+
+  // Is the server running the room (headless player)? If so this app is the
+  // remote control — start polling the box and skip all local playback.
+  const pstate = await pollVenueOnce();
+  venueMode = !!(pstate && pstate.enabled);
+
+  if (venueMode) {
+    venuePollTimer = setTimeout(pollVenue, 3000);
+  } else {
+    applySchedule(true);
+    // Re-apply a saved override (e.g. the venue box rebooted mid-service).
+    const savedScene = String(state.settings.scene || '');
+    if (!state.settings.followSchedule && savedScene.slice(0, 6) === 'block:') {
+      const bid = savedScene.slice(6);
+      if ((state.blocks || []).some((b) => b.id === bid)) playBlock(bid);
+    } else if (!state.settings.followSchedule && savedScene.slice(0, 6) === 'genre:') {
+      playGenre(savedScene.slice(6));
+    }
   }
   loadStreamInfo();
   setupUpload();
