@@ -732,17 +732,27 @@ async function fetchJson(url) {
 app.get('/api/find', async (req, res) => {
   const q = String(req.query.q || '').trim();
   if (!q) return res.json({ results: [], count: 0 });
-  const page = Math.max(1, Math.min(20, Number(req.query.page) || 1));
   const base = process.env.OPENVERSE_BASE || 'https://api.openverse.org/v1/audio/';
   // Commercially-usable, attribution-satisfiable licences: CC0/PDM (no credit)
   // plus CC-BY (credit the artist — which we do by showing the artist on the
   // Now Playing display, a reasonable-manner attribution for background music).
-  // page_size is capped at 20 for anonymous requests (more returns 401), and
-  // category=music also 401s anonymously, so we filter sound-effects below.
-  const url = base + '?license=cc0,pdm,by&page_size=20'
-    + '&page=' + page + '&q=' + encodeURIComponent(q);
+  // page_size is capped at 20 for anonymous requests (more returns 401), so to
+  // give a decent set we pull the first few pages and combine them.
+  const PAGES = 4;
+  const mkUrl = (pg) => base + '?license=cc0,pdm,by&page_size=20&page=' + pg + '&q=' + encodeURIComponent(q);
   try {
-    const j = await fetchJson(url);
+    const pages = await Promise.all(
+      Array.from({ length: PAGES }, (_, i) => fetchJson(mkUrl(i + 1)).catch(() => null))
+    );
+    if (!pages.some(Boolean)) throw new Error('no pages');
+    const seenId = new Set();
+    const combined = [];
+    for (const pj of pages) {
+      for (const t of (pj && pj.results) || []) {
+        if (t && t.id && !seenId.has(t.id)) { seenId.add(t.id); combined.push(t); }
+      }
+    }
+    const j = { results: combined, result_count: (pages.find(Boolean) || {}).result_count };
     // Venue-usable licences: no-credit (cc0/pdm) or credit-by-artist (by).
     const venueOk = (t) => /^(cc0|pdm|by)$/i.test(String(t.license || ''));
     // Drop sound-effects/audiobooks — keep music (or untagged). Freesound is
@@ -779,7 +789,7 @@ app.get('/api/find', async (req, res) => {
       ext: String(t.filetype || 'mp3').toLowerCase(),
       source: t.source || '',
     })).filter((t) => t.preview);
-    res.json({ results, count: j.result_count || results.length, page });
+    res.json({ results, count: results.length });
   } catch (e) {
     res.status(502).json({ error: 'search unavailable (is the box online?)', detail: e.message });
   }
