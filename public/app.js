@@ -637,8 +637,6 @@ function renderFindChips() {
     b.addEventListener('click', () => runFind(q));
     box.appendChild(b);
   };
-  const playing = (venueMode && venueState && venueState.track) || queue[queueIndex];
-  if (playing) chip('🎧 More like now playing', nowPlayingSeed(), 'find-chip-now');
   const seen = new Set();
   // categories you already have in your library first…
   [...new Set(library.filter((t) => !t.licensed).map((t) => t.genre).filter(Boolean))]
@@ -655,7 +653,8 @@ function runFind(q) {
   if (!q || !q.trim()) return;
   if (status) status.textContent = 'Searching…';
   list.innerHTML = '';
-  api('/api/find?q=' + encodeURIComponent(q.trim())).then((d) => {
+  const by = ($('find-by') && $('find-by').value) || 'genre';
+  api('/api/find?by=' + by + '&q=' + encodeURIComponent(q.trim())).then((d) => {
     if (!d || d.error) { if (status) status.textContent = ((d && d.error) || 'Search failed.') + (d && d.detail ? ' (' + d.detail + ')' : ''); return; }
     const rs = d.results || [];
     if (!rs.length) { if (status) status.textContent = 'Nothing found — try another search.'; return; }

@@ -748,19 +748,24 @@ app.get('/api/find', async (req, res) => {
     // Drop sound-effects/audiobooks — keep music (or untagged). Freesound is
     // mostly effects, so treat its untagged items as non-music too.
     const isMusic = (t) => t.category ? t.category === 'music' : String(t.source || '').toLowerCase() !== 'freesound';
-    // Match the query against each track's GENRES + TAGS (not just the title),
-    // so a genre search actually returns that genre. Fall back to a title/tag
-    // match only if nothing is tagged for it.
+    // Match by genre tags (default) or by title, per the ?by= toggle.
+    const by = String(req.query.by || 'genre').toLowerCase();
     const qWords = q.toLowerCase().split(/[\s/,&|-]+/).filter((w) => w.length > 2);
     const tagText = (t) => (
       (Array.isArray(t.genres) ? t.genres.join(' ') : '') + ' ' +
       (Array.isArray(t.tags) ? t.tags.map((x) => (x && x.name) || x || '').join(' ') : '')
     ).toLowerCase();
-    const onGenre = (t) => qWords.length === 0 || qWords.every((w) => tagText(t).includes(w));
     let pool = (j.results || []).filter((t) => venueOk(t) && isMusic(t));
-    const tagged = pool.filter(onGenre);
-    if (tagged.length) pool = tagged;
-    else pool = pool.filter((t) => qWords.every((w) => (tagText(t) + ' ' + (t.title || '').toLowerCase()).includes(w)));
+    if (by === 'title') {
+      // title match; fall back to the full pool if too strict
+      const byTitle = pool.filter((t) => qWords.every((w) => (t.title || '').toLowerCase().includes(w)));
+      if (byTitle.length) pool = byTitle;
+    } else {
+      // genre/tags match; fall back to title+tags, then the full pool
+      const tagged = pool.filter((t) => qWords.length === 0 || qWords.every((w) => tagText(t).includes(w)));
+      if (tagged.length) pool = tagged;
+      else pool = pool.filter((t) => qWords.every((w) => (tagText(t) + ' ' + (t.title || '').toLowerCase()).includes(w)));
+    }
     const results = pool.map((t) => ({
       title: t.title || 'Untitled',
       artist: t.creator || '',

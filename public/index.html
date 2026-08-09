@@ -123,7 +123,7 @@
         <div class="lib-easy">
 
           <div class="card lib-steps">
-            <div class="pill-add">+ Music</div>
+            <div class="pill-add">+music</div>
             <div id="dropzone" class="dropzone" role="button" tabindex="0" title="Drop music here, or click to add files">
               <svg class="dz-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4m0 0 4 4m-4-4-4 4"/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg>
               <input type="file" id="file-input" accept="audio/*,.mp3,.m4a,.aac,.ogg,.wav,.flac" multiple hidden />
@@ -137,10 +137,13 @@
           </div>
 
           <div class="card find-card" id="find-card">
-            <h4>🔎 Find royalty-free music</h4>
-            <p class="hint">Search free tracks and add them straight to your library — all cleared for venue use. Each result shows its licence: <b>CC0</b> needs no credit; <b>CC-BY</b> is credited automatically by showing the artist on Now Playing. Try <i>organic house</i>, <i>deep house</i>, <i>balearic</i>, <i>chillout</i>.</p>
+            <div class="pill-add">+findmusic</div>
             <div class="find-row">
               <input id="find-q" type="text" placeholder="Search royalty-free music…" autocomplete="off" />
+              <select id="find-by" class="find-by" aria-label="Search by" title="Match by genre tags or by title">
+                <option value="genre">by genre</option>
+                <option value="title">by title</option>
+              </select>
               <button id="find-go" class="ghost">Search</button>
             </div>
             <div id="find-chips" class="find-chips"></div>
