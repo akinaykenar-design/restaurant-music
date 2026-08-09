@@ -882,6 +882,15 @@ $('crossfade').addEventListener('change', (e) => saveSettings({ crossfade: Numbe
 $('lib-search').addEventListener('input', (e) => { libFilter = e.target.value.trim().toLowerCase(); renderEditor(); });
 $('lib-genre').addEventListener('change', (e) => { libGenre = e.target.value; renderEditor(); });
 $('lib-sort').addEventListener('change', (e) => { libSort = e.target.value; renderEditor(); });
+$('lib-playall').addEventListener('click', () => {
+  const files = library.filter((t) => !t.licensed).map((t) => t.file);
+  if (!files.length) return;
+  if (venueMode) { venuePost('/api/player/play', { token: 'all' }).then(() => pollVenueSoon()); return; }
+  activeScene = null; saveSettings({ followSchedule: false, scene: '' });
+  $('now-block').textContent = 'All music'; $('now-sub').textContent = files.length + ' track' + (files.length === 1 ? '' : 's');
+  loadQueue(files, true);
+  const nowTab = document.querySelector('.tab[data-tab="now"]'); if (nowTab) nowTab.click();
+});
 
 // keyboard shortcuts (ignored while typing in a field)
 document.addEventListener('keydown', (e) => {

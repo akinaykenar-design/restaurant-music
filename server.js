@@ -1015,6 +1015,8 @@ function resolveTokenFiles(val) {
   if (!val) return [];
   // The after-hours set is ONLY the licensed tracks.
   if (val === 'afterhours') return scanLibrary().filter((t) => t.licensed).map((t) => t.file);
+  // "all" = the whole trading-hours library (never the licensed tracks).
+  if (val === 'all') return scanLibrary().filter((t) => !t.licensed).map((t) => t.file);
   // Everything else is trading-hours music — licensed tracks are excluded so
   // they can never reach guests, no matter how the schedule is set up.
   const noLic = (files) => files.filter((f) => !isLicensed(f));
@@ -1037,6 +1039,7 @@ function resolvePlayToken(token) {
     return { files: resolveTokenFiles(val), label: (blk && blk.label) || 'Block' };
   }
   if (token === 'afterhours') return { files: resolveTokenFiles('afterhours'), label: 'After hours (licensed)' };
+  if (token === 'all') return { files: resolveTokenFiles('all'), label: 'All music' };
   if (token.slice(0, 6) === 'genre:') return { files: resolveTokenFiles(token), label: 'Genre · ' + token.slice(6) };
   if (token.slice(0, 6) === 'style:') return { files: resolveTokenFiles(token), label: token.slice(6) };
   return { files: resolveTokenFiles(token), label: token };
