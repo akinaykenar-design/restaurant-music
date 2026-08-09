@@ -124,15 +124,15 @@
 
           <div class="card lib-steps">
             <div class="pill-add">+music</div>
-            <div id="dropzone" class="dropzone" role="button" tabindex="0" title="Drop music here, or click to add files">
-              <svg class="dz-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4m0 0 4 4m-4-4-4 4"/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg>
-              <input type="file" id="file-input" accept="audio/*,.mp3,.m4a,.aac,.ogg,.wav,.flac" multiple hidden />
-              <input type="file" id="folder-input" webkitdirectory directory multiple hidden />
-              <div id="upload-status" class="upload-status"></div>
+            <div class="lib-add-row">
+              <div id="dropzone" class="dropzone" role="button" tabindex="0" title="Drop music here, or click to add files">
+                <svg class="dz-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4m0 0 4 4m-4-4-4 4"/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg>
+                <input type="file" id="file-input" accept="audio/*,.mp3,.m4a,.aac,.ogg,.wav,.flac" multiple hidden />
+                <input type="file" id="folder-input" webkitdirectory directory multiple hidden />
+                <div id="upload-status" class="upload-status"></div>
+              </div>
+              <button id="auto-all" class="auto-all-btn">✨ Auto-categorise<small>Tag every track Chill / Lively</small></button>
             </div>
-
-            <div class="lib-step-h"><h3>Auto-categorise</h3><div class="hint">Listens to every track and tags its <b>style</b> — Chill or Lively. That's all this does. (Choosing what plays when happens on the Schedule tab.)</div></div>
-            <button id="auto-all" class="auto-all-btn">✨ Auto-categorise<small>Tags every track by style</small></button>
             <div id="analyze-status" class="upload-status auto-status"></div>
           </div>
 

@@ -185,13 +185,13 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 #like.on { color: var(--warn); border-color: var(--warn); background: var(--warn-tint); }
 #dislike.on { color: var(--bad); border-color: var(--bad); background: var(--bad-tint); }
 
-.vol-row { display: flex; align-items: center; gap: 14px; max-width: var(--ctl, 460px); margin: 26px 0 24px; }
+.vol-row { display: flex; align-items: center; gap: 14px; max-width: var(--ctl, 460px); margin: 34px 0 14px; }
 .vic { width: 24px; height: 24px; fill: var(--muted); flex: none; }
 input[type='range'] { -webkit-appearance: none; appearance: none; height: 12px; border-radius: 999px; background: var(--border-strong); outline: none; flex: 1; }
 input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 3px solid var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
 input[type='range']::-moz-range-thumb { width: 28px; height: 28px; border: 3px solid var(--surface); border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
 
-.toggles { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; max-width: var(--ctl, 460px); margin-top: 8px; }
+.toggles { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; max-width: var(--ctl, 460px); margin-top: 30px; }
 /* shuffle / in-order toggle (Spotify-style icon button, neutral not teal) */
 .modebtn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 150px; padding: 9px 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--muted); font: inherit; font-size: 0.84rem; font-weight: 600; cursor: pointer; transition: color 0.14s, border-color 0.14s, background 0.14s; }
 .modebtn svg { width: 18px; height: 18px; }
@@ -200,6 +200,10 @@ input[type='range']::-moz-range-thumb { width: 28px; height: 28px; border: 3px s
 .modebtn:not(.on) .ic-order { display: inline; }
 .modebtn.on { color: var(--text); border-color: var(--border-strong); background: var(--surface); }
 .modebtn:hover { border-color: var(--accent); color: var(--text); }
+/* shuffle is a bare Spotify-style icon — no label; teal when shuffling */
+#shuffle-btn { width: 46px; min-width: 46px; padding: 9px; }
+#shuffle-btn .modebtn-txt { display: none; }
+#shuffle-btn.on { color: var(--play); border-color: color-mix(in srgb, var(--play) 45%, transparent); background: var(--play-tint); }
 .more-opts { margin-top: 10px; }
 .more-opts > summary { cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--muted); padding: 2px 0; user-select: none; }
 .more-opts > summary::-webkit-details-marker { display: none; }
@@ -213,7 +217,7 @@ input[type='range']::-moz-range-thumb { width: 28px; height: 28px; border: 3px s
 .chip select, .chip input[type='time'] { background: transparent; border: none; color: var(--text); font: inherit; font-size: 0.82rem; cursor: pointer; padding: 0; }
 .chip select:focus, .chip input[type='time']:focus { outline: none; }
 /* scenes — one-tap crowd modes */
-.scenes { display: flex; flex-wrap: wrap; gap: 10px; margin: 26px 0 8px; max-width: var(--ctl, 460px); }
+.scenes { display: flex; flex-wrap: wrap; gap: 10px; margin: 34px 0 10px; max-width: var(--ctl, 460px); }
 .scene { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.14s ease; }
 .scene:hover:not(:disabled) { border-color: var(--accent); transform: translateY(-1px); }
 .scene:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -372,6 +376,10 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .lib-step-h { margin: 20px 0 8px; }
 .lib-step-h h3 { margin: 0 0 4px; }
 .lib-step-h .hint { font-size: 0.86rem; margin-top: 2px; }
+.lib-add-row { display: flex; gap: 12px; align-items: stretch; }
+.lib-add-row .dropzone { flex: 1; margin-bottom: 0; }
+.lib-add-row .auto-all-btn { flex: none; width: auto; min-width: 210px; margin-top: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+@media (max-width: 600px) { .lib-add-row { flex-direction: column; } .lib-add-row .auto-all-btn { width: 100%; min-width: 0; } }
 .auto-all-btn { display: block; width: 100%; background: var(--text); color: var(--bg); border: none; border-radius: 12px; padding: 15px; font: inherit; font-size: 1.05rem; font-weight: 700; cursor: pointer; margin-top: 4px; transition: opacity 0.14s, transform 0.1s; }
 .auto-all-btn small { display: block; font-weight: 400; font-size: 0.8rem; opacity: 0.85; margin-top: 2px; }
 .auto-all-btn:hover { opacity: 0.88; }
@@ -443,10 +451,14 @@ h4 { margin: 0 0 12px; font-size: 0.98rem; display: flex; align-items: center; g
 /* ---------- schedule: block editor ---------- */
 .blocks-editor { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
 .block-row { display: flex; gap: 8px; align-items: center; }
-.block-row input { background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; padding: 9px 10px; color: var(--text); font: inherit; }
+.block-row input { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; color: var(--text); font: inherit; }
+.block-row input:focus { border-color: var(--accent); outline: none; }
 .block-row .blk-label { flex: 1; min-width: 0; }
-.block-row .blk-time { width: 130px; flex: none; }
-.block-row .del { width: 38px; height: 38px; border-radius: 9px; border: 1px solid var(--border); background: var(--surface); color: var(--faint); cursor: pointer; flex: none; }
+.block-row .blk-time { width: 150px; flex: none; padding: 10px 10px; }
+/* time picker's clock icon — keep it visible in dark mode */
+.block-row input[type='time']::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.55; }
+:root[data-theme='dark'] .block-row input[type='time']::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.7; }
+.block-row .del { width: 42px; height: 42px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--faint); cursor: pointer; flex: none; font-size: 1rem; }
 .block-row .del:hover:not(:disabled) { border-color: var(--bad); color: var(--bad); }
 .block-row .del:disabled { opacity: 0.3; cursor: not-allowed; }
 
