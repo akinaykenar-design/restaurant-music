@@ -698,8 +698,8 @@ function findRow(t) {
       .then((r) => r.json())
       .then((r) => {
         if (r.error) { add.disabled = false; add.textContent = '+ Add'; if ($('find-status')) $('find-status').textContent = 'Add failed: ' + r.error + (r.detail ? ' (' + r.detail + ')' : ''); return; }
-        add.textContent = '✓ Added'; add.classList.add('on');
-        reloadLibrary();
+        add.textContent = r.duplicate ? '✓ Already added' : '✓ Added'; add.classList.add('on');
+        if (!r.duplicate) reloadLibrary();
       })
       .catch(() => { add.disabled = false; add.textContent = '+ Add'; });
   });
@@ -1565,19 +1565,19 @@ function setupUpload() {
   async function uploadFiles(files) {
     const list = [...files].filter((f) => /\.(mp3|m4a|aac|ogg|oga|wav|flac|webm)$/i.test(f.name));
     if (!list.length) { status.textContent = 'Please choose audio files.'; return; }
-    let done = 0;
+    let done = 0, dupes = 0;
     for (const f of list) {
-      status.textContent = `Uploading ${f.name} (${done + 1}/${list.length})…`;
+      status.textContent = `Uploading ${f.name} (${done + dupes + 1}/${list.length})…`;
       try {
         const res = await fetch('/api/upload?name=' + encodeURIComponent(f.name), { method: 'POST', body: f });
-        if (!res.ok) throw new Error((await res.json()).error || 'failed');
-        done++;
+        const d = await res.json();
+        if (!res.ok) throw new Error(d.error || 'failed');
+        if (d.duplicate) dupes++; else done++;
       } catch (e) { status.textContent = `Couldn't upload ${f.name}: ${e.message}`; return; }
     }
-    status.textContent = `Added ${done} track${done === 1 ? '' : 's'}.`;
-    toast(`Added ${done} track${done === 1 ? '' : 's'} to the library`);
+    status.textContent = `Added ${done} track${done === 1 ? '' : 's'}` + (dupes ? ` · ${dupes} already in library (skipped)` : '') + '.';
     await reloadLibrary();
-    setTimeout(() => (status.textContent = ''), 4000);
+    setTimeout(() => (status.textContent = ''), 5000);
   }
   // Recursively pull every file out of a dropped folder (or files).
   function readEntry(entry, out) {
@@ -1724,16 +1724,16 @@ async function uploadLicensed(files) {
   const list = Array.from(files || []).filter((f) => /\.(mp3|m4a|aac|ogg|oga|wav|flac|webm)$/i.test(f.name));
   const st = $('licensed-status');
   if (!list.length) { if (st) st.textContent = 'Please choose audio files.'; return; }
-  let done = 0;
+  let done = 0, dupes = 0;
   if (st) st.textContent = 'Adding…';
   for (const f of list) {
     try {
-      await fetch('/api/upload?licensed=1&name=' + encodeURIComponent(f.name), { method: 'POST', body: f });
-      done += 1;
-      if (st) st.textContent = 'Adding ' + done + '/' + list.length + '…';
+      const r = await fetch('/api/upload?licensed=1&name=' + encodeURIComponent(f.name), { method: 'POST', body: f }).then((x) => x.json());
+      if (r && r.duplicate) dupes += 1; else done += 1;
+      if (st) st.textContent = 'Adding ' + (done + dupes) + '/' + list.length + '…';
     } catch { /* skip this file */ }
   }
-  if (st) st.textContent = 'Added ' + done + ' track' + (done === 1 ? '' : 's') + '.';
+  if (st) st.textContent = 'Added ' + done + ' track' + (done === 1 ? '' : 's') + (dupes ? ' · ' + dupes + ' already there (skipped)' : '') + '.';
   await reloadLibrary();
 }
 function setupLicensed() {

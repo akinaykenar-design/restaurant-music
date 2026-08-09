@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { spawn } = require('child_process');
+const crypto = require('crypto');
 const https = require('https');
 const http = require('http');
 const qrcode = require('qrcode-generator');
@@ -394,6 +395,28 @@ app.get('/api/qr', (req, res) => {
   }
 });
 
+// Is `buf` already in the library — same name, or byte-identical under any
+// name (catches re-drops and re-downloads)? Returns the existing filename.
+function findDuplicate(buf, name, checkName) {
+  if (checkName !== false && name && fs.existsSync(path.join(MUSIC_DIR, name))) return name;
+  const size = buf.length;
+  let hash = null;
+  try {
+    for (const f of fs.readdirSync(MUSIC_DIR)) {
+      if (f === name || !AUDIO_EXT.has(path.extname(f).toLowerCase())) continue;
+      const full = path.join(MUSIC_DIR, f);
+      let st; try { st = fs.statSync(full); } catch { continue; }
+      if (st.size !== size) continue; // different size → not identical, skip the hash
+      if (!hash) hash = crypto.createHash('md5').update(buf).digest('hex');
+      try {
+        const fh = crypto.createHash('md5').update(fs.readFileSync(full)).digest('hex');
+        if (fh === hash) return f;
+      } catch { /* ignore */ }
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
 // Upload an audio file (raw body; the browser posts the file bytes directly).
 app.post('/api/upload', express.raw({ type: '*/*', limit: '300mb' }), (req, res) => {
   const name = path.basename(String(req.query.name || ''));
@@ -403,6 +426,9 @@ app.post('/api/upload', express.raw({ type: '*/*', limit: '300mb' }), (req, res)
   if (!req.body || !req.body.length) return res.status(400).json({ error: 'empty upload' });
   try {
     fs.mkdirSync(MUSIC_DIR, { recursive: true });
+    // Skip duplicates — don't overwrite or pile up copies; tell the client.
+    const dup = findDuplicate(req.body, name);
+    if (dup) return res.json({ ok: true, duplicate: true, file: dup, title: prettyTitle(dup) });
     fs.writeFileSync(path.join(MUSIC_DIR, name), req.body);
     // Uploaded from the after-hours panel? Flag it licensed so it stays out of
     // the trading-hours rotation.
@@ -873,6 +899,10 @@ app.post('/api/find/add', async (req, res) => {
       ws.on('error', reject);
       r.on('error', reject);
     });
+    // Already have this exact track (byte-identical) under another name? Bin the
+    // download and tell the client it's a duplicate instead of adding a copy.
+    const dupOf = findDuplicate(fs.readFileSync(dest), name, false);
+    if (dupOf) { fs.unlink(dest, () => {}); return res.json({ ok: true, duplicate: true, file: dupOf, title: prettyTitle(dupOf) }); }
     // keep the licence/credit alongside the track, and the artist so it shows
     // on Now Playing (that display IS the attribution for CC-BY tracks).
     data.credits = data.credits || {};
