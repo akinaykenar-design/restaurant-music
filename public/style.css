@@ -282,7 +282,7 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .ghost { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: 9px; padding: 8px 14px; cursor: pointer; font: inherit; font-size: 0.86rem; }
 .ghost:hover { border-color: var(--accent); }
 /* Admin: uniform spacing between cards (was a mix of ad-hoc margins). */
-#admin-content { display: flex; flex-direction: column; gap: 16px; }
+#admin-content { display: flex; flex-direction: column; gap: 22px; }
 #admin-content[hidden] { display: none; } /* stay hidden until unlocked (author CSS beats UA) */
 #admin-content > * { margin-top: 0; }
 /* Admin cards are static settings panels — no hover-lift (it read as jitter). */
@@ -413,12 +413,12 @@ h4 { margin: 0 0 12px; font-size: 0.98rem; display: flex; align-items: center; g
 .tag.tag-less { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); background: var(--warn-tint); }
 .tag.tag-dislike { color: var(--bad, #c0392b); border-color: color-mix(in srgb, var(--bad, #c0392b) 45%, transparent); background: var(--bad-tint, #c0392b14); }
 .pl-auto { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 1px 6px; border-radius: 999px; color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); background: var(--accent-tint); vertical-align: middle; }
-.dropzone { border: 2px dashed var(--border-strong); border-radius: var(--radius-sm); padding: 16px; text-align: center; color: var(--muted); font-size: 0.86rem; margin-bottom: 12px; transition: all 0.15s; }
-.dropzone svg { width: 24px; height: 24px; fill: none; stroke: var(--faint); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 2px; }
+.dropzone { border: 2px dashed var(--border-strong); border-radius: var(--radius-sm); padding: 26px 16px; text-align: center; color: var(--muted); margin-bottom: 12px; transition: all 0.15s; cursor: pointer; display: grid; place-items: center; }
+.dropzone .dz-ico { width: 40px; height: 40px; stroke: var(--faint); }
+.dropzone:hover { border-color: var(--accent); }
+.dropzone:hover .dz-ico { stroke: var(--accent); }
 .dropzone.drag { border-color: var(--accent); background: var(--accent-tint); color: var(--text); }
-.dropzone.drag svg { stroke: var(--accent); }
-.dropzone p { margin: 0; }
-.dropzone .link { color: var(--accent); cursor: pointer; text-decoration: underline; }
+.dropzone.drag .dz-ico { stroke: var(--accent); }
 .upload-status { margin-top: 6px; font-size: 0.78rem; color: var(--accent); min-height: 14px; }
 
 /* ---------- schedule: block editor ---------- */
@@ -495,7 +495,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
 /* Desktop: the classic layout — visualiser on the left, the track info and
    all the controls on the right, the whole player centred on the screen. */
 @media (min-width: 821px) {
-  #tab-now.active { min-height: calc(100vh - 160px); display: flex; flex-direction: column; justify-content: center; }
+  #tab-now.active { display: flex; flex-direction: column; justify-content: flex-start; padding-top: clamp(8px, 2vh, 28px); }
   #tab-now .player { width: 100%; }
   .art { width: 200px; height: 200px; }
   .player { grid-template-columns: 200px 1fr; gap: 30px; padding: 30px; }
@@ -611,14 +611,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
    grows smoothly with the viewport (clamp), capped so it never gets silly. */
 @media (min-width: 1100px) {
   main { max-width: 1180px; }
-  #tab-now .np-meta { --ctl: clamp(520px, 46vw, 720px); }
+  #tab-now .np-meta { --ctl: clamp(560px, 54vw, 900px); }
   .art { width: clamp(220px, 20vw, 300px); height: clamp(220px, 20vw, 300px); }
   /* grow the meter's grid column with it so it can't overlap the controls */
   #tab-now .player { grid-template-columns: clamp(220px, 20vw, 300px) 1fr; gap: 42px; padding: 40px; }
 }
 @media (min-width: 1500px) {
   main { max-width: 1380px; }
-  #tab-now .np-meta { --ctl: clamp(680px, 44vw, 860px); }
+  #tab-now .np-meta { --ctl: clamp(780px, 52vw, 1040px); }
   .art { width: clamp(280px, 18vw, 340px); height: clamp(280px, 18vw, 340px); }
   #tab-now .player { grid-template-columns: clamp(280px, 18vw, 340px) 1fr; }
 }

@@ -124,9 +124,8 @@
 
           <div class="card lib-steps">
             <div class="lib-step"><span class="lib-n">1</span><div><b>Add your music</b><div class="hint">Drag a whole folder in, or browse.</div></div></div>
-            <div id="dropzone" class="dropzone">
-              <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0 4 4m-4-4-4 4M4 20h16"/></svg>
-              <p>Drop music — a whole <b>folder</b> works too — or <label for="file-input" class="link">browse files</label> · <label for="folder-input" class="link">a folder</label></p>
+            <div id="dropzone" class="dropzone" role="button" tabindex="0" title="Drop music here, or click to add files">
+              <svg class="dz-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4m0 0 4 4m-4-4-4 4"/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg>
               <input type="file" id="file-input" accept="audio/*,.mp3,.m4a,.aac,.ogg,.wav,.flac" multiple hidden />
               <input type="file" id="folder-input" webkitdirectory directory multiple hidden />
               <div id="upload-status" class="upload-status"></div>
@@ -223,14 +222,18 @@
           <div id="blocks-editor" class="blocks-editor"></div>
           <button id="add-block" class="ghost" style="margin-top:10px">+ Add time block</button>
         </div>
-        <div class="sched-auto">
-          <button id="auto-schedule" class="ghost">✨ Auto-schedule by style</button>
-          <span class="hint">Plays your categorised music by style — chill through the day, livelier into dinner. Categorise your library first.</span>
-          <span id="sched-status" class="upload-status" style="width:100%"></span>
+        <div class="card" style="margin-bottom:16px">
+          <h3>Fill the week automatically</h3>
+          <p class="hint">Spreads your categorised music across the week by style — chill through the day, livelier into dinner. Categorise your library on the Library tab first.</p>
+          <button id="auto-schedule" class="auto-all-btn">✨ Auto-schedule by style<small>Chill by day, livelier at dinner</small></button>
+          <div id="sched-status" class="upload-status"></div>
         </div>
-        <p class="hint">Or set each block × day by hand — pick a style, a genre, or one of your playlists. The music switches automatically when a block begins.</p>
-        <div class="card table-wrap">
-          <table id="schedule-table"></table>
+        <div class="card">
+          <h3>Or set the week by hand</h3>
+          <p class="hint">Pick a style, a genre, or one of your playlists for each block × day. The music switches automatically when a block begins.</p>
+          <div class="table-wrap">
+            <table id="schedule-table"></table>
+          </div>
         </div>
       </section>
 

@@ -1587,6 +1587,9 @@ function setupUpload() {
   input.addEventListener('change', () => uploadFiles(input.files));
   const folderInput = $('folder-input');
   if (folderInput) folderInput.addEventListener('change', () => uploadFiles(folderInput.files));
+  // Tap / click anywhere in the dashed box to add files (touch-friendly).
+  zone.addEventListener('click', (e) => { if (e.target.tagName !== 'INPUT') input.click(); });
+  zone.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); } });
   ['dragenter', 'dragover'].forEach((ev) => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.add('drag'); }));
   ['dragleave', 'drop'].forEach((ev) => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.remove('drag'); }));
   zone.addEventListener('drop', (e) => { filesFromDrop(e.dataTransfer).then(uploadFiles); });
