@@ -132,6 +132,18 @@ const KNOWN_ARTISTS = [
 
 const capWords = (s) => s.replace(/\b([a-z])/g, (m) => m.toUpperCase());
 
+// If the title still starts with the artist's name (common when the embedded
+// tag is "Artist Song Title"), drop that leading copy so it's not shown twice.
+function stripLeadingArtist(title, artist) {
+  if (!title || !artist) return title;
+  const a = artist.trim();
+  if (a && title.toLowerCase().startsWith(a.toLowerCase())) {
+    const rest = title.slice(a.length).replace(/^[\s\-–—:_.]+/, '').trim();
+    if (rest) return rest;
+  }
+  return title;
+}
+
 // Parse a bare filename into { artist, title, genre } for tracks with no
 // embedded tags — e.g. "9jackjack8 Anatolian Tears Turkish Deep House 413141.mp3"
 // → artist "9jackjack8", genre "Deep House", title "Anatolian Tears Turkish".
@@ -405,14 +417,17 @@ function scanLibrary() {
       .sort((a, b) => a.localeCompare(b));
     const tracks = files.map((f) => {
       const m = trackMeta(f);
+      const parsed = parseFileName(f);
+      const artist = (data.artists && data.artists[f]) || m.artist || (data.credits && data.credits[f] && data.credits[f].artist) || parsed.artist || '';
       return {
         file: f,
-        title: (m.title && m.title.trim()) || prettyTitle(f),
+        // strip a leading copy of the artist so it isn't shown in both columns
+        title: stripLeadingArtist((m.title && m.title.trim()) || prettyTitle(f), artist),
         duration: m.duration || 0,
         // a manually-set genre wins over the file's tag (Pixabay tracks
         // often ship with no genre, so staff can set one that sticks)
-        genre: (data.genres && data.genres[f]) || m.genre || parseFileName(f).genre || '',
-        artist: (data.artists && data.artists[f]) || m.artist || (data.credits && data.credits[f] && data.credits[f].artist) || parseFileName(f).artist || '',
+        genre: (data.genres && data.genres[f]) || m.genre || parsed.genre || '',
+        artist,
         bpm: m.analyzedBpm || m.bpm || null,
         energy: m.energy != null ? m.energy : null,
         vibe: normalizeVibe((data.vibes && data.vibes[f]) || m.vibe),
@@ -1396,10 +1411,12 @@ function trackInfo(file) {
   let m = {};
   try { m = trackMeta(file) || {}; } catch { m = {}; }
   const credit = (data.credits && data.credits[file]) || {};
+  const parsed = parseFileName(file);
+  const artist = (data.artists && data.artists[file]) || (m.artist && m.artist.trim()) || (credit.artist || '').trim() || parsed.artist || null;
   return {
-    title: (m.title && m.title.trim()) || prettyTitle(file),
-    artist: (data.artists && data.artists[file]) || (m.artist && m.artist.trim()) || (credit.artist || '').trim() || parseFileName(file).artist || null,
-    genre: (data.genres && data.genres[file]) || m.genre || parseFileName(file).genre || null,
+    title: stripLeadingArtist((m.title && m.title.trim()) || prettyTitle(file), artist),
+    artist,
+    genre: (data.genres && data.genres[file]) || m.genre || parsed.genre || null,
   };
 }
 
