@@ -577,6 +577,109 @@ function setupPlayHere(serverHeadless, playMode) {
   });
 }
 
+// ---- find royalty-free music (in-app search via the server proxy) ----------
+let findPreviewEl = null;
+
+// A search seed for "more like what's playing": prefer the current track's
+// genre, then its vibe, then keywords from its title.
+function nowPlayingSeed() {
+  let file = null, genre = '', vibe = '';
+  if (venueMode && venueState) { file = venueState.track; genre = venueState.genre || ''; }
+  else { file = queue[queueIndex]; }
+  const t = file && library.find((x) => x.file === file);
+  if (t) { genre = genre || t.genre || ''; vibe = t.vibe || ''; }
+  if (genre) return genre;
+  const words = (venueState && venueState.title) || (t && t.title) || '';
+  const kw = words.replace(/[^a-z0-9 ]/gi, ' ').split(/\s+/).filter((w) => w.length > 3).slice(0, 2).join(' ');
+  if (kw) return kw;
+  return vibe === 'Lively' ? 'deep house' : 'organic house';
+}
+
+// Chips to expand the library: "more like now playing", every genre you
+// already have, and a few on-brand starters.
+function renderFindChips() {
+  const box = $('find-chips'); if (!box) return;
+  box.innerHTML = '';
+  const chip = (label, q, cls) => {
+    const b = document.createElement('button');
+    b.className = 'find-chip' + (cls ? ' ' + cls : '');
+    b.textContent = label;
+    b.addEventListener('click', () => runFind(q));
+    box.appendChild(b);
+  };
+  const playing = (venueMode && venueState && venueState.track) || queue[queueIndex];
+  if (playing) chip('🎧 More like now playing', nowPlayingSeed(), 'find-chip-now');
+  const genres = [...new Set(library.filter((t) => !t.licensed).map((t) => t.genre).filter(Boolean))].sort();
+  genres.slice(0, 8).forEach((g) => chip(g, g));
+  if (!genres.length) ['organic house', 'deep house', 'balearic', 'chillout', 'nu disco'].forEach((s) => chip(s, s));
+}
+
+function runFind(q) {
+  const input = $('find-q'); const status = $('find-status'); const list = $('find-results');
+  if (!list) return;
+  if (input) input.value = q;
+  if (!q || !q.trim()) return;
+  if (status) status.textContent = 'Searching…';
+  list.innerHTML = '';
+  api('/api/find?q=' + encodeURIComponent(q.trim())).then((d) => {
+    if (!d || d.error) { if (status) status.textContent = (d && d.error) || 'Search failed.'; return; }
+    const rs = d.results || [];
+    if (!rs.length) { if (status) status.textContent = 'Nothing found — try another search.'; return; }
+    if (status) status.textContent = rs.length + ' found — preview, then add what you like.';
+    rs.forEach((t) => list.appendChild(findRow(t)));
+  }).catch(() => { if (status) status.textContent = 'Search unavailable — is the box online?'; });
+}
+
+function findRow(t) {
+  const li = document.createElement('li');
+  const meta = document.createElement('div');
+  meta.className = 'find-meta';
+  const title = document.createElement('div');
+  title.className = 'find-title'; title.textContent = t.title;
+  const sub = document.createElement('div');
+  sub.className = 'find-sub';
+  sub.textContent = [t.artist, t.license, t.duration ? fmtDur(t.duration) : ''].filter(Boolean).join(' · ');
+  meta.append(title, sub);
+
+  const prev = document.createElement('button');
+  prev.className = 'mini find-prev'; prev.textContent = '▶'; prev.title = 'Preview';
+  prev.addEventListener('click', () => {
+    if (findPreviewEl && !findPreviewEl.paused && findPreviewEl.src === t.preview) { findPreviewEl.pause(); prev.textContent = '▶'; return; }
+    document.querySelectorAll('.find-prev').forEach((b) => { b.textContent = '▶'; });
+    if (!findPreviewEl) findPreviewEl = new Audio();
+    findPreviewEl.src = t.preview; findPreviewEl.play().then(() => { prev.textContent = '⏸'; }).catch(() => {});
+    findPreviewEl.onended = () => { prev.textContent = '▶'; };
+  });
+
+  const add = document.createElement('button');
+  add.className = 'ghost find-add'; add.textContent = '+ Add';
+  add.addEventListener('click', () => {
+    add.disabled = true; add.textContent = 'Adding…';
+    fetch('/api/find/add', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: t.preview, title: t.title, ext: t.ext, license: t.license, attribution: t.attribution, landing: t.landing }) })
+      .then((r) => r.json())
+      .then((r) => {
+        if (r.error) { add.disabled = false; add.textContent = '+ Add'; if ($('find-status')) $('find-status').textContent = 'Add failed: ' + r.error; return; }
+        add.textContent = '✓ Added'; add.classList.add('on');
+        reloadLibrary();
+      })
+      .catch(() => { add.disabled = false; add.textContent = '+ Add'; });
+  });
+
+  li.append(meta, prev, add);
+  return li;
+}
+
+function setupFind() {
+  const input = $('find-q'); const go = $('find-go');
+  if (!input || !go) return;
+  findPreviewEl = new Audio();
+  const run = () => runFind(input.value);
+  renderFindChips();
+  go.addEventListener('click', run);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') run(); });
+}
+
 function setupListenHere() {
   const btn = $('listen-here'); if (!btn) return;
   btn.addEventListener('click', () => {
@@ -1190,7 +1293,7 @@ function closeRowMenus() { document.querySelectorAll('.row-menu:not([hidden])').
 document.addEventListener('click', closeRowMenus);
 
 function reloadLibrary() {
-  return api('/api/library').then((lib) => { library = lib.tracks; renderEditor(); renderQueue(); renderHistory(); updateOnboard(); renderScenes(); renderLicensed(); });
+  return api('/api/library').then((lib) => { library = lib.tracks; renderEditor(); renderQueue(); renderHistory(); updateOnboard(); renderScenes(); renderLicensed(); renderFindChips(); });
 }
 
 // ---- venue name (editable, shown in the header + poster) -------------------
@@ -1841,6 +1944,7 @@ async function boot() {
   setupAdmin();
   setupLicensed();
   setupListenHere();
+  setupFind();
   refreshAhPlaylists();
 }
 boot();

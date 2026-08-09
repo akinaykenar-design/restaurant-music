@@ -321,6 +321,22 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .licensed-list .lic-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .licensed-list li button { flex: none; }
 
+/* ---------- find royalty-free music ---------- */
+.find-card h4 { margin: 0 0 4px; }
+.find-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+.find-row input { flex: 1; min-width: 0; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: 9px; padding: 10px 12px; font: inherit; }
+.find-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.find-chip { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 0.8rem; cursor: pointer; }
+.find-chip:hover { border-color: var(--accent); }
+.find-chip-now { border-color: var(--play); color: var(--play); font-weight: 600; }
+.find-results { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.find-results li { display: flex; align-items: center; gap: 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; padding: 8px 11px; }
+.find-meta { flex: 1; min-width: 0; }
+.find-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.find-sub { font-size: 0.76rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.find-results button { flex: none; }
+.find-add.on { color: var(--play); border-color: var(--play); }
+
 /* ---------- library / playlists ---------- */
 /* ---------- easy Library (two-step flow) ---------- */
 .lib-easy { display: flex; flex-direction: column; gap: 16px; max-width: 720px; margin: 0 auto; }

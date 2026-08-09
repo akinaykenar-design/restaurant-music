@@ -5,6 +5,8 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { spawn } = require('child_process');
+const https = require('https');
+const http = require('http');
 const qrcode = require('qrcode-generator');
 
 const app = express();
@@ -676,6 +678,104 @@ app.post('/api/audio/output', async (req, res) => {
   applyVenueVolume(venueTargetVol());
   playerFadeRestart(); // restart mpg123 on the new output
   res.json({ ok: true, device: audioDevice(), card: audioCard(), control: audioControl() });
+});
+
+// ---- find royalty-free music (in-app search) -------------------------------
+// Searches Openverse (aggregates Creative-Commons / public-domain audio from
+// Jamendo, ccMixter, Freesound, etc.), filtered to commercially-usable tracks
+// so they're safe to play in the venue. Needs the box to have internet.
+function httpGet(url, opts, depth) {
+  depth = depth || 0;
+  return new Promise((resolve, reject) => {
+    if (depth > 5) return reject(new Error('too many redirects'));
+    const mod = url.slice(0, 5) === 'http:' ? http : https;
+    const req = mod.get(url, Object.assign({ headers: { 'User-Agent': 'WatermansMusic/1.0' } }, opts || {}), (r) => {
+      if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location) {
+        r.resume();
+        return resolve(httpGet(new URL(r.headers.location, url).toString(), opts, depth + 1));
+      }
+      resolve(r); // caller consumes the stream
+    });
+    req.on('error', reject);
+    req.setTimeout(15000, () => req.destroy(new Error('timeout')));
+  });
+}
+async function fetchJson(url) {
+  const r = await httpGet(url, { headers: { 'User-Agent': 'WatermansMusic/1.0', Accept: 'application/json' } });
+  if (r.statusCode !== 200) { r.resume(); throw new Error('http ' + r.statusCode); }
+  let d = '';
+  return new Promise((resolve, reject) => {
+    r.on('data', (c) => { d += c; });
+    r.on('end', () => { try { resolve(JSON.parse(d)); } catch { reject(new Error('bad json')); } });
+    r.on('error', reject);
+  });
+}
+
+app.get('/api/find', async (req, res) => {
+  const q = String(req.query.q || '').trim();
+  if (!q) return res.json({ results: [], count: 0 });
+  const page = Math.max(1, Math.min(20, Number(req.query.page) || 1));
+  const base = process.env.OPENVERSE_BASE || 'https://api.openverse.org/v1/audio/';
+  const url = base + '?format=json&license_type=commercial&page_size=24'
+    + '&page=' + page + '&q=' + encodeURIComponent(q);
+  try {
+    const j = await fetchJson(url);
+    const results = (j.results || []).map((t) => ({
+      title: t.title || 'Untitled',
+      artist: t.creator || '',
+      license: ((t.license || '') + (t.license_version ? ' ' + t.license_version : '')).trim().toUpperCase(),
+      licenseUrl: t.license_url || '',
+      attribution: t.attribution || '',
+      preview: t.url || '',                 // direct audio file (preview + download)
+      landing: t.foreign_landing_url || '',
+      duration: t.duration ? Math.round(t.duration / 1000) : 0,
+      ext: String(t.filetype || 'mp3').toLowerCase(),
+      source: t.source || '',
+    })).filter((t) => t.preview);
+    res.json({ results, count: j.result_count || results.length, page });
+  } catch (e) {
+    res.status(502).json({ error: 'search unavailable (is the box online?)', detail: e.message });
+  }
+});
+
+// Download a found track straight into the library (server-side, avoids CORS).
+app.post('/api/find/add', async (req, res) => {
+  const url = String((req.body && req.body.url) || '');
+  if (!/^https?:\/\//.test(url)) return res.status(400).json({ error: 'bad url' });
+  const title = String((req.body && req.body.title) || 'track');
+  let ext = String((req.body && req.body.ext) || 'mp3').replace(/[^a-z0-9]/gi, '').toLowerCase();
+  if (!AUDIO_EXT.has('.' + ext)) ext = 'mp3';
+  const base = (title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'track').slice(0, 60);
+  fs.mkdirSync(MUSIC_DIR, { recursive: true });
+  let name = base + '.' + ext, n = 1;
+  while (fs.existsSync(path.join(MUSIC_DIR, name))) name = base + '-' + (++n) + '.' + ext;
+  const dest = path.join(MUSIC_DIR, name);
+  const MAX = 40 * 1024 * 1024;
+  try {
+    const r = await httpGet(url, { headers: { 'User-Agent': 'WatermansMusic/1.0' } });
+    if (r.statusCode !== 200) { r.resume(); return res.status(502).json({ error: 'download failed (http ' + r.statusCode + ')' }); }
+    const ct = r.headers['content-type'] || '';
+    if (ct && !/audio|octet-stream|mpeg|ogg|mp4|wav|flac|x-m4a/i.test(ct)) { r.resume(); return res.status(415).json({ error: 'that link is not audio' }); }
+    await new Promise((resolve, reject) => {
+      let size = 0;
+      const ws = fs.createWriteStream(dest);
+      r.on('data', (c) => { size += c.length; if (size > MAX) { r.destroy(); ws.destroy(); reject(new Error('file too large')); } });
+      r.pipe(ws);
+      ws.on('finish', resolve);
+      ws.on('error', reject);
+      r.on('error', reject);
+    });
+    // keep the licence/credit alongside the track
+    if (req.body && (req.body.attribution || req.body.license)) {
+      data.credits = data.credits || {};
+      data.credits[name] = { license: req.body.license || '', attribution: req.body.attribution || '', source: req.body.landing || '' };
+      saveData(data);
+    }
+    res.json({ ok: true, file: name, title: prettyTitle(name) });
+  } catch (e) {
+    fs.unlink(dest, () => {});
+    res.status(502).json({ error: 'could not download', detail: e.message });
+  }
 });
 
 // One-tap update: pull the latest code, then exit so systemd (Restart=always)
