@@ -285,8 +285,6 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 
 /* ---------- accent cards ---------- */
 .accent-card { margin-top: 16px; }
-.player-row { display: flex; align-items: center; gap: 10px; }
-.player-row span { flex: 1; }
 .ghost { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 9px 15px; cursor: pointer; font: inherit; font-size: 0.86rem; font-weight: 600; }
 .ghost:hover { border-color: var(--accent); }
 /* Admin: uniform spacing between cards (was a mix of ad-hoc margins). */

@@ -1574,42 +1574,14 @@ function loadStreamInfo() {
   }).catch(() => {});
 }
 function setupVenuePlayer() {
+  // The card just holds the box/browser switch now — pause/skip live on Now
+  // Playing, and the box always plays out its own jack (no device picker).
   const card = $('player-card'); if (!card) return;
-  const refresh = () => api('/api/player/state').then((s) => {
-    if (!s || !s.enabled) return;
-    card.hidden = false;
-    $('player-now').textContent = s.broken ? 'Audio player not installed (sudo apt install mpg123)' : (s.title || '—') + (s.paused ? '  (paused)' : '');
-    $('player-pause').textContent = s.paused ? 'Play' : 'Pause';
-  }).catch(() => {});
-  $('player-pause').addEventListener('click', () => fetch('/api/player/pause', { method: 'POST' }).then(refresh));
-  $('player-skip').addEventListener('click', () => fetch('/api/player/skip', { method: 'POST' }).then(() => setTimeout(refresh, 300)));
+  const refresh = () => api('/api/player/state').then((s) => { if (s && s.enabled) card.hidden = false; }).catch(() => {});
   refresh(); setInterval(refresh, 5000);
-  setupAudioOutput();
 }
 
 // Pick which physical output the box plays out of (3.5mm / HDMI / USB DAC).
-function setupAudioOutput() {
-  const sel = $('audio-out'); if (!sel) return;
-  const status = $('audio-out-status');
-  api('/api/audio/devices').then((d) => {
-    if (!d || !d.enabled) return; // only meaningful on the venue box
-    const opts = [{ dev: '', label: 'System default' }].concat(d.devices || []);
-    sel.innerHTML = opts.map((o) => `<option value="${o.dev}"${o.dev === (d.current || '') ? ' selected' : ''}>${o.label}${o.dev ? ' (' + o.dev + ')' : ''}</option>`).join('');
-    if (!d.devices || !d.devices.length) { if (status) status.textContent = 'No output devices detected.'; }
-  }).catch(() => {});
-  const save = $('audio-out-save');
-  if (save) save.addEventListener('click', () => {
-    if (status) status.textContent = 'Switching…';
-    fetch('/api/audio/output', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ device: sel.value, password: adminPass }) })
-      .then((r) => r.json())
-      .then((r) => {
-        if (r.error) { if (status) status.textContent = r.error === 'wrong password' ? 'Unlock admin first.' : ('Failed: ' + r.error); return; }
-        if (status) status.textContent = 'Output set' + (r.control ? ' · volume via ' + r.control : '') + '.';
-      })
-      .catch(() => { if (status) status.textContent = 'Failed to switch.'; });
-  });
-}
-
 // ---- after-hours licensed music (staff, off-schedule) ----------------------
 // Commercial/licensed tracks staff add for after close. Kept out of the
 // trading-hours rotation on the server; only played via the admin-gated
