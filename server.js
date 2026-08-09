@@ -793,16 +793,21 @@ app.post('/api/find/add', async (req, res) => {
   const dest = path.join(MUSIC_DIR, name);
   const MAX = 40 * 1024 * 1024;
   try {
-    const r = await httpGet(url, { headers: { 'User-Agent': 'WatermansMusic/1.0' } });
+    const r = await httpGet(url, { headers: {
+      'User-Agent': 'Mozilla/5.0 (Watermans Music box)',
+      Accept: 'audio/*,*/*;q=0.8',
+      Referer: (req.body && req.body.landing) || url,
+    } });
     if (r.statusCode !== 200) { r.resume(); return res.status(502).json({ error: 'download failed (http ' + r.statusCode + ')' }); }
-    const ct = r.headers['content-type'] || '';
-    if (ct && !/audio|octet-stream|mpeg|ogg|mp4|wav|flac|x-m4a/i.test(ct)) { r.resume(); return res.status(415).json({ error: 'that link is not audio' }); }
+    // Accept anything that isn't obviously a web page / error body.
+    const ct = (r.headers['content-type'] || '').toLowerCase();
+    if (/text\/html|application\/json|text\/plain|application\/xml/.test(ct)) { r.resume(); return res.status(415).json({ error: 'that link returned a web page, not an audio file' }); }
     await new Promise((resolve, reject) => {
       let size = 0;
       const ws = fs.createWriteStream(dest);
       r.on('data', (c) => { size += c.length; if (size > MAX) { r.destroy(); ws.destroy(); reject(new Error('file too large')); } });
       r.pipe(ws);
-      ws.on('finish', resolve);
+      ws.on('finish', () => (size > 1024 ? resolve() : reject(new Error('empty download'))));
       ws.on('error', reject);
       r.on('error', reject);
     });

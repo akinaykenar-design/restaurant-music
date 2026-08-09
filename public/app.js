@@ -698,7 +698,7 @@ function findRow(t) {
       body: JSON.stringify({ url: t.preview, title: t.title, artist: t.artist, ext: t.ext, license: t.license, attribution: t.attribution, landing: t.landing }) })
       .then((r) => r.json())
       .then((r) => {
-        if (r.error) { add.disabled = false; add.textContent = '+ Add'; if ($('find-status')) $('find-status').textContent = 'Add failed: ' + r.error; return; }
+        if (r.error) { add.disabled = false; add.textContent = '+ Add'; if ($('find-status')) $('find-status').textContent = 'Add failed: ' + r.error + (r.detail ? ' (' + r.detail + ')' : ''); return; }
         add.textContent = '✓ Added'; add.classList.add('on');
         reloadLibrary();
       })
