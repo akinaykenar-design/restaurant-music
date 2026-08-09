@@ -288,8 +288,30 @@ function updateProgress(d) {
   $('t-cur').textContent = fmt(d.currentTime);
   $('t-dur').textContent = fmt(dur);
 }
-// The progress bar is display-only — no seeking. This plays to a room full
-// of guests, so staff can't accidentally scrub or jump the current track.
+// Progress bar seeking — enabled ONLY when playing on this device (Play here /
+// management), so you can scrub to test a track quickly. Never in venue mode:
+// you can't scrub a live room, so there the bar stays a display-only "Live".
+(function setupSeek() {
+  const pbar = $('pbar'); if (!pbar) return;
+  let seeking = false;
+  const seekTo = (clientX) => {
+    if (venueMode) return;
+    const d = activeDeck(); if (!d || !d.duration || isNaN(d.duration)) return;
+    const rect = pbar.getBoundingClientRect();
+    const frac = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    d.currentTime = frac * d.duration;
+    updateProgress(d);
+  };
+  pbar.addEventListener('pointerdown', (e) => {
+    if (venueMode) return;
+    seeking = true;
+    try { pbar.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    seekTo(e.clientX);
+  });
+  pbar.addEventListener('pointermove', (e) => { if (seeking) seekTo(e.clientX); });
+  pbar.addEventListener('pointerup', () => { seeking = false; });
+  pbar.addEventListener('pointercancel', () => { seeking = false; });
+})();
 
 // Toast pop-ups disabled — kept as a no-op so call sites stay harmless.
 function toast(_msg) { /* popups removed */ }
@@ -1880,6 +1902,7 @@ async function boot() {
     window.addEventListener('pointerdown', armRoomViz, { once: true });
     window.addEventListener('keydown', armRoomViz, { once: true });
   } else {
+    const pb = $('pbar'); if (pb) pb.classList.add('seekable'); // scrubbing OK when playing on this device
     applySchedule(true);
     // Re-apply a saved override (e.g. the venue box rebooted mid-service).
     const savedScene = String(state.settings.scene || '');

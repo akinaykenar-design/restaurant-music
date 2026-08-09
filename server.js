@@ -721,10 +721,11 @@ app.get('/api/find', async (req, res) => {
   if (!q) return res.json({ results: [], count: 0 });
   const page = Math.max(1, Math.min(20, Number(req.query.page) || 1));
   const base = process.env.OPENVERSE_BASE || 'https://api.openverse.org/v1/audio/';
-  // CC0 + Public-Domain-Mark only (no attribution, like Pixabay). NB: the
-  // `category=music` query param makes Openverse 401 for anonymous requests,
-  // so we filter out sound-effects from the results below instead.
-  const url = base + '?license=cc0,pdm&page_size=40'
+  // CC0 + Public-Domain-Mark only (no attribution, like Pixabay). page_size is
+  // capped at 20 for anonymous requests — asking for more returns 401. We
+  // filter sound-effects out of the results below rather than via a query param
+  // (category=music also 401s anonymously).
+  const url = base + '?license=cc0,pdm&page_size=20'
     + '&page=' + page + '&q=' + encodeURIComponent(q);
   try {
     const j = await fetchJson(url);
@@ -1007,15 +1008,24 @@ const station = {
     return this.queue[this.idx];
   },
   advance() {
-    this.idx += 1;
-    if (this.idx >= this.queue.length) {
-      this.idx = 0;
-      this.refresh(true);
+    if (!this.queue.length) return;
+    // The weighted queue repeats liked tracks, so the very next slot can be the
+    // SAME file — step past any run of the current file so a skip always lands
+    // on a different track (unless there's genuinely only one).
+    const cur = this.queue[this.idx];
+    for (let n = 0; n < this.queue.length; n++) {
+      this.idx += 1;
+      if (this.idx >= this.queue.length) { this.idx = 0; this.refresh(true); }
+      if (this.queue[this.idx] !== cur) break;
     }
   },
   prev() {
     if (!this.queue.length) return;
-    this.idx = (this.idx - 1 + this.queue.length) % this.queue.length;
+    const cur = this.queue[this.idx];
+    for (let n = 0; n < this.queue.length; n++) {
+      this.idx = (this.idx - 1 + this.queue.length) % this.queue.length;
+      if (this.queue[this.idx] !== cur) break;
+    }
   },
 };
 
@@ -1176,9 +1186,10 @@ function applyVenueVolume(level) {
 function fadeThen(swap) {
   const dying = playerProc;
   if (!HEADLESS_PLAYER || playerBroken || !dying) { swap(); return; }
-  rampVol(0, 500, () => {
+  // Short fade so a skip feels instant but doesn't hard-click the room.
+  rampVol(0, 160, () => {
     if (playerProc === dying) swap();
-    else rampVol(venueTargetVol(), 400);
+    else rampVol(venueTargetVol(), 250);
   });
 }
 
@@ -1208,7 +1219,7 @@ function playerPlayCurrent() {
     station.advance();
     playerPlayCurrent();
   });
-  if (fadeIn) rampVol(venueTargetVol(), 600);
+  if (fadeIn) rampVol(venueTargetVol(), 250);
 }
 
 // Repoint the venue player to whatever station.current() now is (the queue has
@@ -1241,12 +1252,11 @@ app.get('/api/player/state', (_req, res) => {
 
 app.post('/api/player/skip', (_req, res) => {
   if (HEADLESS_PLAYER && !playerBroken) {
-    playerPaused = false;
-    // Fade the current track out, then kill it — the exit handler advances once
-    // and the next track fades in. (No playerNoAdvance here: the queue is NOT
-    // pre-moved, so the single advance in the exit handler is exactly right.)
-    if (playerProc) fadeThen(() => { fadeInNext = true; playerProc.kill('SIGTERM'); });
-    else { station.advance(); fadeInNext = true; playerPlayCurrent(); }
+    // Advance the queue immediately on EVERY press (so two quick taps skip two
+    // tracks, and the response already reports the new track), then fade-restart
+    // onto it. playerFadeRestart flags the exit handler not to advance again.
+    station.advance();
+    playerFadeRestart();
   }
   res.json({ ok: true, track: station.current() || null });
 });

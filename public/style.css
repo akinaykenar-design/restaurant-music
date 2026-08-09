@@ -142,7 +142,8 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
    transport, scenes and volume line up to the same length. */
 .progress { margin: 24px 0 8px; max-width: var(--ctl, 460px); }
 /* display-only progress bar (no seeking) — larger and easy to read across a room */
-.pbar { height: 14px; border-radius: 999px; background: var(--border-strong); cursor: default; overflow: hidden; }
+.pbar { height: 14px; border-radius: 999px; background: var(--border-strong); cursor: default; overflow: hidden; touch-action: none; }
+.pbar.seekable { cursor: pointer; }
 .pfill { height: 100%; width: 0%; border-radius: 999px; background: var(--accent); transition: width 0.2s linear; }
 .ptime { display: flex; justify-content: space-between; margin-top: 7px; font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 
