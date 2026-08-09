@@ -716,11 +716,14 @@ app.get('/api/find', async (req, res) => {
   if (!q) return res.json({ results: [], count: 0 });
   const page = Math.max(1, Math.min(20, Number(req.query.page) || 1));
   const base = process.env.OPENVERSE_BASE || 'https://api.openverse.org/v1/audio/';
-  const url = base + '?format=json&license_type=commercial&page_size=24'
+  // CC0 + Public-Domain-Mark only: free for commercial/venue use AND no
+  // attribution required — same "no strings" deal as Pixabay.
+  const url = base + '?format=json&license=cc0,pdm&page_size=24'
     + '&page=' + page + '&q=' + encodeURIComponent(q);
   try {
     const j = await fetchJson(url);
-    const results = (j.results || []).map((t) => ({
+    const noStrings = (t) => /^(cc0|pdm)$/i.test(String(t.license || '')); // belt-and-braces: attribution-free only
+    const results = (j.results || []).filter(noStrings).map((t) => ({
       title: t.title || 'Untitled',
       artist: t.creator || '',
       license: ((t.license || '') + (t.license_version ? ' ' + t.license_version : '')).trim().toUpperCase(),
