@@ -360,7 +360,9 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 
 /* ---------- library / playlists ---------- */
 /* ---------- easy Library (two-step flow) ---------- */
-.lib-easy { display: flex; flex-direction: column; gap: 16px; max-width: 720px; margin: 0 auto; }
+/* No width cap here — Library fills the same column as Schedule and Admin so
+   every tab is the same width (they used to be 720 vs 980, which looked off). */
+.lib-easy { display: flex; flex-direction: column; gap: 16px; }
 .lib-step { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
 .lib-step b { font-size: 1rem; }
 .lib-step .hint { font-size: 0.86rem; }
