@@ -715,10 +715,17 @@ function renderScenes() {
     box.appendChild(b);
   });
 
-  // genre quick-picks — on their own row so the time blocks stay uncluttered
+  // genre quick-picks — on their own row so the time blocks stay uncluttered.
+  // Leads with "All genres" to play everything / reset the genre narrowing.
   const gbox = $('genres');
   if (gbox) {
     gbox.innerHTML = '';
+    const all = document.createElement('button');
+    all.className = 'scene scene-genre' + (activeScene === 'all' ? ' on' : '');
+    all.title = 'Play everything';
+    all.textContent = 'All genres';
+    all.addEventListener('click', () => { playVibeAll(); activeScene = 'all'; renderScenes(); });
+    gbox.appendChild(all);
     const genres = [...new Set(library.filter((t) => !t.licensed).map((t) => t.genre).filter(Boolean))].sort();
     genres.forEach((g) => {
       const b = document.createElement('button');
