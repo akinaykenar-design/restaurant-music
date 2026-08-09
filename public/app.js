@@ -558,6 +558,25 @@ function updateListenBtn() {
   b.title = listening ? 'Listening to the room on this device — tap to stop' : "Hear what's playing in the room, on this device";
   const t = b.querySelector('.modebtn-txt'); if (t) t.textContent = listening ? 'Listening' : 'Listen here';
 }
+// "Play here": make THIS device the player (music out of this browser) instead
+// of driving the venue box. Per-device, remembered on the device. Switching
+// reloads so playback starts cleanly in the chosen mode.
+function setupPlayHere(serverHeadless, playMode) {
+  const btn = $('play-here'); if (!btn) return;
+  if (!serverHeadless) { btn.hidden = true; return; } // no venue box → app is already a local player
+  btn.hidden = false;
+  const onDevice = playMode === 'device';
+  btn.classList.toggle('on', onDevice);
+  btn.setAttribute('aria-pressed', onDevice ? 'true' : 'false');
+  btn.title = onDevice ? 'Playing on this device — tap to hand playback back to the venue' : 'Play the music on THIS device instead of the venue box';
+  const t = btn.querySelector('.modebtn-txt'); if (t) t.textContent = onDevice ? 'Playing here' : 'Play here';
+  btn.addEventListener('click', () => {
+    const next = onDevice ? 'venue' : 'device';
+    try { localStorage.setItem('wm-playmode', next); } catch (e) { /* ignore */ }
+    location.reload();
+  });
+}
+
 function setupListenHere() {
   const btn = $('listen-here'); if (!btn) return;
   btn.addEventListener('click', () => {
@@ -1735,9 +1754,14 @@ async function boot() {
   renderScenes();
 
   // Is the server running the room (headless player)? If so this app is the
-  // remote control — start polling the box and skip all local playback.
+  // remote control by default — unless THIS device is set to "Play here",
+  // which makes it a local player (music out of this browser instead).
   const pstate = await pollVenueOnce();
-  venueMode = !!(pstate && pstate.enabled);
+  const serverHeadless = !!(pstate && pstate.enabled);
+  let playMode = 'venue';
+  try { playMode = localStorage.getItem('wm-playmode') || 'venue'; } catch (e) { /* ignore */ }
+  venueMode = serverHeadless && playMode !== 'device';
+  setupPlayHere(serverHeadless, playMode);
 
   if (venueMode) {
     venuePollTimer = setTimeout(pollVenue, 3000);
