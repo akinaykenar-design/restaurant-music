@@ -748,7 +748,20 @@ app.get('/api/find', async (req, res) => {
     // Drop sound-effects/audiobooks — keep music (or untagged). Freesound is
     // mostly effects, so treat its untagged items as non-music too.
     const isMusic = (t) => t.category ? t.category === 'music' : String(t.source || '').toLowerCase() !== 'freesound';
-    const results = (j.results || []).filter((t) => venueOk(t) && isMusic(t)).map((t) => ({
+    // Match the query against each track's GENRES + TAGS (not just the title),
+    // so a genre search actually returns that genre. Fall back to a title/tag
+    // match only if nothing is tagged for it.
+    const qWords = q.toLowerCase().split(/[\s/,&|-]+/).filter((w) => w.length > 2);
+    const tagText = (t) => (
+      (Array.isArray(t.genres) ? t.genres.join(' ') : '') + ' ' +
+      (Array.isArray(t.tags) ? t.tags.map((x) => (x && x.name) || x || '').join(' ') : '')
+    ).toLowerCase();
+    const onGenre = (t) => qWords.length === 0 || qWords.every((w) => tagText(t).includes(w));
+    let pool = (j.results || []).filter((t) => venueOk(t) && isMusic(t));
+    const tagged = pool.filter(onGenre);
+    if (tagged.length) pool = tagged;
+    else pool = pool.filter((t) => qWords.every((w) => (tagText(t) + ' ' + (t.title || '').toLowerCase()).includes(w)));
+    const results = pool.map((t) => ({
       title: t.title || 'Untitled',
       artist: t.creator || '',
       license: ((t.license || '') + (t.license_version ? ' ' + t.license_version : '')).trim().toUpperCase(),
