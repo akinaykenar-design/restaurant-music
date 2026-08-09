@@ -127,8 +127,10 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 .player > * { position: relative; z-index: 1; }
 .player-bg { position: absolute; inset: 0; z-index: 0; background-size: cover; background-position: center; filter: blur(26px) saturate(1.25) brightness(0.62); opacity: 0; transform: scale(1.15); transition: opacity 0.5s ease; pointer-events: none; }
 .player.has-art .player-bg { opacity: 0.96; filter: blur(7px) saturate(1.4) brightness(0.78); }
-/* light scrim only behind the text so the cover shows clearly yet stays legible */
-.player.has-art::after { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(120% 90% at 50% 62%, color-mix(in srgb, var(--surface) 46%, transparent) 0%, color-mix(in srgb, var(--surface) 12%, transparent) 70%); }
+/* colour wash for tracks with no cover art — a soft blurred gradient */
+.player.has-wash .player-bg { opacity: 0.5; filter: blur(34px) saturate(1.2) brightness(0.85); }
+/* light scrim only behind the text so the cover/wash shows yet stays legible */
+.player.has-art::after, .player.has-wash::after { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(130% 100% at 50% 60%, color-mix(in srgb, var(--surface) 55%, transparent) 0%, color-mix(in srgb, var(--surface) 18%, transparent) 72%); }
 .art {
   width: 176px; height: 176px; border-radius: var(--radius-sm);
   background: linear-gradient(150deg, #2c3238, #14181c);
@@ -169,7 +171,8 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 .transport button { border: none; cursor: pointer; display: grid; place-items: center; transition: transform 0.1s, background 0.12s, color 0.12s, border-color 0.12s; }
 .transport button:active { transform: scale(0.93); }
 .transport svg { width: 27px; height: 27px; fill: currentColor; }
-.tbtn { width: 60px; height: 60px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border-strong); color: var(--text); }
+.tbtn { width: 78px; height: 78px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border-strong); color: var(--text); }
+.tbtn svg { width: 34px; height: 34px; }
 .tbtn:hover { border-color: var(--play); color: var(--play); }
 .play { width: 92px; height: 92px; border-radius: 50%; background: var(--play); color: #fff; box-shadow: 0 12px 30px -10px var(--play); }
 .play svg { width: 38px; height: 38px; }
@@ -208,6 +211,7 @@ input[type='range']::-moz-range-thumb { width: 28px; height: 28px; border: 3px s
 #shuffle-btn { width: 44px; min-width: 44px; height: 44px; padding: 9px; }
 #shuffle-btn .modebtn-txt { display: none; }
 #shuffle-btn.on { color: var(--play); border-color: color-mix(in srgb, var(--play) 45%, transparent); background: var(--play-tint); }
+#lib-playall.on { color: var(--play); border-color: var(--play); background: var(--play-tint); }
 .more-opts { margin-top: 10px; }
 .more-opts > summary { cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--muted); padding: 2px 0; user-select: none; }
 .more-opts > summary::-webkit-details-marker { display: none; }
@@ -225,7 +229,7 @@ input[type='range']::-moz-range-thumb { width: 28px; height: 28px; border: 3px s
 /* "Browse genres" section heading + a wrapping row (no more cut-off) */
 .genre-head { color: var(--faint); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 10px; max-width: var(--ctl, 460px); }
 .genres { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 6px; max-width: var(--ctl, 460px); }
-.scene { display: inline-flex; align-items: center; gap: 7px; padding: 12px 20px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: inherit; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: border-color 0.14s ease, color 0.14s ease, background 0.14s ease; }
+.scene { display: inline-flex; align-items: center; gap: 7px; height: 46px; padding: 0 20px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: inherit; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: border-color 0.14s ease, color 0.14s ease, background 0.14s ease; }
 .scene-ic { font-size: 1.05rem; }
 .scene:hover:not(:disabled) { border-color: var(--play); }
 .scene:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -314,9 +318,9 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .ghost.on { border-color: var(--play); color: var(--play); background: var(--play-tint); }
 /* Admin: uniform spacing between cards (was a mix of ad-hoc margins). */
 #admin-content { display: flex; flex-direction: column; gap: 22px; }
-/* Admin action buttons all share one width + height so a card's buttons line up. */
-#admin-content .ghost, #admin-content .warnbtn, #admin-content .dangerbtn { min-width: 180px; height: 44px; text-align: center; }
-@media (max-width: 520px) { #admin-content .ghost, #admin-content .warnbtn, #admin-content .dangerbtn { min-width: 0; flex: 1; } }
+/* Admin action buttons all share one exact width + height so they line up. */
+#admin-content .ghost, #admin-content .warnbtn, #admin-content .dangerbtn { width: 210px; height: 44px; text-align: center; white-space: nowrap; }
+@media (max-width: 520px) { #admin-content .ghost, #admin-content .warnbtn, #admin-content .dangerbtn { width: auto; flex: 1; } }
 #admin-content[hidden] { display: none; } /* stay hidden until unlocked (author CSS beats UA) */
 #admin-content > * { margin-top: 0; }
 /* Admin cards are static settings panels — no hover-lift (it read as jitter). */

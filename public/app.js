@@ -120,14 +120,33 @@ function setPlayingUI(on) {
 
 // Show the current track's embedded cover art as a soft background behind the
 // player (the meter stays). Only applies if the file actually has art.
+// Tasteful gradient for tracks with no cover art — a consistent colour per
+// track (hashed from its name), warmed for Lively / cooled for Chill.
+const WASHES = [
+  ['#e5533a', '#5b2a9e'], ['#3aa0b8', '#264a86'], ['#c72c7a', '#4a2a7e'],
+  ['#d8a24a', '#7a3b2e'], ['#1fb89c', '#123a6b'], ['#7a5cff', '#26286b'],
+  ['#e0774a', '#8b2f5a'], ['#2f9e8f', '#1c355e'],
+];
+function washFor(file) {
+  const t = library.find((x) => x.file === file);
+  let h = 0; const s = file || '';
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  let idx = h % WASHES.length;
+  if (t && t.vibe === 'Chill') idx = [1, 4, 7][h % 3];        // cool pairs
+  else if (t && t.vibe === 'Lively') idx = [0, 2, 6][h % 3];  // warm pairs
+  const [a, b] = WASHES[idx];
+  return `linear-gradient(140deg, ${a}, ${b} 70%)`;
+}
+
 function setNowArt(file) {
   const bg = $('player-bg'); const player = document.querySelector('.player');
   if (!bg || !player) return;
-  if (!file) { player.classList.remove('has-art'); bg.style.backgroundImage = ''; return; }
+  const wash = () => { bg.style.backgroundImage = washFor(file); player.classList.remove('has-art'); player.classList.add('has-wash'); };
+  if (!file) { player.classList.remove('has-art', 'has-wash'); bg.style.backgroundImage = ''; return; }
   const url = '/api/art?file=' + encodeURIComponent(file);
   const probe = new Image();
-  probe.onload = () => { bg.style.backgroundImage = 'url("' + url + '")'; player.classList.add('has-art'); };
-  probe.onerror = () => { player.classList.remove('has-art'); bg.style.backgroundImage = ''; };
+  probe.onload = () => { bg.style.backgroundImage = 'url("' + url + '")'; player.classList.remove('has-wash'); player.classList.add('has-art'); };
+  probe.onerror = () => { wash(); }; // no embedded cover → colour wash instead
   probe.src = url;
 }
 
@@ -680,6 +699,19 @@ $('volume').addEventListener('change', () => { if (!venueMode) saveSettings({ vo
 // The Now Playing quick buttons are the schedule's own time blocks. Tapping
 // one plays that block's set for today; "Schedule" hands control back to the
 // weekly clock. (Vibe still organises the Library — this is just the override.)
+// A time-of-day icon for a block, from its label (then its start hour).
+function iconForBlock(blk) {
+  const l = (blk.label || '').toLowerCase();
+  if (/(breakfast|morning|sunrise|open)/.test(l)) return '🌅';
+  if (/(brunch)/.test(l)) return '🥐';
+  if (/(afternoon|arvo|after)/.test(l)) return '🌤️'; // before "lunch/noon" — afternoon contains "noon"
+  if (/(lunch|midday|noon)/.test(l)) return '☀️';
+  if (/(dinner|evening|sunset)/.test(l)) return '🌙';
+  if (/(night|late|close)/.test(l)) return '🌛';
+  const h = parseInt((blk.start || '0').split(':')[0], 10) || 0;
+  if (h < 11) return '🌅'; if (h < 15) return '☀️'; if (h < 18) return '🌤️'; return '🌙';
+}
+
 function renderScenes() {
   const box = $('scenes'); if (!box) return;
   box.innerHTML = '';
@@ -696,7 +728,8 @@ function renderScenes() {
     const isActive = activeScene === 'block:' + blk.id || (following && nowBlk && blk.id === nowBlk.id);
     const b = document.createElement('button');
     b.className = 'scene' + (isActive ? ' on' : '');
-    b.textContent = blk.label;
+    b.innerHTML = '<span class="scene-ic">' + iconForBlock(blk) + '</span>';
+    b.appendChild(document.createTextNode(blk.label));
     b.disabled = !has;
     b.title = has ? 'Play the ' + blk.label + ' set now' : 'Nothing set for ' + blk.label + ' — set it on the Schedule tab';
     if (has) b.addEventListener('click', () => {
@@ -712,6 +745,9 @@ function renderScenes() {
     });
     box.appendChild(b);
   });
+
+  // "Play all" reflects the same "all" state as the All-genres chip.
+  const pa = $('lib-playall'); if (pa) pa.classList.toggle('on', activeScene === 'all');
 
   // genre quick-picks — on their own row so the time blocks stay uncluttered.
   // Leads with "All genres" to play everything / reset the genre narrowing.
