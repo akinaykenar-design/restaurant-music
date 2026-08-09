@@ -331,7 +331,7 @@ function scanLibrary() {
         // a manually-set genre wins over the file's tag (Pixabay tracks
         // often ship with no genre, so staff can set one that sticks)
         genre: (data.genres && data.genres[f]) || m.genre || '',
-        artist: m.artist || '',
+        artist: m.artist || (data.credits && data.credits[f] && data.credits[f].artist) || '',
         bpm: m.analyzedBpm || m.bpm || null,
         energy: m.energy != null ? m.energy : null,
         vibe: normalizeVibe(m.vibe),
@@ -721,19 +721,21 @@ app.get('/api/find', async (req, res) => {
   if (!q) return res.json({ results: [], count: 0 });
   const page = Math.max(1, Math.min(20, Number(req.query.page) || 1));
   const base = process.env.OPENVERSE_BASE || 'https://api.openverse.org/v1/audio/';
-  // CC0 + Public-Domain-Mark only (no attribution, like Pixabay). page_size is
-  // capped at 20 for anonymous requests — asking for more returns 401. We
-  // filter sound-effects out of the results below rather than via a query param
-  // (category=music also 401s anonymously).
-  const url = base + '?license=cc0,pdm&page_size=20'
+  // Commercially-usable, attribution-satisfiable licences: CC0/PDM (no credit)
+  // plus CC-BY (credit the artist — which we do by showing the artist on the
+  // Now Playing display, a reasonable-manner attribution for background music).
+  // page_size is capped at 20 for anonymous requests (more returns 401), and
+  // category=music also 401s anonymously, so we filter sound-effects below.
+  const url = base + '?license=cc0,pdm,by&page_size=20'
     + '&page=' + page + '&q=' + encodeURIComponent(q);
   try {
     const j = await fetchJson(url);
-    const noStrings = (t) => /^(cc0|pdm)$/i.test(String(t.license || '')); // belt-and-braces: attribution-free only
+    // Venue-usable licences: no-credit (cc0/pdm) or credit-by-artist (by).
+    const venueOk = (t) => /^(cc0|pdm|by)$/i.test(String(t.license || ''));
     // Drop sound-effects/audiobooks — keep music (or untagged). Freesound is
     // mostly effects, so treat its untagged items as non-music too.
     const isMusic = (t) => t.category ? t.category === 'music' : String(t.source || '').toLowerCase() !== 'freesound';
-    const results = (j.results || []).filter((t) => noStrings(t) && isMusic(t)).map((t) => ({
+    const results = (j.results || []).filter((t) => venueOk(t) && isMusic(t)).map((t) => ({
       title: t.title || 'Untitled',
       artist: t.creator || '',
       license: ((t.license || '') + (t.license_version ? ' ' + t.license_version : '')).trim().toUpperCase(),
@@ -778,12 +780,16 @@ app.post('/api/find/add', async (req, res) => {
       ws.on('error', reject);
       r.on('error', reject);
     });
-    // keep the licence/credit alongside the track
-    if (req.body && (req.body.attribution || req.body.license)) {
-      data.credits = data.credits || {};
-      data.credits[name] = { license: req.body.license || '', attribution: req.body.attribution || '', source: req.body.landing || '' };
-      saveData(data);
-    }
+    // keep the licence/credit alongside the track, and the artist so it shows
+    // on Now Playing (that display IS the attribution for CC-BY tracks).
+    data.credits = data.credits || {};
+    data.credits[name] = {
+      artist: (req.body && req.body.artist) || '',
+      license: (req.body && req.body.license) || '',
+      attribution: (req.body && req.body.attribution) || '',
+      source: (req.body && req.body.landing) || '',
+    };
+    saveData(data);
     res.json({ ok: true, file: name, title: prettyTitle(name) });
   } catch (e) {
     fs.unlink(dest, () => {});
@@ -1120,9 +1126,10 @@ function trackInfo(file) {
   if (!file) return { title: null, artist: null, genre: null };
   let m = {};
   try { m = trackMeta(file) || {}; } catch { m = {}; }
+  const credit = (data.credits && data.credits[file]) || {};
   return {
     title: (m.title && m.title.trim()) || prettyTitle(file),
-    artist: (m.artist && m.artist.trim()) || null,
+    artist: (m.artist && m.artist.trim()) || (credit.artist || '').trim() || null,
     genre: (data.genres && data.genres[file]) || m.genre || null,
   };
 }

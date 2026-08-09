@@ -637,9 +637,13 @@ function renderFindChips() {
   };
   const playing = (venueMode && venueState && venueState.track) || queue[queueIndex];
   if (playing) chip('🎧 More like now playing', nowPlayingSeed(), 'find-chip-now');
-  const genres = [...new Set(library.filter((t) => !t.licensed).map((t) => t.genre).filter(Boolean))].sort();
-  genres.slice(0, 8).forEach((g) => chip(g, g));
-  if (!genres.length) ['organic house', 'deep house', 'balearic', 'chillout', 'nu disco'].forEach((s) => chip(s, s));
+  const seen = new Set();
+  // categories you already have in your library first…
+  [...new Set(library.filter((t) => !t.licensed).map((t) => t.genre).filter(Boolean))]
+    .slice(0, 6).forEach((g) => { const k = g.toLowerCase(); if (!seen.has(k)) { seen.add(k); chip(g, g); } });
+  // …then a curated set of venue-friendly categories to search.
+  ['organic house', 'deep house', 'melodic house', 'balearic', 'ibiza', 'chillout', 'downtempo', 'nu disco', 'afro house', 'ambient']
+    .forEach((c) => { if (!seen.has(c)) { seen.add(c); chip(c, c); } });
 }
 
 function runFind(q) {
@@ -684,7 +688,7 @@ function findRow(t) {
   add.addEventListener('click', () => {
     add.disabled = true; add.textContent = 'Adding…';
     fetch('/api/find/add', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: t.preview, title: t.title, ext: t.ext, license: t.license, attribution: t.attribution, landing: t.landing }) })
+      body: JSON.stringify({ url: t.preview, title: t.title, artist: t.artist, ext: t.ext, license: t.license, attribution: t.attribution, landing: t.landing }) })
       .then((r) => r.json())
       .then((r) => {
         if (r.error) { add.disabled = false; add.textContent = '+ Add'; if ($('find-status')) $('find-status').textContent = 'Add failed: ' + r.error; return; }
