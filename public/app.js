@@ -622,7 +622,7 @@ function runFind(q) {
   if (status) status.textContent = 'Searching…';
   list.innerHTML = '';
   api('/api/find?q=' + encodeURIComponent(q.trim())).then((d) => {
-    if (!d || d.error) { if (status) status.textContent = (d && d.error) || 'Search failed.'; return; }
+    if (!d || d.error) { if (status) status.textContent = ((d && d.error) || 'Search failed.') + (d && d.detail ? ' (' + d.detail + ')' : ''); return; }
     const rs = d.results || [];
     if (!rs.length) { if (status) status.textContent = 'Nothing found — try another search.'; return; }
     if (status) status.textContent = rs.length + ' found — preview, then add what you like.';
