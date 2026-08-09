@@ -441,7 +441,7 @@ function beginCrossfade(cf) {
 }
 
 function skip(dir) {
-  if (venueMode) { venuePost(dir < 0 ? '/api/player/prev' : '/api/player/skip').then(() => setTimeout(pollVenueOnce, 300)); return; }
+  if (venueMode) { venuePost(dir < 0 ? '/api/player/prev' : '/api/player/skip').then(() => pollVenueSoon()); return; }
   if (!queue.length) return;
   crossing = false;
   otherDeck().pause();
@@ -506,6 +506,9 @@ function pollVenueOnce() {
 function pollVenue() {
   pollVenueOnce().finally(() => { venuePollTimer = setTimeout(pollVenue, 3000); });
 }
+// After an action that triggers a ~500ms fade + track swap on the box, refresh
+// the UI both quickly (feels responsive) and once the swap has landed.
+function pollVenueSoon() { setTimeout(pollVenueOnce, 250); setTimeout(pollVenueOnce, 850); }
 
 // Volume in venue mode: write the level (0–100) to the box, debounced.
 function setVenueVolume(v01) {
@@ -559,7 +562,7 @@ function renderScenes() {
   sched.addEventListener('click', () => {
     activeScene = null;
     saveSettings({ followSchedule: true, scene: '' });
-    if (venueMode) { venuePost('/api/player/play', { token: 'schedule' }).then(() => setTimeout(pollVenueOnce, 300)); renderScenes(); return; }
+    if (venueMode) { venuePost('/api/player/play', { token: 'schedule' }).then(() => pollVenueSoon()); renderScenes(); return; }
     applySchedule(true);
     renderScenes();
   });
@@ -610,7 +613,7 @@ function playBlock(blockId) {
   saveSettings({ followSchedule: false, scene: activeScene });
   $('now-block').textContent = (blk ? blk.label : 'Block') + ' · playing now';
   $('now-sub').textContent = r.label + ' · ' + r.files.length + ' track' + (r.files.length === 1 ? '' : 's');
-  if (venueMode) { venuePost('/api/player/play', { token: 'block:' + blockId }).then(() => setTimeout(pollVenueOnce, 300)); renderScenes(); return; }
+  if (venueMode) { venuePost('/api/player/play', { token: 'block:' + blockId }).then(() => pollVenueSoon()); renderScenes(); return; }
   loadQueue(r.files, true);
   renderScenes();
 }
@@ -623,7 +626,7 @@ function playGenre(g) {
   saveSettings({ followSchedule: false, scene: activeScene });
   $('now-block').textContent = '♪ ' + g + ' · playing now';
   $('now-sub').textContent = g + ' · ' + files.length + ' track' + (files.length === 1 ? '' : 's');
-  if (venueMode) { venuePost('/api/player/play', { token: 'genre:' + g }).then(() => setTimeout(pollVenueOnce, 300)); renderScenes(); return; }
+  if (venueMode) { venuePost('/api/player/play', { token: 'genre:' + g }).then(() => pollVenueSoon()); renderScenes(); return; }
   loadQueue(files, true);
   renderScenes();
 }
@@ -679,7 +682,7 @@ function rateFile(file, kind) {
         // (the box rebuilds its queue without the banned track on the next skip).
         const cur2 = venueState && venueState.track;
         if ((next === 'dislike' || next === 'less') && file === cur2) {
-          venuePost('/api/player/skip').then(() => setTimeout(pollVenueOnce, 300));
+          venuePost('/api/player/skip').then(() => pollVenueSoon());
         }
         return next;
       }

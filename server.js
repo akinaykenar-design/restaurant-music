@@ -874,8 +874,12 @@ let playerBroken = false;
 // When we kill the current track to jump somewhere specific (play a scene /
 // go to previous), the exit handler must NOT auto-advance to the next track —
 // the queue has already been repositioned. This flag suppresses that advance
-// for exactly one exit.
+// for exactly one exit. It is set ONLY right before such a kill and consumed by
+// the very next exit, so it can never leak into a later skip.
 let playerNoAdvance = false;
+let fadeInNext = false;   // the next track should ramp up from silent (after a faded skip)
+let hwVol = null;         // last level we set on the sound card (percent), for fades
+let fadeTimer = null;
 
 // Title / artist / genre for the venue "now playing" readout.
 function trackInfo(file) {
@@ -889,18 +893,58 @@ function trackInfo(file) {
   };
 }
 
-// Push the venue volume to the sound card. On the Pi the 3.5mm jack is card 2
+function venueTargetVol() {
+  return data.settings.venueVolume != null ? data.settings.venueVolume : 80;
+}
+
+// Set the sound card level immediately. On the Pi the 3.5mm jack is card 2
 // (bcm2835 Headphones); amixer's control there is "PCM". Best-effort: if amixer
 // or the control name differs, we just skip — the app volume still tracks it.
-function applyVenueVolume(level) {
+function amixerSet(pct) {
   if (!HEADLESS_PLAYER) return;
-  const pct = Math.max(0, Math.min(100, Math.round(level)));
+  hwVol = Math.max(0, Math.min(100, Math.round(pct)));
   try {
     const card = process.env.AUDIO_CARD || '2';
     const ctrl = process.env.AUDIO_CONTROL || 'PCM';
-    const amix = spawn('amixer', ['-c', card, 'sset', ctrl, pct + '%', 'unmute']);
+    const amix = spawn('amixer', ['-c', card, 'sset', ctrl, hwVol + '%', 'unmute']);
     amix.on('error', () => { /* amixer missing / control differs — ignore */ });
   } catch { /* ignore */ }
+}
+
+// Ramp the card level from where it is now to `to` over `ms`, then call done().
+// Used to fade the room out before a skip and fade the next track back in, so
+// guests never hear an abrupt cut.
+function rampVol(to, ms, done) {
+  if (fadeTimer) { clearInterval(fadeTimer); fadeTimer = null; }
+  if (!HEADLESS_PLAYER) { if (done) done(); return; }
+  const from = hwVol == null ? venueTargetVol() : hwVol;
+  const steps = 8;
+  if (from === to || steps <= 0) { amixerSet(to); if (done) done(); return; }
+  let i = 0;
+  fadeTimer = setInterval(() => {
+    i += 1;
+    amixerSet(from + (to - from) * (i / steps));
+    if (i >= steps) { clearInterval(fadeTimer); fadeTimer = null; if (done) done(); }
+  }, Math.max(25, Math.round(ms / steps)));
+}
+
+// Direct volume set from the app's slider — cancel any fade and snap to it.
+function applyVenueVolume(level) {
+  if (!HEADLESS_PLAYER) return;
+  if (fadeTimer) { clearInterval(fadeTimer); fadeTimer = null; }
+  amixerSet(level);
+}
+
+// Fade the room down, then run `swap` (which kills the current track). The exit
+// handler brings the next one in. If the track ends on its own mid-fade, the
+// proc has changed under us — don't kill the new one, just restore the level.
+function fadeThen(swap) {
+  const dying = playerProc;
+  if (!HEADLESS_PLAYER || playerBroken || !dying) { swap(); return; }
+  rampVol(0, 500, () => {
+    if (playerProc === dying) swap();
+    else rampVol(venueTargetVol(), 400);
+  });
 }
 
 function playerPlayCurrent() {
@@ -911,6 +955,8 @@ function playerPlayCurrent() {
     return;
   }
   const full = path.join(MUSIC_DIR, file);
+  const fadeIn = fadeInNext; fadeInNext = false;
+  if (fadeIn) amixerSet(0); // start silent so the ramp-up isn't a hard hit
   playerProc = spawn('mpg123', ['-q', full]);
   playerProc.on('error', (e) => {
     playerBroken = true;
@@ -925,15 +971,17 @@ function playerPlayCurrent() {
     station.advance();
     playerPlayCurrent();
   });
+  if (fadeIn) rampVol(venueTargetVol(), 600);
 }
 
-// Repoint the venue player to whatever station.current() now is, killing the
-// track in progress without letting the exit handler skip forward.
-function playerRestart() {
+// Repoint the venue player to whatever station.current() now is (the queue has
+// already been moved to the target), fading out the old track and the new one
+// in. The exit handler must NOT advance again, so we flag it.
+function playerFadeRestart() {
   if (!HEADLESS_PLAYER || playerBroken) return;
   playerPaused = false;
-  if (playerProc) { playerNoAdvance = true; playerProc.kill('SIGTERM'); }
-  else playerPlayCurrent();
+  if (!playerProc) { fadeInNext = true; playerPlayCurrent(); return; }
+  fadeThen(() => { fadeInNext = true; playerNoAdvance = true; playerProc.kill('SIGTERM'); });
 }
 
 app.get('/api/player/state', (_req, res) => {
@@ -956,15 +1004,19 @@ app.get('/api/player/state', (_req, res) => {
 
 app.post('/api/player/skip', (_req, res) => {
   if (HEADLESS_PLAYER && !playerBroken) {
-    if (playerProc) playerProc.kill('SIGTERM'); // exit handler advances + plays next
-    else { station.advance(); playerPlayCurrent(); }
+    playerPaused = false;
+    // Fade the current track out, then kill it — the exit handler advances once
+    // and the next track fades in. (No playerNoAdvance here: the queue is NOT
+    // pre-moved, so the single advance in the exit handler is exactly right.)
+    if (playerProc) fadeThen(() => { fadeInNext = true; playerProc.kill('SIGTERM'); });
+    else { station.advance(); fadeInNext = true; playerPlayCurrent(); }
   }
   res.json({ ok: true, track: station.current() || null });
 });
 
 app.post('/api/player/prev', (_req, res) => {
   station.prev();
-  playerRestart();
+  playerFadeRestart();
   res.json({ ok: true, track: station.current() || null });
 });
 
@@ -979,7 +1031,7 @@ app.post('/api/player/play', (req, res) => {
     if (!files.length) return res.status(400).json({ ok: false, error: 'nothing to play for ' + token });
     station.playFiles(files, label);
   }
-  playerRestart();
+  playerFadeRestart();
   res.json({ ok: true, track: station.current() || null, mode: station.override ? station.override.label : 'Schedule' });
 });
 
@@ -995,8 +1047,14 @@ app.post('/api/player/volume', (req, res) => {
 
 app.post('/api/player/pause', (_req, res) => {
   playerPaused = !playerPaused;
-  if (playerPaused) { if (playerProc) { playerNoAdvance = true; playerProc.kill('SIGTERM'); } }
-  else playerPlayCurrent();
+  if (playerPaused) {
+    // Fade out, then stop. No playerNoAdvance: the exit handler returns early
+    // while paused, so there's no advance to suppress (and nothing to leak).
+    if (playerProc) fadeThen(() => playerProc.kill('SIGTERM'));
+  } else {
+    fadeInNext = true; // ease back in when resuming
+    playerPlayCurrent();
+  }
   res.json({ ok: true, paused: playerPaused });
 });
 
@@ -1010,7 +1068,7 @@ app.listen(PORT, HOST, () => {
   startBroadcast();
   if (HEADLESS_PLAYER) {
     console.log('Headless player ON — playing scheduled music out this device.');
-    applyVenueVolume(data.settings.venueVolume != null ? data.settings.venueVolume : 80);
+    applyVenueVolume(venueTargetVol());
     station.refresh(true);
     playerPlayCurrent();
   }
