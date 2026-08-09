@@ -733,13 +733,12 @@ app.get('/api/find', async (req, res) => {
   const q = String(req.query.q || '').trim();
   if (!q) return res.json({ results: [], count: 0 });
   const base = process.env.OPENVERSE_BASE || 'https://api.openverse.org/v1/audio/';
-  // Commercially-usable, attribution-satisfiable licences: CC0/PDM (no credit)
-  // plus CC-BY (credit the artist — which we do by showing the artist on the
-  // Now Playing display, a reasonable-manner attribution for background music).
-  // page_size is capped at 20 for anonymous requests (more returns 401), so to
-  // give a decent set we pull the first few pages and combine them.
+  // CC0 + Public-Domain-Mark ONLY — no attribution ever needed, same as
+  // Pixabay, so it's fully safe to play without crediting anyone. page_size is
+  // capped at 20 for anonymous requests (more returns 401), so pull the first
+  // few pages and combine them for a decent set.
   const PAGES = 4;
-  const mkUrl = (pg) => base + '?license=cc0,pdm,by&page_size=20&page=' + pg + '&q=' + encodeURIComponent(q);
+  const mkUrl = (pg) => base + '?license=cc0,pdm&page_size=20&page=' + pg + '&q=' + encodeURIComponent(q);
   try {
     const pages = await Promise.all(
       Array.from({ length: PAGES }, (_, i) => fetchJson(mkUrl(i + 1)).catch(() => null))
@@ -753,8 +752,8 @@ app.get('/api/find', async (req, res) => {
       }
     }
     const j = { results: combined, result_count: (pages.find(Boolean) || {}).result_count };
-    // Venue-usable licences: no-credit (cc0/pdm) or credit-by-artist (by).
-    const venueOk = (t) => /^(cc0|pdm|by)$/i.test(String(t.license || ''));
+    // Attribution-free only (CC0 / public domain) — belt-and-braces.
+    const venueOk = (t) => /^(cc0|pdm)$/i.test(String(t.license || ''));
     // Drop sound-effects/audiobooks — keep music (or untagged). Freesound is
     // mostly effects, so treat its untagged items as non-music too.
     const isMusic = (t) => t.category ? t.category === 'music' : String(t.source || '').toLowerCase() !== 'freesound';

@@ -342,7 +342,9 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .find-player { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 10px 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; }
 .find-player[hidden] { display: none; } /* author display:flex would otherwise beat the hidden attribute */
 .find-player .find-np { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.82rem; font-weight: 600; }
-.find-player .find-seek { flex: 2; height: 8px; accent-color: var(--play); cursor: pointer; }
+.find-player .find-seek { flex: 2; cursor: pointer; }
+.find-player .find-seek::-webkit-slider-thumb { background: var(--play); }
+.find-player .find-seek::-moz-range-thumb { background: var(--play); }
 .find-player .find-time { font-size: 0.76rem; color: var(--muted); min-width: 34px; text-align: right; }
 .find-results { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .find-results li { display: flex; align-items: center; gap: 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; padding: 8px 11px; }
