@@ -863,13 +863,17 @@ function rateFile(file, kind) {
         }
         return next;
       }
-      if (next === 'dislike' && file === cur) {
-        // Banned the track that's playing to the room — don't hard-cut it;
-        // gently fade across to the next track so guests hear a smooth change.
-        const cf = Math.max(3, Number(state.settings.crossfade ?? 4));
-        if (queue.length > 1 && !crossing) beginCrossfade(cf); else skip(1);
-      } else if (next === 'less' && file === cur) {
+      if ((next === 'dislike' || next === 'less') && file === cur) {
+        // Banned/less the playing track — skip off it now (quick crossfade).
         skip(1);
+        if (next === 'dislike') {
+          // Drop the banned track from the current queue so it can't loop back,
+          // keeping queueIndex pointed at the track we just moved to.
+          const playing = queue[queueIndex];
+          queue = queue.filter((f) => f !== file);
+          const i = queue.indexOf(playing);
+          if (i >= 0) queueIndex = i;
+        }
       }
       return next;
     });
