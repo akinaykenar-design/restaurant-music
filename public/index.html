@@ -338,10 +338,11 @@
           <div class="card ah-card" id="licensed-card">
             <h3>After-hours licensed music</h3>
             <p class="hint">Add your own <b>commercial / licensed</b> tracks (Spotify rips, purchased MP3s, chart music) to play <b>after close, when there are no guests</b>. These are kept out of the trading-hours rotation, so they <b>never play to customers</b> — no APRA/PPCA risk. Only play them once the venue is closed.</p>
-            <div class="ah-row" style="margin-top:10px">
-              <label class="ghost restore-label">➕ Add licensed tracks<input type="file" id="licensed-file" accept="audio/*" multiple hidden /></label>
-              <span id="licensed-status" class="upload-status"></span>
+            <div id="licensed-drop" class="dropzone" role="button" tabindex="0" title="Drop licensed tracks here, or click to add">
+              <svg class="dz-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4m0 0 4 4m-4-4-4 4"/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg>
+              <input type="file" id="licensed-file" accept="audio/*" multiple hidden />
             </div>
+            <span id="licensed-status" class="upload-status"></span>
             <ul id="licensed-list" class="licensed-list"></ul>
             <div class="ah-row" style="margin-top:12px">
               <button id="licensed-play" class="warnbtn">▶ Play licensed music now</button>

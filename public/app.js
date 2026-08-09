@@ -1711,25 +1711,34 @@ function renderLicensed() {
   });
 }
 
+async function uploadLicensed(files) {
+  const list = Array.from(files || []).filter((f) => /\.(mp3|m4a|aac|ogg|oga|wav|flac|webm)$/i.test(f.name));
+  const st = $('licensed-status');
+  if (!list.length) { if (st) st.textContent = 'Please choose audio files.'; return; }
+  let done = 0;
+  if (st) st.textContent = 'Adding…';
+  for (const f of list) {
+    try {
+      await fetch('/api/upload?licensed=1&name=' + encodeURIComponent(f.name), { method: 'POST', body: f });
+      done += 1;
+      if (st) st.textContent = 'Adding ' + done + '/' + list.length + '…';
+    } catch { /* skip this file */ }
+  }
+  if (st) st.textContent = 'Added ' + done + ' track' + (done === 1 ? '' : 's') + '.';
+  await reloadLibrary();
+}
 function setupLicensed() {
   const input = $('licensed-file');
-  if (input) input.addEventListener('change', async (e) => {
-    const files = Array.from(e.target.files || []);
-    const st = $('licensed-status');
-    if (!files.length) return;
-    let done = 0;
-    if (st) st.textContent = 'Adding…';
-    for (const f of files) {
-      try {
-        await fetch('/api/upload?licensed=1&name=' + encodeURIComponent(f.name), { method: 'POST', body: f });
-        done += 1;
-        if (st) st.textContent = 'Adding ' + done + '/' + files.length + '…';
-      } catch { /* skip this file */ }
-    }
-    if (st) st.textContent = 'Added ' + done + ' track' + (done === 1 ? '' : 's') + '.';
-    input.value = '';
-    await reloadLibrary();
-  });
+  if (input) input.addEventListener('change', (e) => { uploadLicensed(e.target.files); input.value = ''; });
+  // dashed dropzone (same as the Library +music box): click / Enter / drag-drop
+  const zone = $('licensed-drop');
+  if (zone && input) {
+    zone.addEventListener('click', (e) => { if (e.target.tagName !== 'INPUT') input.click(); });
+    zone.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); } });
+    ['dragenter', 'dragover'].forEach((ev) => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.add('drag'); }));
+    ['dragleave', 'drop'].forEach((ev) => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.remove('drag'); }));
+    zone.addEventListener('drop', (e) => { uploadLicensed((e.dataTransfer && e.dataTransfer.files) || []); });
+  }
 
   const play = $('licensed-play');
   if (play) play.addEventListener('click', () => {
