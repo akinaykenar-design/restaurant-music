@@ -95,14 +95,6 @@
                 <svg class="ic-order" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3.5" y1="6" x2="3.52" y2="6"/><line x1="3.5" y1="12" x2="3.52" y2="12"/><line x1="3.5" y1="18" x2="3.52" y2="18"/></svg>
                 <span class="modebtn-txt">Shuffle</span>
               </button>
-              <button id="listen-here" class="modebtn" type="button" aria-pressed="false" title="Hear what's playing in the room, on this device">
-                <svg class="ic-listen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
-                <span class="modebtn-txt">Listen in</span>
-              </button>
-              <button id="play-here" class="modebtn" type="button" aria-pressed="false" title="Play the music on THIS device instead of the venue box" hidden>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="14" r="3.5"/><line x1="12" y1="6" x2="12" y2="6"/></svg>
-                <span class="modebtn-txt">Play here</span>
-              </button>
             </div>
           </div>
         </div>
@@ -220,8 +212,8 @@
         </div>
         <div class="card" style="margin-bottom:16px">
           <h3>Fill the week automatically</h3>
-          <p class="hint">Spreads your categorised music across the week by style — chill through the day, livelier into dinner. Categorise your library on the Library tab first.</p>
-          <button id="auto-schedule" class="auto-all-btn">✨ Auto-schedule by style<small>Chill by day, livelier at dinner</small></button>
+          <p class="hint">One tap: sorts your music by style, then spreads it across the week — chill through the day, livelier into dinner. That's it.</p>
+          <button id="auto-schedule" class="auto-all-btn">✨ Auto-schedule<small>Sorts your music and fills the week</small></button>
           <div id="sched-status" class="upload-status"></div>
         </div>
         <div class="card">
@@ -292,6 +284,11 @@
               <select id="audio-out" aria-label="Audio output device"></select>
               <button id="audio-out-save" class="ghost">Set output</button>
               <span id="audio-out-status" class="hint"></span>
+            </div>
+            <p class="hint" style="margin-top:14px">Where the music plays from. Normally the box plays out its own jack into your sound system. Switch to this browser only to test on a laptop/phone away from the venue.</p>
+            <div class="playmode-switch" id="playmode-switch">
+              <button class="pm-opt" id="pm-venue" type="button">The box (jack)</button>
+              <button class="pm-opt" id="pm-device" type="button">This browser</button>
             </div>
           </div>
 

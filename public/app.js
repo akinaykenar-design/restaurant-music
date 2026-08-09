@@ -552,10 +552,10 @@ function pollVenueSoon() { setTimeout(pollVenueOnce, 250); setTimeout(pollVenueO
 // demand — without this device ever becoming a second player (no echo unless
 // you turn Listen here on next to the speakers).
 let roomStream = null;
-let roomGain = null;
 let roomStarted = false;
-let listening = false;
 
+// Feed the visualiser the real room audio (the box's /stream), analysed only —
+// never wired to this device's speakers, so it stays silent here.
 function startRoomAudio() {
   if (roomStarted) return true;
   const ctx = vizEq.ensureCtx();
@@ -563,14 +563,12 @@ function startRoomAudio() {
   try {
     roomStream = new Audio('/stream?_=' + Date.now());
     roomStream.preload = 'auto';
+    roomStream.muted = true; // analysis only — no sound out of this device
     const src = ctx.createMediaElementSource(roomStream);
     const a = ctx.createAnalyser();
     a.fftSize = 512;
     a.smoothingTimeConstant = 0.6;
-    roomGain = ctx.createGain();
-    roomGain.gain.value = 0; // silent until Listen here is switched on
     src.connect(a);                       // analysis path (not wired to speakers)
-    src.connect(roomGain).connect(ctx.destination); // audible path
     vizEq.setAnalyser(a);                 // meter now reads the real room spectrum
     roomStream.play().catch(() => {});
     if (ctx.state === 'suspended') ctx.resume().catch(() => {});
@@ -579,30 +577,25 @@ function startRoomAudio() {
   } catch (e) { return false; }
 }
 
-function updateListenBtn() {
-  const b = $('listen-here'); if (!b) return;
-  b.classList.toggle('on', listening);
-  b.setAttribute('aria-pressed', listening ? 'true' : 'false');
-  b.title = listening ? 'Listening to the room on this device — tap to stop' : "Hear what's playing in the room, on this device";
-  const t = b.querySelector('.modebtn-txt'); if (t) t.textContent = listening ? 'Listening' : 'Listen in';
-}
-// "Play here": make THIS device the player (music out of this browser) instead
-// of driving the venue box. Per-device, remembered on the device. Switching
-// reloads so playback starts cleanly in the chosen mode.
+// "Where the music plays" (Admin) — switch between the venue box driving your
+// sound system (default) and this browser playing locally (for testing away
+// from the venue). Per-device, remembered here; switching reloads so playback
+// starts cleanly in the chosen mode.
 function setupPlayHere(serverHeadless, playMode) {
-  const btn = $('play-here'); if (!btn) return;
-  if (!serverHeadless) { btn.hidden = true; return; } // no venue box → app is already a local player
-  btn.hidden = false;
+  const wrap = $('playmode-switch'); if (!wrap) return;
+  if (!serverHeadless) { wrap.hidden = true; return; } // no venue box → nothing to switch
+  wrap.hidden = false;
   const onDevice = playMode === 'device';
-  btn.classList.toggle('on', onDevice);
-  btn.setAttribute('aria-pressed', onDevice ? 'true' : 'false');
-  btn.title = onDevice ? 'Playing on this device — tap to hand playback back to the venue' : 'Play the music on THIS device instead of the venue box';
-  const t = btn.querySelector('.modebtn-txt'); if (t) t.textContent = onDevice ? 'Playing here' : 'Play here';
-  btn.addEventListener('click', () => {
-    const next = onDevice ? 'venue' : 'device';
-    try { localStorage.setItem('wm-playmode', next); } catch (e) { /* ignore */ }
+  const vBtn = $('pm-venue'); const dBtn = $('pm-device');
+  if (vBtn) vBtn.classList.toggle('on', !onDevice);
+  if (dBtn) dBtn.classList.toggle('on', onDevice);
+  const setMode = (mode) => {
+    if ((mode === 'device') === onDevice) return; // already in that mode
+    try { localStorage.setItem('wm-playmode', mode); } catch (e) { /* ignore */ }
     location.reload();
-  });
+  };
+  if (vBtn) vBtn.addEventListener('click', () => setMode('venue'));
+  if (dBtn) dBtn.addEventListener('click', () => setMode('device'));
 }
 
 // ---- find royalty-free music (in-app search via the server proxy) ----------
@@ -644,20 +637,6 @@ function setupFind() {
   const input = $('find-q'); const go = $('find-go');
   if (go) go.addEventListener('click', () => openPixabay(input && input.value));
   if (input) input.addEventListener('keydown', (e) => { if (e.key === 'Enter') openPixabay(input.value); });
-}
-
-function setupListenHere() {
-  const btn = $('listen-here'); if (!btn) return;
-  btn.addEventListener('click', () => {
-    if (!startRoomAudio()) return; // this click is the gesture that unlocks audio
-    listening = !listening;
-    if (roomGain) {
-      try { roomGain.gain.value = listening ? 1 : 0; } catch (e) { /* ignore */ }
-    }
-    if (listening && roomStream && roomStream.paused) roomStream.play().catch(() => {});
-    updateListenBtn();
-  });
-  updateListenBtn();
 }
 
 // Volume in venue mode: write the level (0–100) to the box, debounced.
@@ -1436,7 +1415,7 @@ function buildVibePlaylists() {
 // matching tracks live, so no playlists get built.
 function autoScheduleByVibe() {
   const analysed = library.filter((t) => t.vibe);
-  if (!analysed.length) { toast('Categorise your music in the Library first'); return; }
+  if (!analysed.length) { toast('Add some music first'); return; }
   const has = { Chill: 0, Lively: 0 };
   analysed.forEach((t) => { if (has[t.vibe] != null) has[t.vibe]++; });
   const pref = { Chill: ['Chill', 'Lively'], Lively: ['Lively', 'Chill'] };
@@ -1999,7 +1978,6 @@ async function boot() {
   setupVenuePlayer();
   setupAdmin();
   setupLicensed();
-  setupListenHere();
   setupFind();
   refreshAhPlaylists();
 }
