@@ -359,16 +359,22 @@ const artCache = new Map(); // file -> { mtime, mime?, data?, none? }
 // for music) and tempo. Three levels is the reliable ceiling for energy+tempo:
 // Two vibes: Chill (calm/slower) and Lively (upbeat/faster). '' = not analysed.
 function vibeFor(energy, bpm, genre) {
-  if (energy == null || !isFinite(energy)) return '';
+  const g = (genre || '').toLowerCase();
+  const isChillGenre = /(chill|ambient|downtempo|lo-?fi|lounge|balearic|organic|deep house|melodic|jazz|bossa|soul)/.test(g);
+  const isLivelyGenre = /(tech house|techno|disco|trance|drum|dnb|dubstep|garage|afro|progressive|nu disco|electro|dance|club)/.test(g);
+  // No audio analysis yet? Go by genre alone (the reliable signal for this room).
+  if (energy == null || !isFinite(energy)) {
+    if (isChillGenre) return 'Chill';
+    if (isLivelyGenre) return 'Lively';
+    return '';
+  }
   // Wider energy band so normally-mastered music doesn't peg the meter (which
   // made almost everything read as Lively).
   const e = Math.max(0, Math.min(1, (energy - 0.05) / 0.30));      // loudness/density
-  const b = bpm ? Math.max(0, Math.min(1, (bpm - 96) / (132 - 96)) ) : e; // tempo (deep/organic house ~120 → mid)
+  const b = bpm ? Math.max(0, Math.min(1, (bpm - 96) / (132 - 96))) : e; // tempo (deep/organic house ~120 → mid)
   let s = 0.5 * e + 0.5 * b;
-  // Genre is a strong hint: chill/organic styles lean calm, club styles upbeat.
-  const g = (genre || '').toLowerCase();
-  if (/(chill|ambient|downtempo|lo-?fi|lounge|balearic|organic|deep house|jazz|bossa)/.test(g)) s -= 0.18;
-  else if (/(techno|tech house|disco|trance|drum|dnb|dubstep|garage|afro|progressive)/.test(g)) s += 0.15;
+  if (isChillGenre) s -= 0.2;       // genre is a strong hint
+  else if (isLivelyGenre) s += 0.18;
   return s < 0.5 ? 'Chill' : 'Lively';
 }
 
@@ -419,6 +425,7 @@ function scanLibrary() {
       const m = trackMeta(f);
       const parsed = parseFileName(f);
       const artist = (data.artists && data.artists[f]) || m.artist || (data.credits && data.credits[f] && data.credits[f].artist) || parsed.artist || '';
+      const genre = (data.genres && data.genres[f]) || m.genre || parsed.genre || '';
       return {
         file: f,
         // strip a leading copy of the artist so it isn't shown in both columns
@@ -426,11 +433,13 @@ function scanLibrary() {
         duration: m.duration || 0,
         // a manually-set genre wins over the file's tag (Pixabay tracks
         // often ship with no genre, so staff can set one that sticks)
-        genre: (data.genres && data.genres[f]) || m.genre || parsed.genre || '',
+        genre,
         artist,
         bpm: m.analyzedBpm || m.bpm || null,
         energy: m.energy != null ? m.energy : null,
-        vibe: normalizeVibe((data.vibes && data.vibes[f]) || m.vibe),
+        // A hand-set vibe wins; otherwise classify LIVE (energy+tempo+genre) so
+        // re-tuning takes effect without re-analysing every track.
+        vibe: normalizeVibe((data.vibes && data.vibes[f]) || vibeFor(m.energy, m.analyzedBpm || m.bpm, genre)),
         // commercial/licensed track added for after-hours (no guests) only
         licensed: !!(data.licensed && data.licensed[f]),
       };
