@@ -123,24 +123,47 @@ function detectGenre(text) {
   return null;
 }
 
+// Real artist names we recognise as a filename prefix (Pixabay uploaders the
+// venue actually uses). Add names here as the library grows.
+const KNOWN_ARTISTS = [
+  'simon le grec', 'livail', 'lesfm', 'coma media', 'ashot danielyan',
+  'lexin music', 'grand project', 'penguinmusic', 'music unlimited',
+];
+
+const capWords = (s) => s.replace(/\b([a-z])/g, (m) => m.toUpperCase());
+
 // Parse a bare filename into { artist, title, genre } for tracks with no
 // embedded tags — e.g. "9jackjack8 Anatolian Tears Turkish Deep House 413141.mp3"
-// → artist "9jackjack8", genre "Deep House", title "Anatolian Tears Turkish"
-// (uploader handle pulled out, the genre phrase lifted into its own field, and
-// the trailing stock-ID number dropped).
+// → artist "9jackjack8", genre "Deep House", title "Anatolian Tears Turkish".
+// Handles: "Artist - Title", known-artist prefixes (Simon Le Grec…), uploader
+// handles (9jackjack8), a lifted genre phrase, and a dropped trailing stock ID.
 function parseFileName(file) {
-  const base = path.basename(file, path.extname(file));
+  let base = path.basename(file, path.extname(file));
+  let artist = null;
+  // 1) "Artist - Title" (spaced hyphen / en / em dash).
+  const sep = base.split(/\s+[-–—]\s+/);
+  if (sep.length >= 2 && sep[0].trim() && !/^\d+$/.test(sep[0].trim())) {
+    artist = capWords(sep[0].trim());
+    base = sep.slice(1).join(' ');
+  }
   let tokens = base.split(/[-_\s]+/).filter(Boolean);
   // Drop a leading "cafe" tag and leading pure-number track numbers.
   while (tokens.length > 1 && (/^\d+$/.test(tokens[0]) || tokens[0].toLowerCase() === 'cafe')) tokens.shift();
   // Drop a trailing long number — Pixabay/stock IDs (4+ digits).
   while (tokens.length > 1 && /^\d{4,}$/.test(tokens[tokens.length - 1])) tokens.pop();
-  // A leading "handle" (letters mixed with a digit, e.g. "9jackjack8") is the
-  // uploader, not part of the title → pull it out as the artist. Require 4+
-  // letters so real titles like "3am" or "80s" aren't mistaken for a handle.
-  let artist = null;
-  const t0 = tokens[0] || '';
-  if (tokens.length > 1 && /\d/.test(t0) && (t0.match(/[a-z]/gi) || []).length >= 4) artist = tokens.shift();
+  // 2) A known artist name sitting at the front of the remaining tokens.
+  if (!artist) {
+    const low = tokens.join(' ').toLowerCase();
+    for (const a of KNOWN_ARTISTS) {
+      if (low === a || low.startsWith(a + ' ')) { const n = a.split(' ').length; artist = capWords(tokens.slice(0, n).join(' ')); tokens = tokens.slice(n); break; }
+    }
+  }
+  // 3) A leading "handle" (letters mixed with a digit, e.g. "9jackjack8") is the
+  // uploader. Require 4+ letters so "3am"/"80s" aren't mistaken for a handle.
+  if (!artist && tokens.length > 1) {
+    const t0 = tokens[0];
+    if (/\d/.test(t0) && (t0.match(/[a-z]/gi) || []).length >= 4) artist = capWords(tokens.shift());
+  }
   const cap = (t) => (t.length ? t[0].toUpperCase() + t.slice(1) : t);
   let title = tokens.map(cap).join(' ');
   // Lift a known genre phrase out of the title into its own field.
@@ -152,7 +175,7 @@ function parseFileName(file) {
     const stripped = title.replace(re, '').replace(/\s{2,}/g, ' ').trim();
     if (stripped) title = stripped; // keep the genre in the title if that's all there was
   }
-  return { artist: artist ? cap(artist) : null, title, genre };
+  return { artist: artist || null, title, genre };
 }
 
 // Turn a filename into a friendly display title (artist handle + trailing stock
@@ -323,11 +346,17 @@ const artCache = new Map(); // file -> { mtime, mime?, data?, none? }
 // Bucket a track into a serving "vibe" from its measured energy (RMS, ~0.02–0.30
 // for music) and tempo. Three levels is the reliable ceiling for energy+tempo:
 // Two vibes: Chill (calm/slower) and Lively (upbeat/faster). '' = not analysed.
-function vibeFor(energy, bpm) {
+function vibeFor(energy, bpm, genre) {
   if (energy == null || !isFinite(energy)) return '';
-  const e = Math.max(0, Math.min(1, (energy - 0.03) / 0.20));      // loudness/density
-  const b = bpm ? Math.max(0, Math.min(1, (bpm - 72) / (128 - 72))) : e; // tempo
-  const s = 0.6 * e + 0.4 * b;
+  // Wider energy band so normally-mastered music doesn't peg the meter (which
+  // made almost everything read as Lively).
+  const e = Math.max(0, Math.min(1, (energy - 0.05) / 0.30));      // loudness/density
+  const b = bpm ? Math.max(0, Math.min(1, (bpm - 96) / (132 - 96)) ) : e; // tempo (deep/organic house ~120 → mid)
+  let s = 0.5 * e + 0.5 * b;
+  // Genre is a strong hint: chill/organic styles lean calm, club styles upbeat.
+  const g = (genre || '').toLowerCase();
+  if (/(chill|ambient|downtempo|lo-?fi|lounge|balearic|organic|deep house|jazz|bossa)/.test(g)) s -= 0.18;
+  else if (/(techno|tech house|disco|trance|drum|dnb|dubstep|garage|afro|progressive)/.test(g)) s += 0.15;
   return s < 0.5 ? 'Chill' : 'Lively';
 }
 
@@ -383,7 +412,7 @@ function scanLibrary() {
         // a manually-set genre wins over the file's tag (Pixabay tracks
         // often ship with no genre, so staff can set one that sticks)
         genre: (data.genres && data.genres[f]) || m.genre || parseFileName(f).genre || '',
-        artist: m.artist || (data.credits && data.credits[f] && data.credits[f].artist) || parseFileName(f).artist || '',
+        artist: (data.artists && data.artists[f]) || m.artist || (data.credits && data.credits[f] && data.credits[f].artist) || parseFileName(f).artist || '',
         bpm: m.analyzedBpm || m.bpm || null,
         energy: m.energy != null ? m.energy : null,
         vibe: normalizeVibe((data.vibes && data.vibes[f]) || m.vibe),
@@ -556,6 +585,7 @@ app.post('/api/library/dedupe', (_req, res) => {
         for (const pl of Object.keys(data.playlists)) data.playlists[pl] = data.playlists[pl].filter((x) => x !== f);
         if (data.licensed) delete data.licensed[f];
         if (data.genres) delete data.genres[f];
+        if (data.artists) delete data.artists[f];
         if (data.vibes) delete data.vibes[f];
         if (data.ratings) delete data.ratings[f];
         if (data.credits) delete data.credits[f];
@@ -606,6 +636,19 @@ app.post('/api/genre', (req, res) => {
   res.json({ ok: true, genres: data.genres });
 });
 
+// Manually set (or clear) a track's artist — overrides the parsed one and
+// survives re-scans, so staff can fix Pixabay names that don't parse cleanly.
+app.post('/api/artist', (req, res) => {
+  const file = req.body && req.body.file;
+  const artist = ((req.body && req.body.artist) || '').trim();
+  if (!file) return res.status(400).json({ error: 'file required' });
+  data.artists = data.artists || {};
+  if (artist) data.artists[file] = artist;
+  else delete data.artists[file];
+  saveData(data);
+  res.json({ ok: true, artist });
+});
+
 // Manually set a track's vibe (Chill / Lively) from the Library — a hand-set
 // vibe wins over the analysed one and survives re-scans.
 app.post('/api/vibe', (req, res) => {
@@ -632,7 +675,8 @@ app.post('/api/analyze', (req, res) => {
   const m = data.meta[file] || {};
   if (isFinite(energy)) m.energy = energy;
   if (bpm && bpm > 0 && bpm < 300) m.analyzedBpm = bpm;
-  m.vibe = vibeFor(m.energy, m.analyzedBpm || m.bpm);
+  const gForVibe = (data.genres && data.genres[file]) || m.genre || parseFileName(file).genre || '';
+  m.vibe = vibeFor(m.energy, m.analyzedBpm || m.bpm, gForVibe);
   m.analyzedAt = Date.now();
   data.meta[file] = m;
   saveData(data);
@@ -1354,7 +1398,7 @@ function trackInfo(file) {
   const credit = (data.credits && data.credits[file]) || {};
   return {
     title: (m.title && m.title.trim()) || prettyTitle(file),
-    artist: (m.artist && m.artist.trim()) || (credit.artist || '').trim() || parseFileName(file).artist || null,
+    artist: (data.artists && data.artists[file]) || (m.artist && m.artist.trim()) || (credit.artist || '').trim() || parseFileName(file).artist || null,
     genre: (data.genres && data.genres[file]) || m.genre || parseFileName(file).genre || null,
   };
 }

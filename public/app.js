@@ -1191,7 +1191,13 @@ function renderEditor() {
     trackCell.className = 'col-track'; trackCell.textContent = t.title; trackCell.title = t.title;
     trackCell.addEventListener('click', () => { if (!libSelect) preview(t.file); });
     const artistCell = document.createElement('div');
-    artistCell.className = 'col-artist'; artistCell.textContent = t.artist || '—'; artistCell.title = t.artist || '';
+    artistCell.className = 'col-artist';
+    const abtn = document.createElement('button');
+    abtn.className = 'cell-edit' + (t.artist ? '' : ' col-empty');
+    abtn.textContent = t.artist || '+ artist';
+    abtn.title = t.artist ? 'Change artist' : 'Set artist';
+    abtn.addEventListener('click', (e) => { e.stopPropagation(); setTrackArtist(t); });
+    artistCell.appendChild(abtn);
 
     attachLongPress(li, t.file);
     li.addEventListener('click', () => {
@@ -1205,7 +1211,7 @@ function renderEditor() {
     const genreCell = document.createElement('div');
     genreCell.className = 'col-genre';
     const gbtn = document.createElement('button');
-    gbtn.className = 'genre-edit' + (t.genre ? '' : ' col-empty');
+    gbtn.className = 'cell-edit' + (t.genre ? '' : ' col-empty');
     gbtn.textContent = t.genre || '+ genre';
     gbtn.title = t.genre ? 'Change genre' : 'Set genre';
     gbtn.addEventListener('click', (e) => { e.stopPropagation(); setTrackGenre(t); });
@@ -1295,6 +1301,13 @@ function setTrackGenre(t) {
   const g = promptGenre('Genre for “' + t.title + '” (leave blank to clear):', t.genre || '');
   if (g === null) return; // cancelled
   fetch('/api/genre', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file: t.file, genre: g.trim() }) })
+    .then((r) => r.json()).then(() => reloadLibrary());
+}
+
+function setTrackArtist(t) {
+  const a = prompt('Artist for “' + t.title + '” (leave blank to clear):', t.artist || '');
+  if (a === null) return; // cancelled
+  fetch('/api/artist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file: t.file, artist: a.trim() }) })
     .then((r) => r.json()).then(() => reloadLibrary());
 }
 
