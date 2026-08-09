@@ -129,7 +129,8 @@ const vizEq = (() => {
   const levels = new Array(COLS).fill(0); // smoothed audio target 0..1
   const shown = new Array(COLS).fill(0);  // integer segments currently lit
   const nextAt = new Array(COLS).fill(0); // when this column may step again
-  const RISE_MS = 28, FALL_MS = 70;       // climb one segment, then wait; fall slower
+  const bandMax = new Array(COLS).fill(0.35); // per-band running peak, for auto-gain
+  const RISE_MS = 22, FALL_MS = 60;       // climb one segment, then wait; fall slower
   let W = 1, H = 1;
   let audioCtx = null, analyser = null, freq = null, wired = false;
 
@@ -190,18 +191,23 @@ const vizEq = (() => {
     if (analyser && playing) {
       analyser.getByteFrequencyData(freq);
       // Split the spectrum into COLS *logarithmic* bands (like a real graphic
-      // EQ) so bass doesn't hog the left side, and tilt the gain up towards the
-      // treble so every bar stays lively instead of dead on the right.
+      // EQ). Each band is normalised to its OWN recent peak (auto-gain) so
+      // every column swings across the full height and dances to the music,
+      // instead of the whole meter sitting flat at one level.
       const bins = freq.length;
-      const minBin = 2, maxBin = Math.floor(bins * 0.9);
+      const minBin = 1, maxBin = Math.floor(bins * 0.85);
       const ratio = maxBin / minBin;
       for (let i = 0; i < COLS; i++) {
         const lo = Math.floor(minBin * Math.pow(ratio, i / COLS));
         const hi = Math.max(lo + 1, Math.floor(minBin * Math.pow(ratio, (i + 1) / COLS)));
-        let s = 0, n = 0; for (let j = lo; j < hi && j < bins; j++) { s += freq[j]; n++; }
-        const tilt = 1 + (i / (COLS - 1)) * 1.7; // boost highs
-        const v = Math.min(1, (n ? s / n / 255 : 0) * 1.35 * tilt) * volScale;
-        levels[i] += (v - levels[i]) * 0.5;
+        let peak = 0; for (let j = lo; j < hi && j < bins; j++) { if (freq[j] > peak) peak = freq[j]; }
+        const raw = peak / 255;
+        // track this band's recent maximum (fast up, slow decay) and scale to it
+        bandMax[i] = Math.max(raw, bandMax[i] * 0.992, 0.12);
+        const v = (raw / bandMax[i]) * volScale;
+        // fast attack, slower release — punchy on the beat, graceful fall
+        const k = v > levels[i] ? 0.7 : 0.22;
+        levels[i] += (v - levels[i]) * k;
       }
     } else if (playing) { // synthetic fallback — evenly lively across all bars
       for (let i = 0; i < COLS; i++) {
