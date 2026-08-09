@@ -266,6 +266,7 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .iact:hover { border-color: var(--border-strong); color: var(--text); }
 .iact.on-like { color: var(--text); background: var(--accent-tint); border-color: transparent; }
 .iact.on-ban { color: var(--bad); background: var(--bad-tint); border-color: transparent; }
+.iact.iact-del:hover { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, transparent); background: var(--bad-tint); }
 .row-menu-wrap { position: relative; }
 .row-menu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 20; min-width: 200px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 11px; box-shadow: var(--shadow); padding: 6px; display: flex; flex-direction: column; }
 .row-menu[hidden] { display: none; }
@@ -337,6 +338,7 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .find-chip:hover { border-color: var(--accent); }
 .find-chip-now { border-color: var(--play); color: var(--play); font-weight: 600; }
 .find-player { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 10px 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; }
+.find-player[hidden] { display: none; } /* author display:flex would otherwise beat the hidden attribute */
 .find-player .find-np { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.82rem; font-weight: 600; }
 .find-player .find-seek { flex: 2; height: 8px; accent-color: var(--play); cursor: pointer; }
 .find-player .find-time { font-size: 0.76rem; color: var(--muted); min-width: 34px; text-align: right; }
@@ -375,12 +377,10 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .selbar-actions { display: flex; gap: 8px; }
 .lib-selbar .del { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, transparent); }
 .lib-selbar .del:hover { background: var(--bad-tint); }
-/* selecting mode: hide per-row buttons, show a tick, highlight selected rows */
+/* selecting mode: hide per-row buttons; selected rows get a teal ring (no ticks) */
 .tracklist.selecting li { cursor: pointer; }
 .tracklist.selecting li button, .tracklist.selecting li .dur { display: none; }
-.tracklist.selecting li::after { content: '○'; color: var(--faint); font-size: 1.2rem; flex: none; margin-left: 4px; }
-.tracklist.selecting li.sel { border-color: var(--accent); background: var(--accent-tint); }
-.tracklist.selecting li.sel::after { content: '✓'; color: var(--accent); font-weight: 700; }
+.tracklist.selecting li.sel { border-color: var(--play); box-shadow: 0 0 0 1px var(--play); background: var(--play-tint); }
 
 .pl-layout { display: grid; grid-template-columns: 244px 1fr; gap: 16px; align-items: start; }
 #playlist-names { list-style: none; padding: 0; margin: 0 0 12px; }

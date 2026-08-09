@@ -882,8 +882,6 @@ $('crossfade').addEventListener('change', (e) => saveSettings({ crossfade: Numbe
 // library search + filters + sort
 $('lib-search').addEventListener('input', (e) => { libFilter = e.target.value.trim().toLowerCase(); renderEditor(); });
 $('lib-genre').addEventListener('change', (e) => { libGenre = e.target.value; renderEditor(); });
-$('lib-vibe').addEventListener('change', (e) => { libVibe = e.target.value; renderEditor(); });
-$('lib-rating').addEventListener('change', (e) => { libRating = e.target.value; renderEditor(); });
 $('lib-sort').addEventListener('change', (e) => { libSort = e.target.value; renderEditor(); });
 
 // keyboard shortcuts (ignored while typing in a field)
@@ -1292,44 +1290,40 @@ function renderEditor() {
     if (t.vibe) { const v = document.createElement('span'); v.className = 'tag vibe-' + t.vibe.toLowerCase(); v.textContent = t.vibe; badges.appendChild(v); }
     if (t.genre) { const g = document.createElement('span'); g.className = 'tag tag-genre'; g.textContent = t.genre; badges.appendChild(g); }
 
-    // two clear actions up front: like + ban
+    // The Library is for organising, so rows get Categorise + Delete.
+    // (Like / ban live on Now Playing, for reacting to what's in the room.)
     const acts = document.createElement('div');
     acts.className = 'row-acts';
-    const like = document.createElement('button');
-    like.className = 'iact' + (rt === 'like' ? ' on-like' : ''); like.title = 'Like — plays more often';
-    like.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
-    like.addEventListener('click', (e) => { e.stopPropagation(); rateFile(t.file, 'like'); });
-    const ban = document.createElement('button');
-    ban.className = 'iact' + (rt === 'dislike' ? ' on-ban' : ''); ban.title = 'Ban — never play this track';
-    ban.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg>';
-    ban.addEventListener('click', (e) => { e.stopPropagation(); rateFile(t.file, 'dislike'); });
 
-    // everything else behind a "⋯" menu
-    const menuWrap = document.createElement('div');
-    menuWrap.className = 'row-menu-wrap';
-    const more = document.createElement('button');
-    more.className = 'iact'; more.title = 'More'; more.setAttribute('aria-label', 'More actions');
-    more.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>';
-    const menu = document.createElement('div');
-    menu.className = 'row-menu'; menu.hidden = true;
-    const mItem = (label, cls, fn) => { const b = document.createElement('button'); b.className = 'row-menu-item' + (cls ? ' ' + cls : ''); b.textContent = label; b.addEventListener('click', (e) => { e.stopPropagation(); menu.hidden = true; fn(); }); return b; };
-    menu.appendChild(mItem(rt === 'less' ? '✓ Plays less often' : '↓ Play less often', '', () => rateFile(t.file, 'less')));
-    menu.appendChild(mItem(t.genre ? '♪ Genre: ' + t.genre : '♪ Set genre…', '', () => setTrackGenre(t)));
-    if (editing) menu.appendChild(mItem('+ Add to “' + editing + '”', '', () => { if (!state.playlists[editing].includes(t.file)) state.playlists[editing].push(t.file); markCustom(editing); savePlaylists(); }));
-    if (rt) menu.appendChild(mItem('× Clear rating', '', () => rateFile(t.file, rt)));
-    menu.appendChild(mItem('🗑 Delete from library', 'danger', () => {
+    const mItem = (menu, label, cls, fn) => { const b = document.createElement('button'); b.className = 'row-menu-item' + (cls ? ' ' + cls : ''); b.textContent = label; b.addEventListener('click', (e) => { e.stopPropagation(); menu.hidden = true; fn(); }); return b; };
+    const setVibe = (v) => fetch('/api/vibe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file: t.file, vibe: v }) }).then(() => reloadLibrary());
+
+    // Categorise — set vibe / genre / add to a playlist
+    const catWrap = document.createElement('div');
+    catWrap.className = 'row-menu-wrap';
+    const cat = document.createElement('button');
+    cat.className = 'iact'; cat.title = 'Categorise'; cat.setAttribute('aria-label', 'Categorise');
+    cat.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 12 22l-9-9V3h10z"/><circle cx="7.5" cy="7.5" r="1.3" fill="currentColor" stroke="none"/></svg>';
+    const catMenu = document.createElement('div');
+    catMenu.className = 'row-menu'; catMenu.hidden = true;
+    catMenu.appendChild(mItem(catMenu, (t.vibe === 'Chill' ? '✓ ' : '') + '🌙 Chill', '', () => setVibe('Chill')));
+    catMenu.appendChild(mItem(catMenu, (t.vibe === 'Lively' ? '✓ ' : '') + '⚡ Lively', '', () => setVibe('Lively')));
+    catMenu.appendChild(mItem(catMenu, t.genre ? '♪ Genre: ' + t.genre : '♪ Set genre…', '', () => setTrackGenre(t)));
+    if (editing) catMenu.appendChild(mItem(catMenu, '+ Add to “' + editing + '”', '', () => { if (!state.playlists[editing].includes(t.file)) state.playlists[editing].push(t.file); markCustom(editing); savePlaylists(); }));
+    cat.addEventListener('click', (e) => { e.stopPropagation(); const willOpen = catMenu.hidden; closeRowMenus(); catMenu.hidden = !willOpen; });
+    catWrap.append(cat, catMenu);
+
+    // Delete
+    const del = document.createElement('button');
+    del.className = 'iact iact-del'; del.title = 'Delete from library'; del.setAttribute('aria-label', 'Delete');
+    del.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>';
+    del.addEventListener('click', (e) => {
+      e.stopPropagation();
       if (!confirm('Delete "' + t.title + '" from the library?')) return;
       fetch('/api/track?name=' + encodeURIComponent(t.file), { method: 'DELETE' }).then((r) => r.json()).then(() => reloadLibrary());
-    }));
-    more.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const willOpen = menu.hidden;
-      closeRowMenus();
-      menu.hidden = !willOpen;
     });
-    menuWrap.append(more, menu);
 
-    acts.append(like, ban, menuWrap);
+    acts.append(catWrap, del);
     li.append(art, meta, badges, acts);
     libUl.appendChild(li);
   });

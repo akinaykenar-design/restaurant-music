@@ -334,7 +334,7 @@ function scanLibrary() {
         artist: m.artist || (data.credits && data.credits[f] && data.credits[f].artist) || '',
         bpm: m.analyzedBpm || m.bpm || null,
         energy: m.energy != null ? m.energy : null,
-        vibe: normalizeVibe(m.vibe),
+        vibe: normalizeVibe((data.vibes && data.vibes[f]) || m.vibe),
         // commercial/licensed track added for after-hours (no guests) only
         licensed: !!(data.licensed && data.licensed[f]),
       };
@@ -466,6 +466,19 @@ app.post('/api/genre', (req, res) => {
   else delete data.genres[file];
   saveData(data);
   res.json({ ok: true, genres: data.genres });
+});
+
+// Manually set a track's vibe (Chill / Lively) from the Library — a hand-set
+// vibe wins over the analysed one and survives re-scans.
+app.post('/api/vibe', (req, res) => {
+  const file = req.body && req.body.file;
+  const vibe = normalizeVibe((req.body && req.body.vibe) || '');
+  if (!file) return res.status(400).json({ error: 'file required' });
+  data.vibes = data.vibes || {};
+  if (vibe) data.vibes[file] = vibe;
+  else delete data.vibes[file];
+  saveData(data);
+  res.json({ ok: true, vibe: vibe || '' });
 });
 
 // Store audio-analysis results (energy + tempo) for a track, computed in the
