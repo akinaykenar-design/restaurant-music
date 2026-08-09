@@ -117,7 +117,7 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
   position: relative; overflow: hidden;
   display: grid; grid-template-columns: 176px 1fr; gap: 26px; align-items: center;
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-  box-shadow: var(--shadow); padding: 26px;
+  box-shadow: var(--shadow); padding: 20px; /* match every other card */
 }
 .player::before {
   content: ''; position: absolute; top: -70%; right: -10%; width: 60%; height: 200%;
@@ -158,7 +158,7 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 
 .np-block { color: var(--warn); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; }
 .np-title { font-size: 1.7rem; margin: 7px 0 3px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; overflow-wrap: break-word; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; min-height: 2.4em; } /* reserve 2 lines so the layout never shifts with title length */
-.np-artist { color: var(--text); font-size: 1rem; font-weight: 600; margin: -2px 0 6px; min-height: 1.4em; overflow-wrap: break-word; } /* reserve the line so the box doesn't resize between tracks with/without an artist */
+.np-artist { color: var(--text); font-size: 1rem; font-weight: 600; margin: -2px 0 6px; height: 1.4em; line-height: 1.4em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* fixed single line so the box never resizes between artist / no-artist tracks */
 .np-sub { color: var(--muted); font-size: 0.92rem; overflow-wrap: break-word; }
 .np-meta { min-width: 0; --ctl: 460px; } /* shrink for long titles; --ctl = shared control width */
 /* Grid children default to min-width:auto (=content width); force 0 so one
