@@ -115,7 +115,7 @@
         <div class="lib-easy">
 
           <div class="card lib-steps">
-            <div class="pill-add">+music</div>
+            <h3>Add music</h3>
             <div id="dropzone" class="dropzone" role="button" tabindex="0" title="Drop music here, or click to add files">
               <svg class="dz-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4m0 0 4 4m-4-4-4 4"/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg>
               <input type="file" id="file-input" accept="audio/*,.mp3,.m4a,.aac,.ogg,.wav,.flac" multiple hidden />
@@ -124,32 +124,10 @@
             </div>
           </div>
 
-          <div class="card find-card" id="find-card">
-            <div class="pill-add">+findmusic</div>
-            <p class="find-lead">Free, licence-safe tracks on Pixabay. Pick a vibe (or search your own), download the MP3, then drop it in <b>+music</b> above.</p>
-            <div class="find-genres">
-              <button class="find-genre" data-q="deep house">Deep House</button>
-              <button class="find-genre" data-q="balearic">Balearic</button>
-              <button class="find-genre" data-q="organic house">Organic House</button>
-              <button class="find-genre" data-q="chillout">Chillout</button>
-              <button class="find-genre" data-q="lounge">Lounge</button>
-              <button class="find-genre" data-q="lo-fi">Lo-fi</button>
-              <button class="find-genre" data-q="ambient">Ambient</button>
-              <button class="find-genre" data-q="downtempo">Downtempo</button>
-            </div>
-            <div class="find-row">
-              <input id="find-q" type="text" placeholder="Or search anything…" autocomplete="off" />
-              <button id="find-go" class="ghost">Search Pixabay</button>
-            </div>
-          </div>
-
           <div class="card lib-main-card">
             <div class="lib-main-head">
               <h3>Your music <span class="count" id="lib-count">0</span></h3>
-              <div class="lib-head-btns">
-                <button id="lib-dedupe" class="ghost">Remove duplicates</button>
-                <button id="lib-playall" class="ghost">▶ Play all</button>
-              </div>
+              <button id="lib-playall" class="ghost">▶ Play all</button>
             </div>
             <input id="lib-search" class="lib-search" type="text" placeholder="Filter your tracks…" />
             <div class="lib-tools">
@@ -244,7 +222,7 @@
           </div>
 
           <div class="card accent-card" id="player-card" hidden>
-            <h3>Venue output (this box)</h3>
+            <h3>Output</h3>
             <div class="playmode-switch" id="playmode-switch">
               <button class="pm-opt" id="pm-venue" type="button">Venue sound system</button>
               <button class="pm-opt" id="pm-device" type="button">This device</button>

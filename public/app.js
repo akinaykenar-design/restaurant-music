@@ -23,6 +23,7 @@ const decks = [new Audio(), new Audio()];
 decks.forEach((d) => { d.preload = 'auto'; });
 let active = 0;
 let crossing = false;
+let crossToken = 0; // invalidates any in-flight crossfade when a newer one starts
 let userVolume = 0.8;
 
 // ---- venue mode ------------------------------------------------------------
@@ -68,14 +69,25 @@ function currentBlock(now) {
 }
 
 // ---- tabs ------------------------------------------------------------------
+function showTab(name) {
+  const btn = document.querySelector('.tab[data-tab="' + name + '"]');
+  const panel = $('tab-' + name);
+  if (!btn || !panel) return;
+  document.querySelectorAll('.tab').forEach((b) => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
+  btn.classList.add('active');
+  panel.classList.add('active');
+  try { localStorage.setItem('wm-tab', name); } catch (e) { /* ignore */ }
+}
 document.querySelectorAll('.tab').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach((b) => b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
-    btn.classList.add('active');
-    $('tab-' + btn.dataset.tab).classList.add('active');
-  });
+  btn.addEventListener('click', () => showTab(btn.dataset.tab));
 });
+// Restore the last tab so a mode-switch reload (or refresh) doesn't dump you
+// back on Now Playing.
+try {
+  const saved = localStorage.getItem('wm-tab');
+  if (saved && document.querySelector('.tab[data-tab="' + saved + '"]')) showTab(saved);
+} catch (e) { /* ignore */ }
 
 // ---- queue building (smart rotation: like more, less fewer, ban never) -----
 function shuffle(a) {
@@ -446,40 +458,45 @@ $('add-all').addEventListener('click', () => {
   toast('Added ' + added + ' track' + (added === 1 ? '' : 's') + ' to ' + editing);
 });
 
-function beginCrossfade(cf) {
-  if (crossing || queue.length < 2) return;
+// Crossfade to an arbitrary queue index over `seconds`. Used for both the
+// end-of-track auto-fade AND manual skip, so a skip always fades (never a hard
+// cut) and every press advances exactly one track. A token invalidates any
+// older ramp so rapid presses can't fight each other or land back on the start.
+function crossfadeTo(idx, seconds) {
+  if (!queue.length) return;
+  const myToken = ++crossToken;
   crossing = true;
-  const from = activeDeck();
-  const to = otherDeck();
-  const nextIdx = (queueIndex + 1) % queue.length;
-  const nextFile = queue[nextIdx];
-  to.src = '/audio/' + encodeURIComponent(nextFile);
+  const from = decks[active];
+  const to = decks[1 - active];
+  to.src = '/audio/' + encodeURIComponent(queue[idx]);
   to.volume = 0;
   to.play().catch(() => {});
+  queueIndex = idx;             // logical position moves now → UI feels instant
+  onTrackChanged(queue[idx]);
   const t0 = performance.now();
-  const dur = Math.max(0.1, cf) * 1000;
+  const dur = Math.max(50, seconds * 1000);
   (function ramp(now) {
+    if (myToken !== crossToken) return; // a newer skip/fade superseded this one
     const t = Math.min(1, (now - t0) / dur);
     from.volume = clamp01(userVolume * (1 - t));
     to.volume = clamp01(userVolume * t);
-    if (t < 1) requestAnimationFrame(ramp);
-    else {
-      active = 1 - active;
-      queueIndex = nextIdx;
-      crossing = false;
-      from.pause();
-      onTrackChanged(nextFile);
-    }
+    if (t < 1) { requestAnimationFrame(ramp); return; }
+    active = 1 - active;
+    from.pause();
+    crossing = false;
   })(t0);
+}
+
+function beginCrossfade(cf) {
+  if (crossing || queue.length < 2) return;
+  crossfadeTo((queueIndex + 1) % queue.length, Math.max(0.1, cf));
 }
 
 function skip(dir) {
   if (venueMode) { venuePost(dir < 0 ? '/api/player/prev' : '/api/player/skip').then(() => pollVenueSoon()); return; }
   if (!queue.length) return;
-  crossing = false;
-  otherDeck().pause();
-  const ni = (queueIndex + dir + queue.length) % queue.length;
-  startTrack(ni, true);
+  // Quick crossfade to the neighbour (never a hard cut). Works mid-fade too.
+  crossfadeTo((queueIndex + dir + queue.length) % queue.length, 0.7);
 }
 
 // deck events (wired once)
@@ -619,26 +636,6 @@ function nowPlayingSeed() {
 }
 
 // Chips to expand the library: "more like now playing", every genre you
-// already have, and a few on-brand starters.
-// "Find music" opens Pixabay's own music search in a new tab — reliable,
-// licence-safe (Pixabay Content Licence covers venue background play), and you
-// just download the MP3 and drop it into +music above. We don't proxy an API:
-// the in-app Openverse search had almost no CC0 music and kept coming up empty.
-function openPixabay(q) {
-  const query = (q || '').trim();
-  const url = 'https://pixabay.com/music/' + (query ? 'search/' + encodeURIComponent(query) + '/' : '');
-  window.open(url, '_blank', 'noopener');
-}
-
-function setupFind() {
-  document.querySelectorAll('.find-genre').forEach((b) => {
-    b.addEventListener('click', () => openPixabay(b.dataset.q || b.textContent));
-  });
-  const input = $('find-q'); const go = $('find-go');
-  if (go) go.addEventListener('click', () => openPixabay(input && input.value));
-  if (input) input.addEventListener('keydown', (e) => { if (e.key === 'Enter') openPixabay(input.value); });
-}
-
 // Volume in venue mode: write the level (0–100) to the box, debounced.
 function setVenueVolume(v01) {
   const pct = Math.round(Math.max(0, Math.min(1, v01)) * 100);
@@ -789,26 +786,6 @@ $('lib-playall').addEventListener('click', () => {
   $('now-block').textContent = 'All music'; $('now-sub').textContent = files.length + ' track' + (files.length === 1 ? '' : 's');
   loadQueue(files, true);
   const nowTab = document.querySelector('.tab[data-tab="now"]'); if (nowTab) nowTab.click();
-});
-
-$('lib-dedupe').addEventListener('click', async () => {
-  const btn = $('lib-dedupe');
-  const prev = btn.textContent;
-  btn.disabled = true; btn.textContent = 'Checking…';
-  try {
-    const found = await fetch('/api/library/duplicates').then((r) => r.json());
-    if (!found.count) { btn.textContent = 'No duplicates'; setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 2000); return; }
-    if (!confirm('Remove ' + found.count + ' duplicate track' + (found.count === 1 ? '' : 's') + '? One copy of each is kept.')) {
-      btn.textContent = prev; btn.disabled = false; return;
-    }
-    btn.textContent = 'Removing…';
-    const res = await fetch('/api/library/dedupe', { method: 'POST' }).then((r) => r.json());
-    await reloadLibrary();
-    btn.textContent = 'Removed ' + res.count;
-    setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 2500);
-  } catch {
-    btn.textContent = 'Failed'; setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 2000);
-  }
 });
 
 // keyboard shortcuts (ignored while typing in a field)
@@ -1950,7 +1927,6 @@ async function boot() {
   setupVenuePlayer();
   setupAdmin();
   setupLicensed();
-  setupFind();
   refreshAhPlaylists();
 }
 boot();
