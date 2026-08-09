@@ -99,7 +99,7 @@ body {
 .lockbtn svg { width: 21px; height: 21px; fill: currentColor; }
 .lockbtn:hover { color: var(--text); border-color: var(--play); }
 .lockbtn.on { color: var(--play); border-color: var(--play); background: var(--play-tint); }
-#header-power:hover { color: var(--bad); border-color: var(--bad); background: var(--bad-tint); }
+#header-power:hover { color: var(--text); border-color: var(--play); }
 
 main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60px; }
 .tab-panel { display: none; animation: fade 0.22s ease; }
@@ -158,8 +158,7 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 
 .np-block { color: var(--warn); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; }
 .np-title { font-size: 1.7rem; margin: 7px 0 3px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; overflow-wrap: break-word; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; min-height: 2.4em; } /* reserve 2 lines so the layout never shifts with title length */
-.np-artist { color: var(--text); font-size: 1rem; font-weight: 600; margin: -2px 0 6px; overflow-wrap: break-word; }
-.np-artist[hidden] { display: none; }
+.np-artist { color: var(--text); font-size: 1rem; font-weight: 600; margin: -2px 0 6px; min-height: 1.4em; overflow-wrap: break-word; } /* reserve the line so the box doesn't resize between tracks with/without an artist */
 .np-sub { color: var(--muted); font-size: 0.92rem; overflow-wrap: break-word; }
 .np-meta { min-width: 0; --ctl: 460px; } /* shrink for long titles; --ctl = shared control width */
 /* Grid children default to min-width:auto (=content width); force 0 so one
@@ -221,9 +220,13 @@ input[type='range']::-moz-range-thumb { width: 28px; height: 28px; border: 3px s
 .chip.range input[type=range] { width: 84px; }
 .chip select, .chip input[type='time'] { background: transparent; border: none; color: var(--text); font: inherit; font-size: 0.82rem; cursor: pointer; padding: 0; }
 .chip select:focus, .chip input[type='time']:focus { outline: none; }
-/* scenes — one-tap crowd modes */
-.scenes { display: flex; flex-wrap: wrap; gap: 10px; margin: 34px 0 10px; max-width: var(--ctl, 460px); }
-.scene { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.14s ease; }
+/* scenes = time blocks (own row); genres = a second, scrollable row below */
+.scenes { display: flex; flex-wrap: wrap; gap: 10px; margin: 32px 0 12px; max-width: var(--ctl, 460px); }
+.genres { display: flex; flex-wrap: nowrap; gap: 10px; margin: 0 0 6px; max-width: var(--ctl, 460px); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.genres::-webkit-scrollbar { display: none; }
+.genres .scene { flex: 0 0 auto; }
+.scene { display: inline-flex; align-items: center; gap: 7px; padding: 12px 20px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: inherit; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: border-color 0.14s ease, color 0.14s ease, background 0.14s ease; }
+.scene-ic { font-size: 1.05rem; }
 .scene:hover:not(:disabled) { border-color: var(--play); }
 .scene:disabled { opacity: 0.4; cursor: not-allowed; }
 .scene.on { color: var(--play); background: var(--play-tint); border-color: var(--play); }
@@ -258,7 +261,7 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .tracklist:not(.tracklist-cols) button { width: 27px; height: 27px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; font-size: 0.8rem; flex: none; }
 .tracklist button:disabled { opacity: 0.3; cursor: not-allowed; }
 .tracklist button:hover:not(:disabled) { border-color: var(--play); }
-.tracklist .del:hover { border-color: var(--bad); color: var(--bad); }
+.tracklist .del:hover { border-color: var(--play); color: var(--play); }
 .tracklist .liked { color: var(--warn); border-color: var(--warn); }
 .tracklist .lessed { color: var(--warn); border-color: var(--warn); }
 .tracklist .disliked { color: var(--bad); border-color: var(--bad); }
@@ -294,7 +297,7 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .iact:hover { border-color: var(--play); color: var(--text); }
 .iact.on-like { color: var(--play); background: var(--play-tint); border-color: transparent; }
 .iact.on-ban { color: var(--bad); background: var(--bad-tint); border-color: transparent; }
-.iact.iact-del:hover { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, transparent); background: var(--bad-tint); }
+.iact.iact-del:hover { color: var(--play); border-color: var(--play); }
 .row-menu-wrap { position: relative; }
 .row-menu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 20; min-width: 200px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 11px; box-shadow: var(--shadow); padding: 6px; display: flex; flex-direction: column; }
 .row-menu[hidden] { display: none; }
@@ -348,7 +351,7 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .ah-row .warnbtn, .warnbtn, .dangerbtn { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 9px 15px; cursor: pointer; font: inherit; font-size: 0.86rem; font-weight: 600; transition: border-color 0.14s ease, color 0.14s ease, background 0.14s ease; }
 .ah-row .warnbtn:hover, .warnbtn:hover { border-color: var(--play); }
 /* Shut down still matches at rest, but flashes red on hover as a safety cue. */
-.dangerbtn:hover { border-color: var(--bad); color: var(--bad); background: var(--bad-tint); }
+.dangerbtn:hover { border-color: var(--play); }
 /* segmented two-way switch: the box (jack) vs this browser */
 .playmode-switch { display: inline-flex; gap: 4px; padding: 4px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; }
 .playmode-switch[hidden] { display: none; }
@@ -356,7 +359,7 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .pm-opt:hover { color: var(--text); }
 .pm-opt.on { background: var(--play-tint); color: var(--play); box-shadow: inset 0 0 0 1px var(--play); }
 .restore-label { display: inline-flex; align-items: center; cursor: pointer; }
-.lib-main-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.lib-main-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 .lib-main-head h3 { margin: 0; }
 .lib-head-btns { display: flex; gap: 8px; flex: none; }
 .ah-gate { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
@@ -366,7 +369,7 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 
 /* Admin code fields: masked like a password but NOT a real password input, so
    the browser never offers to save/autofill it. */
-.maskpw { -webkit-text-security: disc; text-security: disc; letter-spacing: 0.12em; }
+.maskpw { -webkit-text-security: disc; text-security: disc; }
 
 .licensed-list { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .licensed-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; padding: 8px 11px; }
@@ -432,7 +435,7 @@ h4 { margin: 0 0 12px; font-size: 0.98rem; display: flex; align-items: center; g
 
 /* Search box and the genre dropdown share one style (same height, radius, font). */
 .lib-search, .lib-filter { width: 100%; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; font: inherit; font-size: 0.88rem; }
-.lib-search { margin-bottom: 10px; }
+.lib-search { margin-bottom: 12px; }
 .lib-filter { cursor: pointer; }
 .lib-search:focus, .lib-filter:focus { outline: none; border-color: var(--play); }
 .lib-tools { display: flex; gap: 8px; margin-bottom: 10px; }
@@ -453,7 +456,9 @@ h4 { margin: 0 0 12px; font-size: 0.98rem; display: flex; align-items: center; g
 .tag.tag-less { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); background: var(--warn-tint); }
 .tag.tag-dislike { color: var(--bad, #c0392b); border-color: color-mix(in srgb, var(--bad, #c0392b) 45%, transparent); background: var(--bad-tint, #c0392b14); }
 .pl-auto { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 1px 6px; border-radius: 999px; color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); background: var(--accent-tint); vertical-align: middle; }
-.dropzone { border: 2px dashed var(--border-strong); border-radius: var(--radius-sm); padding: 26px 16px; min-height: 120px; text-align: center; color: var(--muted); margin-bottom: 12px; transition: all 0.15s; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+.dropzone { position: relative; border: 2px dashed var(--border-strong); border-radius: var(--radius-sm); padding: 26px 16px; min-height: 130px; text-align: center; color: var(--muted); margin-bottom: 12px; transition: all 0.15s; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.dropzone .upload-status { position: absolute; left: 0; right: 0; bottom: 8px; }
+.dropzone .upload-status:empty { display: none; }
 .dropzone .dz-ico { width: 40px; height: 40px; stroke: var(--faint); }
 .dropzone:hover { border-color: var(--play); }
 .dropzone:hover .dz-ico { stroke: var(--play); }
@@ -472,7 +477,7 @@ h4 { margin: 0 0 12px; font-size: 0.98rem; display: flex; align-items: center; g
 .block-row input[type='time']::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.55; }
 :root[data-theme='dark'] .block-row input[type='time']::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.7; }
 .block-row .del { width: 42px; height: 42px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--faint); cursor: pointer; flex: none; font-size: 1rem; }
-.block-row .del:hover:not(:disabled) { border-color: var(--bad); color: var(--bad); }
+.block-row .del:hover:not(:disabled) { border-color: var(--play); color: var(--play); }
 .block-row .del:disabled { opacity: 0.3; cursor: not-allowed; }
 
 /* ---------- schedule ---------- */

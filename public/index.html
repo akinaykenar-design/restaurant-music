@@ -81,7 +81,8 @@
               </button>
             </div>
 
-            <div class="scenes" id="scenes" aria-label="Quick scenes for the current crowd"></div>
+            <div class="scenes" id="scenes" aria-label="Time blocks for the current crowd"></div>
+            <div class="genres" id="genres" aria-label="Play a genre now"></div>
 
             <div class="vol-row">
               <button id="mute" class="mutebtn" title="Mute" aria-label="Mute">
@@ -233,8 +234,8 @@
           <div class="card" id="power-card">
             <h3>Power</h3>
             <div class="ah-row">
-              <button id="power-restart" class="ghost">↻ Restart the box</button>
-              <button id="power-off" class="dangerbtn">⏻ Shut down the box</button>
+              <button id="power-restart" class="ghost">↻ Restart</button>
+              <button id="power-off" class="ghost">⏻ Shut down</button>
             </div>
             <div id="power-status" class="upload-status"></div>
           </div>
@@ -265,13 +266,6 @@
             </div>
           </div>
 
-          <div class="card ah-card" id="ah-card">
-            <h3>After-hours staff music</h3>
-            <div class="ah-row">
-              <select id="ah-playlist"></select>
-              <button id="ah-play" class="warnbtn">Play (after hours)</button>
-            </div>
-          </div>
 
           <div class="card" id="playback-card">
             <h3>Playback settings</h3>
@@ -305,7 +299,6 @@
                 <div class="big-addr" id="big-addr">—</div>
                 <div class="share-btns">
                   <button id="copy-addr" class="ghost">Copy address</button>
-                  <button id="print-poster" class="ghost">🖨 Print poster</button>
                 </div>
               </div>
             </div>

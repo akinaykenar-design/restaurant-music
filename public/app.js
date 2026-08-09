@@ -50,7 +50,7 @@ const titleOf = (file) => {
   return t ? t.title : file.replace(/\.[^.]+$/, '');
 };
 const artistOf = (file) => { const t = library.find((x) => x.file === file); return (t && t.artist) || ''; };
-function setNowArtist(name) { const el = $('now-artist'); if (el) { el.textContent = name || ''; el.hidden = !name; } }
+function setNowArtist(name) { const el = $('now-artist'); if (el) el.textContent = name || ''; }
 const ratingOf = (file) => (state.ratings || {})[file];
 const durOf = (file) => { const t = library.find((x) => x.file === file); return t ? (t.duration || 0) : 0; };
 function fmtDur(s) { return s ? Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') : ''; }
@@ -715,17 +715,21 @@ function renderScenes() {
     box.appendChild(b);
   });
 
-  // genre quick-picks — every genre present in the library (tag or set by hand)
-  const genres = [...new Set(library.filter((t) => !t.licensed).map((t) => t.genre).filter(Boolean))].sort();
-  genres.forEach((g) => {
-    const b = document.createElement('button');
-    b.className = 'scene scene-genre' + (activeScene === 'genre:' + g ? ' on' : '');
-    b.title = 'Play ' + g + ' tracks now';
-    b.innerHTML = '<span class="scene-ic">♪</span>';
-    b.appendChild(document.createTextNode(g));
-    b.addEventListener('click', () => playGenre(g));
-    box.appendChild(b);
-  });
+  // genre quick-picks — on their own row so the time blocks stay uncluttered
+  const gbox = $('genres');
+  if (gbox) {
+    gbox.innerHTML = '';
+    const genres = [...new Set(library.filter((t) => !t.licensed).map((t) => t.genre).filter(Boolean))].sort();
+    genres.forEach((g) => {
+      const b = document.createElement('button');
+      b.className = 'scene scene-genre' + (activeScene === 'genre:' + g ? ' on' : '');
+      b.title = 'Play ' + g + ' tracks now';
+      b.innerHTML = '<span class="scene-ic">♪</span>';
+      b.appendChild(document.createTextNode(g));
+      b.addEventListener('click', () => playGenre(g));
+      gbox.appendChild(b);
+    });
+  }
 }
 
 // Play a specific time block's music on demand (overrides the schedule until
@@ -1592,7 +1596,6 @@ function loadStreamInfo() {
       // printable poster
       $('poster-qr').src = '/api/qr?text=' + encodeURIComponent(appUrl);
       $('poster-addr').textContent = appUrl;
-      $('print-poster').onclick = () => window.print();
       $('share-card').hidden = false;
     }
   }).catch(() => {});
@@ -1735,14 +1738,17 @@ let adminPass = '';
 function setupAdmin() {
   const showLocked = () => {
     adminUnlocked = false; adminPass = '';
+    try { sessionStorage.removeItem('wm-adminpass'); } catch (e) { /* ignore */ }
     $('admin-content').hidden = true; $('admin-lock').hidden = false;
     $('admin-pass').value = '';
   };
   const showUnlocked = () => {
     adminUnlocked = true;
+    // Remember for this tab session so a reload (e.g. switching Output, which
+    // reloads the page) doesn't flash the password screen again.
+    try { if (adminPass) sessionStorage.setItem('wm-adminpass', adminPass); } catch (e) { /* ignore */ }
     $('admin-lock').hidden = true; $('admin-content').hidden = false;
     const lt = $('admin-lock-toggle'); if (lt) lt.checked = (state.settings.adminLock !== false);
-    refreshAhPlaylists();
     renderLicensed();
   };
   const tryUnlock = () => {
@@ -1752,7 +1758,8 @@ function setupAdmin() {
   };
 
   // Lock disabled on this box? Open Admin straight away, no prompt.
-  if (state.settings && state.settings.adminLock === false) showUnlocked();
+  if (state.settings && state.settings.adminLock === false) { showUnlocked(); }
+  else { try { const sp = sessionStorage.getItem('wm-adminpass'); if (sp) { adminPass = sp; showUnlocked(); } } catch (e) { /* ignore */ } }
 
   $('admin-unlock').addEventListener('click', tryUnlock);
   $('admin-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUnlock(); });
@@ -1808,15 +1815,6 @@ function setupAdmin() {
         setTimeout(() => location.reload(), 6000);
       })
       .catch(() => { st.textContent = 'Restarting… reloading in 6s'; setTimeout(() => location.reload(), 6000); });
-  });
-
-  $('ah-play').addEventListener('click', () => {
-    const name = $('ah-playlist').value;
-    if (!name || !state.playlists[name] || !state.playlists[name].length) return alert('That playlist is empty.');
-    activeScene = null; saveSettings({ followSchedule: false, scene: '' }); renderScenes();
-    $('now-block').textContent = 'After hours'; $('now-sub').textContent = 'Staff: ' + name;
-    loadQueue(state.playlists[name], true);
-    toast('Playing (after hours): ' + name);
   });
 
   $('admin-setpass').addEventListener('click', () => {
