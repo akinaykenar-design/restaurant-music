@@ -208,7 +208,7 @@
 
       <!-- ===== ADMIN (password-gated) ===== -->
       <section id="tab-admin" class="tab-panel">
-        <div id="admin-lock" class="card admin-lock">
+        <div id="admin-lock" class="card admin-lock" hidden>
           <h3>🔒 Admin — password required</h3>
           <div class="ah-row">
             <input type="text" id="admin-pass" class="maskpw" placeholder="Admin password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" name="wm-admin-code" data-lpignore="true" data-1p-ignore data-form-type="other" />
@@ -230,9 +230,9 @@
 
           <div class="card accent-card" id="player-card" hidden>
             <h3>Output</h3>
-            <div class="playmode-switch" id="playmode-switch">
-              <button class="pm-opt" id="pm-venue" type="button">Venue sound system</button>
-              <button class="pm-opt" id="pm-device" type="button">This device</button>
+            <div class="ah-row" id="playmode-switch">
+              <button class="ghost" id="pm-venue" type="button">Venue sound system</button>
+              <button class="ghost" id="pm-device" type="button">This device</button>
             </div>
           </div>
 

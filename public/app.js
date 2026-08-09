@@ -1799,7 +1799,11 @@ function setupAdmin() {
 
   // Lock disabled on this box? Open Admin straight away, no prompt.
   if (state.settings && state.settings.adminLock === false) { showUnlocked(); }
-  else { try { const sp = sessionStorage.getItem('wm-adminpass'); if (sp) { adminPass = sp; showUnlocked(); } } catch (e) { /* ignore */ } }
+  else {
+    let restored = false;
+    try { const sp = sessionStorage.getItem('wm-adminpass'); if (sp) { adminPass = sp; showUnlocked(); restored = true; } } catch (e) { /* ignore */ }
+    if (!restored) showLocked(); // only NOW reveal the password card (starts hidden, so no flash on reload)
+  }
 
   $('admin-unlock').addEventListener('click', tryUnlock);
   $('admin-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUnlock(); });

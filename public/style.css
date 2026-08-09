@@ -316,6 +316,7 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .accent-card { margin-top: 16px; }
 .ghost { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 9px 15px; cursor: pointer; font: inherit; font-size: 0.86rem; font-weight: 600; transition: border-color 0.14s ease, color 0.14s ease, background 0.14s ease; }
 .ghost:hover { border-color: var(--play); }
+.ghost.on { border-color: var(--play); color: var(--play); background: var(--play-tint); }
 /* Admin: uniform spacing between cards (was a mix of ad-hoc margins). */
 #admin-content { display: flex; flex-direction: column; gap: 22px; }
 #admin-content[hidden] { display: none; } /* stay hidden until unlocked (author CSS beats UA) */
