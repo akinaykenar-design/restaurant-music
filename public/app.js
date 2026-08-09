@@ -49,6 +49,8 @@ const titleOf = (file) => {
   const t = library.find((x) => x.file === file);
   return t ? t.title : file.replace(/\.[^.]+$/, '');
 };
+const artistOf = (file) => { const t = library.find((x) => x.file === file); return (t && t.artist) || ''; };
+function setNowArtist(name) { const el = $('now-artist'); if (el) { el.textContent = name || ''; el.hidden = !name; } }
 const ratingOf = (file) => (state.ratings || {})[file];
 const durOf = (file) => { const t = library.find((x) => x.file === file); return t ? (t.duration || 0) : 0; };
 function fmtDur(s) { return s ? Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') : ''; }
@@ -352,6 +354,7 @@ function updateOnboard() { const o = $('onboard'); if (o) o.hidden = library.len
 
 function onTrackChanged(file) {
   $('now-title').textContent = titleOf(file);
+  setNowArtist(artistOf(file));
   $('mini-title').textContent = titleOf(file);
   $('miniplayer').hidden = false;
   document.title = (file ? titleOf(file) + ' · ' : '') + 'Watermans Music';
@@ -523,10 +526,8 @@ function updateVenueUI(s) {
   venueState = s;
   const file = s.track;
   $('now-title').textContent = s.title || (file ? titleOf(file) : 'Nothing playing');
-  const bits = [];
-  if (s.artist) bits.push(s.artist);
-  if (s.genre) bits.push(s.genre);
-  $('now-sub').textContent = bits.join(' · ') || (s.enabled ? 'Playing to the room' : '');
+  setNowArtist(s.artist || (file ? artistOf(file) : ''));
+  $('now-sub').textContent = (s.genre || '') || (s.enabled ? 'Playing to the room' : '');
   $('now-block').textContent = s.onSchedule ? 'On schedule' : (s.mode || 'Playing now');
   if (file) { $('mini-title').textContent = s.title || titleOf(file); $('miniplayer').hidden = false; }
   document.title = (s.title ? s.title + ' · ' : '') + 'Watermans Music';
@@ -1196,7 +1197,7 @@ function renderEditor() {
     abtn.className = 'cell-edit' + (t.artist ? '' : ' col-empty');
     abtn.textContent = t.artist || '+ artist';
     abtn.title = t.artist ? 'Change artist' : 'Set artist';
-    abtn.addEventListener('click', (e) => { e.stopPropagation(); setTrackArtist(t); });
+    abtn.addEventListener('click', (e) => { e.stopPropagation(); editCellInline(abtn, t, 'artist'); });
     artistCell.appendChild(abtn);
 
     attachLongPress(li, t.file);
@@ -1214,7 +1215,7 @@ function renderEditor() {
     gbtn.className = 'cell-edit' + (t.genre ? '' : ' col-empty');
     gbtn.textContent = t.genre || '+ genre';
     gbtn.title = t.genre ? 'Change genre' : 'Set genre';
-    gbtn.addEventListener('click', (e) => { e.stopPropagation(); setTrackGenre(t); });
+    gbtn.addEventListener('click', (e) => { e.stopPropagation(); editCellInline(gbtn, t, 'genre'); });
     genreCell.appendChild(gbtn);
 
     // The Library is for organising, so rows get Categorise + Delete.
@@ -1297,18 +1298,35 @@ function promptGenre(message, current) {
 
 // Manually set (or clear) a track's genre — for tracks with no embedded tag
 // (e.g. Pixabay downloads). Stored server-side; drives the genre buttons.
-function setTrackGenre(t) {
-  const g = promptGenre('Genre for “' + t.title + '” (leave blank to clear):', t.genre || '');
-  if (g === null) return; // cancelled
-  fetch('/api/genre', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file: t.file, genre: g.trim() }) })
-    .then((r) => r.json()).then(() => reloadLibrary());
-}
-
-function setTrackArtist(t) {
-  const a = prompt('Artist for “' + t.title + '” (leave blank to clear):', t.artist || '');
-  if (a === null) return; // cancelled
-  fetch('/api/artist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file: t.file, artist: a.trim() }) })
-    .then((r) => r.json()).then(() => reloadLibrary());
+// Edit an Artist/Genre cell in place — the label becomes a text input; Enter or
+// clicking away saves, Escape cancels. No browser prompt.
+function editCellInline(btn, t, kind) {
+  const cell = btn.parentNode;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'cell-input';
+  input.value = (kind === 'artist' ? t.artist : t.genre) || '';
+  input.placeholder = kind === 'artist' ? 'Artist' : 'Genre';
+  cell.replaceChild(input, btn);
+  input.focus(); input.select();
+  let done = false;
+  const finish = (commit) => {
+    if (done) return; done = true;
+    if (commit) {
+      const val = input.value.trim();
+      fetch('/api/' + kind, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file: t.file, [kind]: val }) })
+        .then((r) => r.json()).then(() => reloadLibrary());
+    } else {
+      reloadLibrary(); // restore the label untouched
+    }
+  };
+  input.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+    else if (e.key === 'Escape') { e.preventDefault(); finish(false); }
+  });
+  input.addEventListener('click', (e) => e.stopPropagation());
+  input.addEventListener('blur', () => finish(true));
 }
 
 // Keep the genre filter dropdown in sync with the genres present in the library,
