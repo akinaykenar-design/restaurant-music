@@ -59,6 +59,9 @@ function defaultData() {
     settings: {
       venueName: 'Watermans',
       volume: 0.8, venueVolume: 80, followSchedule: true, shuffle: true, crossfade: 4,
+      // physical audio output on the box (chosen in Admin > Audio output).
+      // '' = system default; otherwise an ALSA device like 'hw:2,0'.
+      audioDevice: '', audioCard: null, audioControl: null,
       afterHoursPassword: 'staff', // change it in the unlocked panel
     },
   };
@@ -604,6 +607,77 @@ app.post('/api/afterhours/password', (req, res) => {
   res.json({ ok: true });
 });
 
+// ---- audio output selection (which physical output the box plays out) ------
+// Parse `aplay -l` into a list of playback devices.
+function parseAplay(text) {
+  const out = [];
+  const seen = new Set();
+  for (const ln of String(text).split('\n')) {
+    // e.g. "card 2: Headphones [bcm2835 Headphones], device 0: bcm2835 Headphones [bcm2835 Headphones]"
+    const m = ln.match(/^card (\d+):\s*(.+?)\s*\[(.+?)\],\s*device (\d+):/);
+    if (!m) continue;
+    const dev = `hw:${m[1]},${m[4]}`;
+    if (seen.has(dev)) continue;
+    seen.add(dev);
+    out.push({ dev, card: Number(m[1]), device: Number(m[4]), label: (m[3] || m[2]).trim() });
+  }
+  return out;
+}
+function listAudioDevices() {
+  return new Promise((resolve) => {
+    let out = '';
+    try {
+      const pr = spawn('aplay', ['-l']);
+      pr.stdout.on('data', (d) => { out += d; });
+      pr.stderr.on('data', (d) => { out += d; });
+      pr.on('error', () => resolve([]));
+      pr.on('close', () => resolve(parseAplay(out)));
+    } catch { resolve([]); }
+  });
+}
+// Find a usable playback volume control on a card (names vary: PCM/Master/…).
+function resolveAudioControl(card) {
+  return new Promise((resolve) => {
+    let out = '';
+    try {
+      const pr = spawn('amixer', ['-c', String(card), 'scontrols']);
+      pr.stdout.on('data', (d) => { out += d; });
+      pr.on('error', () => resolve(null));
+      pr.on('close', () => {
+        const names = [...out.matchAll(/'([^']+)'/g)].map((x) => x[1]);
+        const prefer = ['PCM', 'Master', 'Headphone', 'Speaker', 'Digital', 'Playback', 'Analogue'];
+        resolve(prefer.find((p) => names.includes(p)) || names[0] || null);
+      });
+    } catch { resolve(null); }
+  });
+}
+
+app.get('/api/audio/devices', async (_req, res) => {
+  const devices = await listAudioDevices();
+  res.json({
+    enabled: HEADLESS_PLAYER,
+    devices,
+    current: audioDevice(),          // '' = system default
+    card: audioCard(),
+    control: audioControl(),
+  });
+});
+
+app.post('/api/audio/output', async (req, res) => {
+  if (!adminOk(req)) return res.status(403).json({ error: 'wrong password' });
+  const dev = String((req.body && req.body.device) || '').trim(); // 'hw:X,Y' or '' for default
+  if (dev && !/^hw:\d+,\d+$/.test(dev)) return res.status(400).json({ error: 'bad device' });
+  data.settings.audioDevice = dev;
+  const m = dev.match(/^hw:(\d+),/);
+  data.settings.audioCard = m ? m[1] : null;
+  // auto-detect the right mixer control for the chosen card
+  data.settings.audioControl = m ? await resolveAudioControl(m[1]) : null;
+  saveData(data);
+  applyVenueVolume(venueTargetVol());
+  playerFadeRestart(); // restart mpg123 on the new output
+  res.json({ ok: true, device: audioDevice(), card: audioCard(), control: audioControl() });
+});
+
 // One-tap update: pull the latest code, then exit so systemd (Restart=always)
 // relaunches the service on the new version — no terminal needed. Admin-gated
 // by the same password as the after-hours / Admin unlock.
@@ -935,16 +1009,27 @@ function venueTargetVol() {
   return data.settings.venueVolume != null ? data.settings.venueVolume : 80;
 }
 
-// Set the sound card level immediately. On the Pi the 3.5mm jack is card 2
-// (bcm2835 Headphones); amixer's control there is "PCM". Best-effort: if amixer
-// or the control name differs, we just skip — the app volume still tracks it.
+// Which sound card + mixer control the venue volume drives. Chosen in Admin >
+// Audio output; falls back to the Pi's 3.5mm jack (card 2, control "PCM").
+function audioCard() {
+  if (data.settings.audioCard != null && data.settings.audioCard !== '') return String(data.settings.audioCard);
+  return process.env.AUDIO_CARD || '2';
+}
+function audioControl() {
+  return data.settings.audioControl || process.env.AUDIO_CONTROL || 'PCM';
+}
+// The mpg123 output device (ALSA), e.g. "hw:2,0". Empty = system default.
+function audioDevice() {
+  return data.settings.audioDevice || process.env.AUDIO_DEVICE || '';
+}
+
+// Set the sound card level immediately. Best-effort: if amixer or the control
+// name differs, we just skip — the app volume still tracks it.
 function amixerSet(pct) {
   if (!HEADLESS_PLAYER) return;
   hwVol = Math.max(0, Math.min(100, Math.round(pct)));
   try {
-    const card = process.env.AUDIO_CARD || '2';
-    const ctrl = process.env.AUDIO_CONTROL || 'PCM';
-    const amix = spawn('amixer', ['-c', card, 'sset', ctrl, hwVol + '%', 'unmute']);
+    const amix = spawn('amixer', ['-c', audioCard(), 'sset', audioControl(), hwVol + '%', 'unmute']);
     amix.on('error', () => { /* amixer missing / control differs — ignore */ });
   } catch { /* ignore */ }
 }
@@ -995,7 +1080,9 @@ function playerPlayCurrent() {
   const full = path.join(MUSIC_DIR, file);
   const fadeIn = fadeInNext; fadeInNext = false;
   if (fadeIn) amixerSet(0); // start silent so the ramp-up isn't a hard hit
-  playerProc = spawn('mpg123', ['-q', full]);
+  const dev = audioDevice();
+  const args = dev ? ['-q', '-a', dev, full] : ['-q', full]; // -a picks the ALSA output
+  playerProc = spawn('mpg123', args);
   playerProc.on('error', (e) => {
     playerBroken = true;
     playerProc = null;
