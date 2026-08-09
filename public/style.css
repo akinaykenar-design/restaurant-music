@@ -467,6 +467,11 @@ h4 { margin: 0 0 12px; font-size: 0.98rem; display: flex; align-items: center; g
 .dropzone { position: relative; border: 2px dashed var(--border-strong); border-radius: var(--radius-sm); padding: 26px 16px; min-height: 130px; text-align: center; color: var(--muted); margin-bottom: 12px; transition: all 0.15s; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .dropzone .upload-status { position: absolute; left: 0; right: 0; bottom: 8px; }
 .dropzone .upload-status:empty { display: none; }
+/* "Get music" — links to free, venue-safe sources */
+.get-music { margin-top: 16px; }
+.get-lead { display: block; color: var(--muted); font-size: 0.85rem; line-height: 1.4; margin-bottom: 10px; }
+.get-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.get-btns .ghost { text-decoration: none; display: inline-flex; align-items: center; height: 40px; }
 .dropzone .dz-ico { width: 40px; height: 40px; stroke: var(--faint); }
 .dropzone:hover { border-color: var(--play); }
 .dropzone:hover .dz-ico { stroke: var(--play); }
