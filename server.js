@@ -65,6 +65,7 @@ function defaultData() {
       // '' = system default; otherwise an ALSA device like 'hw:2,0'.
       audioDevice: '', audioCard: null, audioControl: null,
       afterHoursPassword: 'staff', // change it in the unlocked panel
+      adminLock: true, // require the password to open Admin (staff can turn off)
     },
   };
 }
@@ -570,15 +571,30 @@ app.put('/api/settings', (req, res) => {
 });
 
 // ---- after-hours staff mode ------------------------------------------------
+// Admin is locked only when the lock is on AND a password is set. Staff can
+// turn the lock off (Admin > Security) so their own box opens without asking.
+function adminRequired() {
+  return data.settings.adminLock !== false && !!data.settings.afterHoursPassword;
+}
 app.post('/api/afterhours/unlock', (req, res) => {
+  if (!adminRequired()) return res.json({ ok: true });
   const password = req.body && req.body.password;
-  const ok = !!data.settings.afterHoursPassword && password === data.settings.afterHoursPassword;
-  res.json({ ok });
+  res.json({ ok: password === data.settings.afterHoursPassword });
+});
+
+// Turn the admin password requirement on/off. Changing it needs current
+// authorisation (so a locked box can't be unlocked by an anonymous request).
+app.post('/api/admin/lock', (req, res) => {
+  if (!adminOk(req)) return res.status(403).json({ error: 'wrong password' });
+  data.settings.adminLock = !!(req.body && req.body.enabled);
+  saveData(data);
+  res.json({ ok: true, adminLock: data.settings.adminLock });
 });
 
 const adminOk = (req) => {
+  if (!adminRequired()) return true; // lock disabled — everything is open
   const password = req.body && req.body.password;
-  return !!data.settings.afterHoursPassword && password === data.settings.afterHoursPassword;
+  return password === data.settings.afterHoursPassword;
 };
 
 // Flag / un-flag a track as licensed (after-hours only). Admin-gated.
@@ -858,10 +874,7 @@ app.post('/api/find/add', async (req, res) => {
 // relaunches the service on the new version — no terminal needed. Admin-gated
 // by the same password as the after-hours / Admin unlock.
 app.post('/api/update', (req, res) => {
-  const password = req.body && req.body.password;
-  if (!data.settings.afterHoursPassword || password !== data.settings.afterHoursPassword) {
-    return res.status(403).json({ error: 'wrong password' });
-  }
+  if (!adminOk(req)) return res.status(403).json({ error: 'wrong password' });
   const git = spawn('git', ['pull', '--ff-only'], { cwd: ROOT });
   let out = '';
   git.stdout.on('data', (d) => { out += d; });
@@ -881,11 +894,8 @@ app.post('/api/update', (req, res) => {
 // Safely power the box off or restart it (better than pulling the plug).
 // Admin-gated. Needs a one-time sudoers grant — see scripts/enable-power.sh.
 app.post('/api/power', (req, res) => {
-  const password = req.body && req.body.password;
+  if (!adminOk(req)) return res.status(403).json({ error: 'wrong password' });
   const action = req.body && req.body.action;
-  if (!data.settings.afterHoursPassword || password !== data.settings.afterHoursPassword) {
-    return res.status(403).json({ error: 'wrong password' });
-  }
   if (action !== 'shutdown' && action !== 'reboot') return res.status(400).json({ error: 'bad action' });
   const args = action === 'reboot' ? ['-n', 'reboot'] : ['-n', 'shutdown', '-h', 'now'];
   const proc = spawn('sudo', args);

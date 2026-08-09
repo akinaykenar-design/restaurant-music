@@ -1779,6 +1779,7 @@ function setupAdmin() {
   const showUnlocked = () => {
     adminUnlocked = true;
     $('admin-lock').hidden = true; $('admin-content').hidden = false;
+    const lt = $('admin-lock-toggle'); if (lt) lt.checked = (state.settings.adminLock !== false);
     refreshAhPlaylists();
     renderLicensed();
   };
@@ -1788,9 +1789,25 @@ function setupAdmin() {
       .then((r) => r.json()).then((d) => { if (d.ok) { adminPass = password; showUnlocked(); } else alert('Wrong password.'); });
   };
 
+  // Lock disabled on this box? Open Admin straight away, no prompt.
+  if (state.settings && state.settings.adminLock === false) showUnlocked();
+
   $('admin-unlock').addEventListener('click', tryUnlock);
   $('admin-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUnlock(); });
   $('admin-relock').addEventListener('click', showLocked);
+
+  const lockToggle = $('admin-lock-toggle');
+  if (lockToggle) lockToggle.addEventListener('change', () => {
+    const enabled = lockToggle.checked;
+    fetch('/api/admin/lock', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled, password: adminPass }) })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.error) { lockToggle.checked = !enabled; alert('Could not change: ' + d.error); return; }
+        state.settings.adminLock = d.adminLock;
+        toast(d.adminLock ? 'Admin password on' : 'Admin password off');
+      })
+      .catch(() => { lockToggle.checked = !enabled; });
+  });
 
   function powerAction(action) {
     const st = $('power-status');
