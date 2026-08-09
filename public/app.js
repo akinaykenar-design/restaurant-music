@@ -751,16 +751,43 @@ function playBlock(blockId) {
 }
 
 // Play every track of one genre on demand (overrides the schedule).
+let nowVibe = ''; // '' = All, 'Chill', 'Lively' — filters genre picks by mood
 function playGenre(g) {
-  const files = library.filter((t) => (t.genre || '') === g).map((t) => t.file);
-  if (!files.length) return;
+  const files = library.filter((t) => (t.genre || '') === g && (!nowVibe || t.vibe === nowVibe)).map((t) => t.file);
+  if (!files.length) { toast('No ' + (nowVibe ? nowVibe + ' ' : '') + g + ' tracks'); return; }
   activeScene = 'genre:' + g;
   saveSettings({ followSchedule: false, scene: activeScene });
-  $('now-block').textContent = '♪ ' + g + ' · playing now';
-  $('now-sub').textContent = g + ' · ' + files.length + ' track' + (files.length === 1 ? '' : 's');
-  if (venueMode) { venuePost('/api/player/play', { token: 'genre:' + g }).then(() => pollVenueSoon()); renderScenes(); return; }
+  const label = (nowVibe ? nowVibe + ' ' : '') + g;
+  $('now-block').textContent = '♪ ' + label + ' · playing now';
+  $('now-sub').textContent = label + ' · ' + files.length + ' track' + (files.length === 1 ? '' : 's');
+  const token = nowVibe ? 'gv:' + nowVibe + ':' + g : 'genre:' + g;
+  if (venueMode) { venuePost('/api/player/play', { token }).then(() => pollVenueSoon()); renderScenes(); return; }
   loadQueue(files, true);
   renderScenes();
+}
+
+// Play everything matching the current mood filter (used by "Play all").
+function playVibeAll() {
+  const files = library.filter((t) => !t.licensed && (!nowVibe || t.vibe === nowVibe)).map((t) => t.file);
+  if (!files.length) { toast('No ' + (nowVibe || '') + ' tracks'); return; }
+  activeScene = null; saveSettings({ followSchedule: false, scene: '' });
+  const label = nowVibe ? nowVibe + ' — all' : 'All music';
+  $('now-block').textContent = label; $('now-sub').textContent = files.length + ' track' + (files.length === 1 ? '' : 's');
+  const token = nowVibe ? 'gv:' + nowVibe + ':all' : 'all';
+  if (venueMode) { venuePost('/api/player/play', { token }).then(() => pollVenueSoon()); return; }
+  loadQueue(files, true);
+}
+
+function setupVibeFilter() {
+  const box = $('vibe-filter'); if (!box) return;
+  box.querySelectorAll('.vf-opt').forEach((b) => {
+    b.addEventListener('click', () => {
+      nowVibe = b.dataset.v || '';
+      box.querySelectorAll('.vf-opt').forEach((x) => x.classList.toggle('on', x === b));
+      // if a genre is currently playing, re-apply with the new mood
+      if (activeScene && activeScene.slice(0, 6) === 'genre:') playGenre(activeScene.slice(6));
+    });
+  });
 }
 
 function updateShuffleBtn() {
@@ -801,12 +828,7 @@ function updateColHead() {
 }
 updateColHead();
 $('lib-playall').addEventListener('click', () => {
-  const files = library.filter((t) => !t.licensed).map((t) => t.file);
-  if (!files.length) return;
-  if (venueMode) { venuePost('/api/player/play', { token: 'all' }).then(() => pollVenueSoon()); return; }
-  activeScene = null; saveSettings({ followSchedule: false, scene: '' });
-  $('now-block').textContent = 'All music'; $('now-sub').textContent = files.length + ' track' + (files.length === 1 ? '' : 's');
-  loadQueue(files, true);
+  playVibeAll();
   const nowTab = document.querySelector('.tab[data-tab="now"]'); if (nowTab) nowTab.click();
 });
 
@@ -1976,6 +1998,7 @@ async function boot() {
     exitSelect();
     reloadLibrary();
   });
+  setupVibeFilter();
   setupVenuePlayer();
   setupAdmin();
   setupLicensed();

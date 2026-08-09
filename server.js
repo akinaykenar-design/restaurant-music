@@ -1258,6 +1258,13 @@ function resolveTokenFiles(val) {
   const noLic = (files) => files.filter((f) => !isLicensed(f));
   if (val.slice(0, 6) === 'style:') { const s = val.slice(6); return noLic(scanLibrary().filter((t) => t.vibe === s).map((t) => t.file)); }
   if (val.slice(0, 6) === 'genre:') { const g = val.slice(6); return noLic(scanLibrary().filter((t) => (t.genre || '') === g).map((t) => t.file)); }
+  // "gv:VIBE:GENRE" — a genre filtered by vibe (e.g. gv:Chill:R&B). Empty VIBE
+  // ("gv::all") means the whole vibe.
+  if (val.slice(0, 3) === 'gv:') {
+    const rest = val.slice(3); const i = rest.indexOf(':');
+    const vibe = i >= 0 ? rest.slice(0, i) : rest; const g = i >= 0 ? rest.slice(i + 1) : '';
+    return noLic(scanLibrary().filter((t) => (!vibe || t.vibe === vibe) && (!g || g === 'all' || (t.genre || '') === g)).map((t) => t.file));
+  }
   const pl = data.playlists[val];
   return pl ? noLic(pl.slice()) : [];
 }
@@ -1277,6 +1284,7 @@ function resolvePlayToken(token) {
   if (token === 'afterhours') return { files: resolveTokenFiles('afterhours'), label: 'After hours (licensed)' };
   if (token === 'all') return { files: resolveTokenFiles('all'), label: 'All music' };
   if (token.slice(0, 6) === 'genre:') return { files: resolveTokenFiles(token), label: 'Genre · ' + token.slice(6) };
+  if (token.slice(0, 3) === 'gv:') { const rest = token.slice(3); const i = rest.indexOf(':'); const vibe = i >= 0 ? rest.slice(0, i) : rest; const g = i >= 0 ? rest.slice(i + 1) : ''; return { files: resolveTokenFiles(token), label: [vibe, g && g !== 'all' ? g : ''].filter(Boolean).join(' ') || 'Music' }; }
   if (token.slice(0, 6) === 'style:') return { files: resolveTokenFiles(token), label: token.slice(6) };
   return { files: resolveTokenFiles(token), label: token };
 }
