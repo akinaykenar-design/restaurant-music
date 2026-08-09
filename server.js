@@ -689,7 +689,12 @@ function httpGet(url, opts, depth) {
   return new Promise((resolve, reject) => {
     if (depth > 5) return reject(new Error('too many redirects'));
     const mod = url.slice(0, 5) === 'http:' ? http : https;
-    const req = mod.get(url, Object.assign({ headers: { 'User-Agent': 'WatermansMusic/1.0' } }, opts || {}), (r) => {
+    // family: 4 forces IPv4 — some boxes have broken IPv6 and Node would
+    // otherwise stall on an AAAA address that never connects (curl doesn't).
+    const base = { family: 4, headers: { 'User-Agent': 'WatermansMusic/1.0', 'Accept-Encoding': 'identity' } };
+    const options = Object.assign(base, opts || {});
+    if (opts && opts.headers) options.headers = Object.assign({}, base.headers, opts.headers);
+    const req = mod.get(url, options, (r) => {
       if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location) {
         r.resume();
         return resolve(httpGet(new URL(r.headers.location, url).toString(), opts, depth + 1));
@@ -697,7 +702,7 @@ function httpGet(url, opts, depth) {
       resolve(r); // caller consumes the stream
     });
     req.on('error', reject);
-    req.setTimeout(15000, () => req.destroy(new Error('timeout')));
+    req.setTimeout(20000, () => req.destroy(new Error('timeout')));
   });
 }
 async function fetchJson(url) {
@@ -716,9 +721,9 @@ app.get('/api/find', async (req, res) => {
   if (!q) return res.json({ results: [], count: 0 });
   const page = Math.max(1, Math.min(20, Number(req.query.page) || 1));
   const base = process.env.OPENVERSE_BASE || 'https://api.openverse.org/v1/audio/';
-  // CC0 + Public-Domain-Mark only: free for commercial/venue use AND no
-  // attribution required — same "no strings" deal as Pixabay.
-  const url = base + '?format=json&license=cc0,pdm&page_size=24'
+  // CC0 + Public-Domain-Mark only (no attribution, like Pixabay), and
+  // category=music so we get songs, not Freesound sound-effects.
+  const url = base + '?format=json&license=cc0,pdm&category=music&page_size=24'
     + '&page=' + page + '&q=' + encodeURIComponent(q);
   try {
     const j = await fetchJson(url);
