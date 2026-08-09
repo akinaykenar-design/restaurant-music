@@ -57,7 +57,10 @@
 /* Fluid base size: everything is sized in rem, so scaling the root scales the
    whole UI with the screen — 16px on a phone up to ~21px on a big monitor, so
    it never looks tiny on a desktop. */
-html { -webkit-text-size-adjust: 100%; font-size: clamp(16px, 13.5px + 0.5vw, 21px); }
+/* Always reserve the vertical scrollbar's space so switching between a short
+   tab (Now Playing) and a tall one (Library/Admin) doesn't make a scrollbar
+   pop in and shove the whole centred layout sideways. */
+html { -webkit-text-size-adjust: 100%; font-size: clamp(16px, 13.5px + 0.5vw, 21px); scrollbar-gutter: stable; overflow-y: scroll; }
 body {
   margin: 0; background: var(--bg); color: var(--text);
   font-family: var(--font); font-size: 1rem; line-height: 1.5;
@@ -193,7 +196,7 @@ input[type='range']::-moz-range-thumb { width: 28px; height: 28px; border: 3px s
 
 .toggles { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; max-width: var(--ctl, 460px); margin-top: 30px; }
 /* shuffle / in-order toggle (Spotify-style icon button, neutral not teal) */
-.modebtn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 150px; padding: 9px 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--muted); font: inherit; font-size: 0.84rem; font-weight: 600; cursor: pointer; transition: color 0.14s, border-color 0.14s, background 0.14s; }
+.modebtn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 18px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--muted); font: inherit; font-size: 0.84rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: color 0.14s, border-color 0.14s, background 0.14s; }
 .modebtn svg { width: 18px; height: 18px; }
 .modebtn .ic-shuffle, .modebtn .ic-order { display: none; }
 .modebtn.on .ic-shuffle { display: inline; }
@@ -325,6 +328,7 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .restore-label { display: inline-flex; align-items: center; cursor: pointer; }
 .lib-main-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .lib-main-head h3 { margin: 0; }
+.lib-head-btns { display: flex; gap: 8px; flex: none; }
 .ah-gate { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
 .ah-toggle { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; }
 .ah-toggle input:disabled { opacity: 0.5; }
@@ -340,29 +344,13 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .licensed-list .lic-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .licensed-list li button { flex: none; }
 
-/* ---------- find royalty-free music ---------- */
-.find-card h4 { margin: 0 0 4px; }
-.find-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
-.find-row input { flex: 1; min-width: 0; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 10px 12px; font: inherit; }
-.find-row .find-by { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 10px 10px; font: inherit; font-size: 0.84rem; cursor: pointer; flex: none; }
-.find-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-.find-chip { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 0.8rem; cursor: pointer; }
-.find-chip:hover { border-color: var(--accent); }
-.find-chip-now { border-color: var(--play); color: var(--play); font-weight: 600; }
-.find-player { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 10px 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; }
-.find-player[hidden] { display: none; } /* author display:flex would otherwise beat the hidden attribute */
-.find-player .find-np { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.82rem; font-weight: 600; }
-.find-player .find-seek { flex: 2; cursor: pointer; }
-.find-player .find-seek::-webkit-slider-thumb { background: var(--play); }
-.find-player .find-seek::-moz-range-thumb { background: var(--play); }
-.find-player .find-time { font-size: 0.76rem; color: var(--muted); min-width: 34px; text-align: right; }
-.find-results { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.find-results li { display: flex; align-items: center; gap: 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; padding: 8px 11px; }
-.find-meta { flex: 1; min-width: 0; }
-.find-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.find-sub { font-size: 0.76rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.find-results button { flex: none; }
-.find-add.on { color: var(--play); border-color: var(--play); }
+/* ---------- find royalty-free music (opens Pixabay) ---------- */
+.find-lead { color: var(--muted); font-size: 0.9rem; margin: 12px 0 14px; line-height: 1.5; }
+.find-genres { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.find-genre { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: 999px; padding: 10px 17px; font: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: border-color 0.12s, background 0.12s; }
+.find-genre:hover { border-color: var(--accent); background: var(--surface); }
+.find-row { display: flex; gap: 8px; align-items: center; }
+.find-row input { flex: 1; min-width: 0; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 11px 13px; font: inherit; }
 
 /* ---------- library / playlists ---------- */
 /* ---------- easy Library (two-step flow) ---------- */
@@ -620,8 +608,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
   .vol-row input[type='range'] { height: 18px; }
   .vol-row input[type='range']::-webkit-slider-thumb { width: 34px; height: 34px; }
   .vol-row input[type='range']::-moz-range-thumb { width: 34px; height: 34px; }
-  .toggles { gap: 12px; margin-top: 10px; }
-  .modebtn { width: 172px; padding: 13px 18px; font-size: 0.95rem; }
+  .toggles { gap: 12px; margin-top: 30px; }
+  .modebtn { padding: 13px 22px; font-size: 0.95rem; }
   .modebtn svg { width: 21px; height: 21px; }
   .np-title { font-size: 2rem; }
   .np-sub { font-size: 1rem; margin-top: 2px; }

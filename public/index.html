@@ -97,7 +97,7 @@
               </button>
               <button id="listen-here" class="modebtn" type="button" aria-pressed="false" title="Hear what's playing in the room, on this device">
                 <svg class="ic-listen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
-                <span class="modebtn-txt">Listen here</span>
+                <span class="modebtn-txt">Listen in</span>
               </button>
               <button id="play-here" class="modebtn" type="button" aria-pressed="false" title="Play the music on THIS device instead of the venue box" hidden>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="14" r="3.5"/><line x1="12" y1="6" x2="12" y2="6"/></svg>
@@ -124,42 +124,40 @@
 
           <div class="card lib-steps">
             <div class="pill-add">+music</div>
-            <div class="lib-add-row">
-              <div id="dropzone" class="dropzone" role="button" tabindex="0" title="Drop music here, or click to add files">
-                <svg class="dz-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4m0 0 4 4m-4-4-4 4"/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg>
-                <input type="file" id="file-input" accept="audio/*,.mp3,.m4a,.aac,.ogg,.wav,.flac" multiple hidden />
-                <input type="file" id="folder-input" webkitdirectory directory multiple hidden />
-                <div id="upload-status" class="upload-status"></div>
-              </div>
-              <button id="auto-all" class="auto-all-btn">✨ Auto-categorise<small>Tag every track Chill / Lively</small></button>
+            <div id="dropzone" class="dropzone" role="button" tabindex="0" title="Drop music here, or click to add files">
+              <svg class="dz-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4m0 0 4 4m-4-4-4 4"/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg>
+              <input type="file" id="file-input" accept="audio/*,.mp3,.m4a,.aac,.ogg,.wav,.flac" multiple hidden />
+              <input type="file" id="folder-input" webkitdirectory directory multiple hidden />
+              <div id="upload-status" class="upload-status"></div>
             </div>
-            <div id="analyze-status" class="upload-status auto-status"></div>
           </div>
 
           <div class="card find-card" id="find-card">
             <div class="pill-add">+findmusic</div>
+            <p class="find-lead">Free, licence-safe tracks on Pixabay. Pick a vibe (or search your own), download the MP3, then drop it in <b>+music</b> above.</p>
+            <div class="find-genres">
+              <button class="find-genre" data-q="deep house">Deep House</button>
+              <button class="find-genre" data-q="balearic">Balearic</button>
+              <button class="find-genre" data-q="organic house">Organic House</button>
+              <button class="find-genre" data-q="chillout">Chillout</button>
+              <button class="find-genre" data-q="lounge">Lounge</button>
+              <button class="find-genre" data-q="lo-fi">Lo-fi</button>
+              <button class="find-genre" data-q="ambient">Ambient</button>
+              <button class="find-genre" data-q="downtempo">Downtempo</button>
+            </div>
             <div class="find-row">
-              <input id="find-q" type="text" placeholder="Search royalty-free music…" autocomplete="off" />
-              <select id="find-by" class="find-by" aria-label="Search by" title="Match by genre tags or by title">
-                <option value="genre">by genre</option>
-                <option value="title">by title</option>
-              </select>
-              <button id="find-go" class="ghost">Search</button>
+              <input id="find-q" type="text" placeholder="Or search anything…" autocomplete="off" />
+              <button id="find-go" class="ghost">Search Pixabay</button>
             </div>
-            <div id="find-chips" class="find-chips"></div>
-            <div id="find-status" class="upload-status"></div>
-            <div id="find-player" class="find-player" hidden>
-              <span id="find-np" class="find-np">—</span>
-              <input id="find-seek" class="find-seek" type="range" min="0" max="1000" value="0" aria-label="Scrub preview" />
-              <span id="find-time" class="find-time">0:00</span>
-            </div>
-            <ul id="find-results" class="find-results"></ul>
           </div>
 
           <div class="card lib-main-card">
             <div class="lib-main-head">
               <h3>Your music <span class="count" id="lib-count">0</span></h3>
-              <button id="lib-playall" class="ghost">▶ Play all</button>
+              <div class="lib-head-btns">
+                <button id="lib-dedupe" class="ghost">Remove duplicates</button>
+                <button id="lib-playall" class="ghost">▶ Play all</button>
+              </div>
             </div>
             <input id="lib-search" class="lib-search" type="text" placeholder="Filter your tracks…" />
             <div class="lib-tools">

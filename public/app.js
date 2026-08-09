@@ -584,7 +584,7 @@ function updateListenBtn() {
   b.classList.toggle('on', listening);
   b.setAttribute('aria-pressed', listening ? 'true' : 'false');
   b.title = listening ? 'Listening to the room on this device — tap to stop' : "Hear what's playing in the room, on this device";
-  const t = b.querySelector('.modebtn-txt'); if (t) t.textContent = listening ? 'Listening' : 'Listen here';
+  const t = b.querySelector('.modebtn-txt'); if (t) t.textContent = listening ? 'Listening' : 'Listen in';
 }
 // "Play here": make THIS device the player (music out of this browser) instead
 // of driving the venue box. Per-device, remembered on the device. Switching
@@ -627,103 +627,23 @@ function nowPlayingSeed() {
 
 // Chips to expand the library: "more like now playing", every genre you
 // already have, and a few on-brand starters.
-function renderFindChips() {
-  const box = $('find-chips'); if (!box) return;
-  box.innerHTML = '';
-  const chip = (label, q, cls) => {
-    const b = document.createElement('button');
-    b.className = 'find-chip' + (cls ? ' ' + cls : '');
-    b.textContent = label;
-    b.addEventListener('click', () => runFind(q));
-    box.appendChild(b);
-  };
-  const seen = new Set();
-  // categories you already have in your library first…
-  [...new Set(library.filter((t) => !t.licensed).map((t) => t.genre).filter(Boolean))]
-    .slice(0, 6).forEach((g) => { const k = g.toLowerCase(); if (!seen.has(k)) { seen.add(k); chip(g, g); } });
-  // …then a curated set of venue-friendly categories to search.
-  ['organic house', 'deep house', 'melodic house', 'balearic', 'ibiza', 'chillout', 'downtempo', 'nu disco', 'afro house', 'ambient']
-    .forEach((c) => { if (!seen.has(c)) { seen.add(c); chip(c, c); } });
-}
-
-function runFind(q) {
-  const input = $('find-q'); const status = $('find-status'); const list = $('find-results');
-  if (!list) return;
-  if (input) input.value = q;
-  if (!q || !q.trim()) return;
-  if (status) status.textContent = 'Searching…';
-  list.innerHTML = '';
-  const by = ($('find-by') && $('find-by').value) || 'genre';
-  api('/api/find?by=' + by + '&q=' + encodeURIComponent(q.trim())).then((d) => {
-    if (!d || d.error) { if (status) status.textContent = ((d && d.error) || 'Search failed.') + (d && d.detail ? ' (' + d.detail + ')' : ''); return; }
-    const rs = d.results || [];
-    if (!rs.length) { if (status) status.textContent = 'Nothing found — try another search.'; return; }
-    if (status) status.textContent = rs.length + ' found — preview, then add what you like.';
-    rs.forEach((t) => list.appendChild(findRow(t)));
-  }).catch(() => { if (status) status.textContent = 'Search unavailable — is the box online?'; });
-}
-
-function findRow(t) {
-  const li = document.createElement('li');
-  const meta = document.createElement('div');
-  meta.className = 'find-meta';
-  const title = document.createElement('div');
-  title.className = 'find-title'; title.textContent = t.title;
-  const sub = document.createElement('div');
-  sub.className = 'find-sub';
-  sub.textContent = [t.artist, t.license, t.duration ? fmtDur(t.duration) : ''].filter(Boolean).join(' · ');
-  meta.append(title, sub);
-
-  const prev = document.createElement('button');
-  prev.className = 'mini find-prev'; prev.textContent = '▶'; prev.title = 'Preview';
-  prev.addEventListener('click', () => {
-    if (findPreviewEl && !findPreviewEl.paused && findPreviewEl.src === t.preview) { findPreviewEl.pause(); prev.textContent = '▶'; return; }
-    document.querySelectorAll('.find-prev').forEach((b) => { b.textContent = '▶'; });
-    if (!findPreviewEl) findPreviewEl = new Audio();
-    findPreviewEl.src = t.preview;
-    findPreviewEl.play().then(() => {
-      prev.textContent = '⏸';
-      const player = $('find-player'); if (player) player.hidden = false;
-      const np = $('find-np'); if (np) np.textContent = t.title + (t.artist ? ' · ' + t.artist : '');
-    }).catch(() => {});
-    findPreviewEl.onended = () => { prev.textContent = '▶'; const player = $('find-player'); if (player) player.hidden = true; };
-  });
-
-  const add = document.createElement('button');
-  add.className = 'ghost find-add'; add.textContent = '+ Add';
-  add.addEventListener('click', () => {
-    add.disabled = true; add.textContent = 'Adding…';
-    fetch('/api/find/add', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: t.preview, title: t.title, artist: t.artist, ext: t.ext, license: t.license, attribution: t.attribution, landing: t.landing }) })
-      .then((r) => r.json())
-      .then((r) => {
-        if (r.error) { add.disabled = false; add.textContent = '+ Add'; if ($('find-status')) $('find-status').textContent = 'Add failed: ' + r.error + (r.detail ? ' (' + r.detail + ')' : ''); return; }
-        add.textContent = r.duplicate ? '✓ Already added' : '✓ Added'; add.classList.add('on');
-        if (!r.duplicate) reloadLibrary();
-      })
-      .catch(() => { add.disabled = false; add.textContent = '+ Add'; });
-  });
-
-  li.append(meta, prev, add);
-  return li;
+// "Find music" opens Pixabay's own music search in a new tab — reliable,
+// licence-safe (Pixabay Content Licence covers venue background play), and you
+// just download the MP3 and drop it into +music above. We don't proxy an API:
+// the in-app Openverse search had almost no CC0 music and kept coming up empty.
+function openPixabay(q) {
+  const query = (q || '').trim();
+  const url = 'https://pixabay.com/music/' + (query ? 'search/' + encodeURIComponent(query) + '/' : '');
+  window.open(url, '_blank', 'noopener');
 }
 
 function setupFind() {
-  const input = $('find-q'); const go = $('find-go');
-  if (!input || !go) return;
-  findPreviewEl = new Audio();
-  // scrub bar for the preview, so you can jump into a track to test it fast
-  const seek = $('find-seek'), tEl = $('find-time');
-  findPreviewEl.addEventListener('timeupdate', () => {
-    if (!findPreviewEl.duration || !seek) return;
-    if (document.activeElement !== seek) seek.value = Math.round((findPreviewEl.currentTime / findPreviewEl.duration) * 1000);
-    if (tEl) tEl.textContent = fmtDur(Math.floor(findPreviewEl.currentTime));
+  document.querySelectorAll('.find-genre').forEach((b) => {
+    b.addEventListener('click', () => openPixabay(b.dataset.q || b.textContent));
   });
-  if (seek) seek.addEventListener('input', () => { if (findPreviewEl.duration) findPreviewEl.currentTime = (seek.value / 1000) * findPreviewEl.duration; });
-  const run = () => runFind(input.value);
-  renderFindChips();
-  go.addEventListener('click', run);
-  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') run(); });
+  const input = $('find-q'); const go = $('find-go');
+  if (go) go.addEventListener('click', () => openPixabay(input && input.value));
+  if (input) input.addEventListener('keydown', (e) => { if (e.key === 'Enter') openPixabay(input.value); });
 }
 
 function setupListenHere() {
@@ -890,6 +810,26 @@ $('lib-playall').addEventListener('click', () => {
   $('now-block').textContent = 'All music'; $('now-sub').textContent = files.length + ' track' + (files.length === 1 ? '' : 's');
   loadQueue(files, true);
   const nowTab = document.querySelector('.tab[data-tab="now"]'); if (nowTab) nowTab.click();
+});
+
+$('lib-dedupe').addEventListener('click', async () => {
+  const btn = $('lib-dedupe');
+  const prev = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Checking…';
+  try {
+    const found = await fetch('/api/library/duplicates').then((r) => r.json());
+    if (!found.count) { btn.textContent = 'No duplicates'; setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 2000); return; }
+    if (!confirm('Remove ' + found.count + ' duplicate track' + (found.count === 1 ? '' : 's') + '? One copy of each is kept.')) {
+      btn.textContent = prev; btn.disabled = false; return;
+    }
+    btn.textContent = 'Removing…';
+    const res = await fetch('/api/library/dedupe', { method: 'POST' }).then((r) => r.json());
+    await reloadLibrary();
+    btn.textContent = 'Removed ' + res.count;
+    setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 2500);
+  } catch {
+    btn.textContent = 'Failed'; setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 2000);
+  }
 });
 
 // keyboard shortcuts (ignored while typing in a field)
@@ -1342,7 +1282,7 @@ function closeRowMenus() { document.querySelectorAll('.row-menu:not([hidden])').
 document.addEventListener('click', closeRowMenus);
 
 function reloadLibrary() {
-  return api('/api/library').then((lib) => { library = lib.tracks; renderEditor(); renderQueue(); renderHistory(); updateOnboard(); renderScenes(); renderLicensed(); renderFindChips(); });
+  return api('/api/library').then((lib) => { library = lib.tracks; renderEditor(); renderQueue(); renderHistory(); updateOnboard(); renderScenes(); renderLicensed(); });
 }
 
 // ---- venue name (editable, shown in the header + poster) -------------------
@@ -1402,27 +1342,26 @@ function syncGenreOptions() {
 // ---- audio analysis (genre is read server-side; tempo + energy here) --------
 // Decode each track in the browser and measure loudness (RMS) and tempo, then
 // POST the result so the server can bucket it into a Chill / Lively vibe.
-async function analyzeLibrary() {
+async function analyzeLibrary(statusEl) {
   const AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) { toast('This browser can’t analyse audio'); return; }
   const todo = library.filter((t) => !t.vibe);
-  const btn = $('analyze-btn'); const status = $('analyze-status');
-  if (!todo.length) { status.textContent = 'Every track is already analysed.'; setTimeout(() => (status.textContent = ''), 4000); return; }
-  btn.disabled = true;
+  const btn = $('analyze-btn'); const status = statusEl || $('analyze-status');
+  const say = (m) => { if (status) status.textContent = m; };
+  if (!todo.length) { say('Every track is already sorted by style.'); setTimeout(() => say(''), 4000); return; }
+  if (btn) btn.disabled = true;
   let done = 0; let failed = 0;
   for (const t of todo) {
-    status.textContent = `Analysing ${done + failed + 1}/${todo.length}: ${t.title}…`;
+    say(`Sorting ${done + failed + 1}/${todo.length}: ${t.title}…`);
     try {
       const r = await analyzeTrack(t.file, AC);
       await api('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file: t.file, energy: r.energy, bpm: r.bpm }) });
       done++;
     } catch (e) { failed++; }
   }
-  status.textContent = `Tagged ${done} track${done === 1 ? '' : 's'}${failed ? `, ${failed} skipped` : ''}.`;
-  btn.disabled = false;
+  say(`Sorted ${done} track${done === 1 ? '' : 's'}${failed ? `, ${failed} skipped` : ''}.`);
+  if (btn) btn.disabled = false;
   await reloadLibrary();
-  toast(`Analysed ${done} track${done === 1 ? '' : 's'}`);
-  setTimeout(() => (status.textContent = ''), 6000);
 }
 
 async function analyzeTrack(file, AC) {
@@ -2006,23 +1945,22 @@ async function boot() {
   setupUpload();
   $('analyze-btn').addEventListener('click', analyzeLibrary);
   $('auto-vibe').addEventListener('click', buildVibePlaylists);
-  $('auto-schedule').addEventListener('click', () => {
+  // One button does it all: if tracks haven't been sorted by style yet, analyse
+  // them first (Chill / Lively), then lay them across the week — chill by day,
+  // livelier at dinner. No separate "categorise" step to remember.
+  $('auto-schedule').addEventListener('click', async (e) => {
     const st = $('sched-status');
-    const categorised = library.filter((t) => t.vibe).length;
-    if (!categorised) { if (st) st.textContent = 'Categorise your music first — tap “✨ Auto-categorise” on the Library tab.'; return; }
-    autoScheduleByVibe(); // assign style tokens across the week by time of day
-    if (st) st.textContent = `Scheduled by style — ${categorised} track${categorised === 1 ? '' : 's'} spread across the week. ✅`;
-  });
-  const autoAll = $('auto-all');
-  if (autoAll) autoAll.addEventListener('click', async () => {
-    const st = $('analyze-status');
-    if (!library.length) { if (st) st.textContent = 'Add some music first ↑'; return; }
-    autoAll.disabled = true;
+    const btn = e.currentTarget;
+    if (!library.length) { if (st) st.textContent = 'Add some music first (Library → +music).'; return; }
+    btn.disabled = true;
     try {
-      await analyzeLibrary();  // categorise only: tag each track's style (vibe)
-      if (st) st.textContent = 'Done — every track tagged by style. ✅ Now set up the Schedule tab.';
-    } catch (e) { if (st) st.textContent = 'Something went wrong — try again.'; }
-    finally { autoAll.disabled = false; }
+      const todo = library.filter((t) => !t.vibe).length;
+      if (todo) { if (st) st.textContent = `Sorting ${todo} track${todo === 1 ? '' : 's'} by style…`; await analyzeLibrary(st); }
+      const categorised = library.filter((t) => t.vibe).length;
+      if (!categorised) { if (st) st.textContent = 'Could not read those tracks — try Analyse audio under Advanced.'; return; }
+      autoScheduleByVibe(); // assign style tokens across the week by time of day
+      if (st) st.textContent = `Scheduled — ${categorised} track${categorised === 1 ? '' : 's'} spread chill by day, livelier at dinner. ✅`;
+    } finally { btn.disabled = false; }
   });
 
   const selCancel = $('lib-selcancel'); if (selCancel) selCancel.addEventListener('click', exitSelect);

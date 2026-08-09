@@ -463,6 +463,67 @@ app.delete('/api/track', (req, res) => {
   }
 });
 
+// Find (and optionally remove) duplicate tracks: byte-identical files stored
+// under different names. Groups by size then MD5, keeps the best-named copy of
+// each group, deletes the rest. GET = preview, POST = actually remove.
+function findDuplicateGroups() {
+  const bySize = new Map();
+  try {
+    for (const f of fs.readdirSync(MUSIC_DIR)) {
+      if (!AUDIO_EXT.has(path.extname(f).toLowerCase())) continue;
+      let st; try { st = fs.statSync(path.join(MUSIC_DIR, f)); } catch { continue; }
+      if (!st.isFile()) continue;
+      if (!bySize.has(st.size)) bySize.set(st.size, []);
+      bySize.get(st.size).push(f);
+    }
+  } catch { /* ignore */ }
+  const groups = [];
+  for (const files of bySize.values()) {
+    if (files.length < 2) continue; // unique size → can't be a dupe
+    const byHash = new Map();
+    for (const f of files) {
+      let h; try { h = crypto.createHash('md5').update(fs.readFileSync(path.join(MUSIC_DIR, f))).digest('hex'); } catch { continue; }
+      if (!byHash.has(h)) byHash.set(h, []);
+      byHash.get(h).push(f);
+    }
+    for (const same of byHash.values()) {
+      if (same.length < 2) continue;
+      // Keep the "cleanest" name: shortest wins (drops "song (1).mp3" in favour
+      // of "song.mp3"); ties broken alphabetically for a stable choice.
+      same.sort((a, b) => a.length - b.length || a.localeCompare(b));
+      groups.push({ keep: same[0], remove: same.slice(1) });
+    }
+  }
+  return groups;
+}
+
+app.get('/api/library/duplicates', (_req, res) => {
+  const groups = findDuplicateGroups();
+  res.json({ groups, count: groups.reduce((n, g) => n + g.remove.length, 0) });
+});
+
+app.post('/api/library/dedupe', (_req, res) => {
+  const groups = findDuplicateGroups();
+  const removed = [];
+  for (const g of groups) {
+    for (const f of g.remove) {
+      try {
+        fs.unlinkSync(path.join(MUSIC_DIR, f));
+        for (const pl of Object.keys(data.playlists)) data.playlists[pl] = data.playlists[pl].filter((x) => x !== f);
+        if (data.licensed) delete data.licensed[f];
+        if (data.genres) delete data.genres[f];
+        if (data.vibes) delete data.vibes[f];
+        if (data.ratings) delete data.ratings[f];
+        if (data.credits) delete data.credits[f];
+        if (data.meta) delete data.meta[f];
+        removed.push(f);
+      } catch { /* ignore */ }
+    }
+  }
+  if (removed.length) saveData(data);
+  res.json({ ok: true, removed, count: removed.length });
+});
+
 app.get('/api/state', (_req, res) => {
   res.json({
     blocks: data.blocks,
