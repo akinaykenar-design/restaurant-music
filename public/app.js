@@ -1191,10 +1191,17 @@ function renderEditor() {
     aimg.src = '/api/art?file=' + encodeURIComponent(t.file);
     art.appendChild(aimg);
 
-    // Columns: Track | Artist | Genre. Click the track to preview.
+    // Columns: Track | Artist | Genre — each editable in place. Preview is on
+    // the album tile (click the art on the left).
+    art.addEventListener('click', () => { if (!libSelect) preview(t.file); });
+    art.style.cursor = 'pointer';
     const trackCell = document.createElement('div');
-    trackCell.className = 'col-track'; trackCell.textContent = t.title; trackCell.title = t.title;
-    trackCell.addEventListener('click', () => { if (!libSelect) preview(t.file); });
+    trackCell.className = 'col-track';
+    const tbtn = document.createElement('button');
+    tbtn.className = 'cell-edit cell-title';
+    tbtn.textContent = t.title; tbtn.title = 'Rename track';
+    tbtn.addEventListener('click', (e) => { e.stopPropagation(); editCellInline(tbtn, t, 'title'); });
+    trackCell.appendChild(tbtn);
     const artistCell = document.createElement('div');
     artistCell.className = 'col-artist';
     const abtn = document.createElement('button');
@@ -1309,8 +1316,8 @@ function editCellInline(btn, t, kind) {
   const input = document.createElement('input');
   input.type = 'text';
   input.className = 'cell-input';
-  input.value = (kind === 'artist' ? t.artist : t.genre) || '';
-  input.placeholder = kind === 'artist' ? 'Artist' : 'Genre';
+  input.value = (kind === 'artist' ? t.artist : kind === 'title' ? t.title : t.genre) || '';
+  input.placeholder = kind === 'artist' ? 'Artist' : kind === 'title' ? 'Track name' : 'Genre';
   cell.replaceChild(input, btn);
   input.focus(); input.select();
   let done = false;

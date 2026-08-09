@@ -428,8 +428,8 @@ function scanLibrary() {
       const genre = (data.genres && data.genres[f]) || m.genre || parsed.genre || '';
       return {
         file: f,
-        // strip a leading copy of the artist so it isn't shown in both columns
-        title: stripLeadingArtist((m.title && m.title.trim()) || prettyTitle(f), artist),
+        // a hand-set title wins; otherwise strip a leading artist copy
+        title: (data.titles && data.titles[f]) || stripLeadingArtist((m.title && m.title.trim()) || prettyTitle(f), artist),
         duration: m.duration || 0,
         // a manually-set genre wins over the file's tag (Pixabay tracks
         // often ship with no genre, so staff can set one that sticks)
@@ -610,6 +610,7 @@ app.post('/api/library/dedupe', (_req, res) => {
         if (data.licensed) delete data.licensed[f];
         if (data.genres) delete data.genres[f];
         if (data.artists) delete data.artists[f];
+        if (data.titles) delete data.titles[f];
         if (data.vibes) delete data.vibes[f];
         if (data.ratings) delete data.ratings[f];
         if (data.credits) delete data.credits[f];
@@ -671,6 +672,18 @@ app.post('/api/artist', (req, res) => {
   else delete data.artists[file];
   saveData(data);
   res.json({ ok: true, artist });
+});
+
+// Manually set (or clear) a track's title (display name).
+app.post('/api/title', (req, res) => {
+  const file = req.body && req.body.file;
+  const title = ((req.body && req.body.title) || '').trim();
+  if (!file) return res.status(400).json({ error: 'file required' });
+  data.titles = data.titles || {};
+  if (title) data.titles[file] = title;
+  else delete data.titles[file];
+  saveData(data);
+  res.json({ ok: true, title });
 });
 
 // Manually set a track's vibe (Chill / Lively) from the Library — a hand-set
@@ -1423,7 +1436,7 @@ function trackInfo(file) {
   const parsed = parseFileName(file);
   const artist = (data.artists && data.artists[file]) || (m.artist && m.artist.trim()) || (credit.artist || '').trim() || parsed.artist || null;
   return {
-    title: stripLeadingArtist((m.title && m.title.trim()) || prettyTitle(file), artist),
+    title: (data.titles && data.titles[file]) || stripLeadingArtist((m.title && m.title.trim()) || prettyTitle(file), artist),
     artist,
     genre: (data.genres && data.genres[file]) || m.genre || parsed.genre || null,
   };
