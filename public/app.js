@@ -174,14 +174,11 @@ const vizEq = (() => {
     wireAudio();
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
   }
-  // Feed an external audio element (e.g. the "Listen here" room stream) into the
-  // same analyser so the meter shows the real spectrum of what you're hearing.
-  function attach(el) {
-    wireAudio();
-    if (!audioCtx || !analyser) return;
-    try { audioCtx.createMediaElementSource(el).connect(analyser); } catch (e) { /* already wired */ }
-    if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
-  }
+  // Share the audio context (create it on demand) and let callers swap in a
+  // different analyser — the venue "room stream" feeds a silent analyser so the
+  // meter reads the REAL song even though this device isn't the player.
+  function ensureCtx() { wireAudio(); return audioCtx; }
+  function setAnalyser(a) { analyser = a; freq = new Uint8Array(a.frequencyBinCount); }
 
   function sample(playing, t) {
     // Scale the meter by the actual output volume — the analyser reads the raw
@@ -190,7 +187,7 @@ const vizEq = (() => {
     // gentle curve: stays lively at normal listening levels but still drops
     // right down when the volume is low (and flat at mute).
     const volScale = Math.pow(Math.max(0, Math.min(1, userVolume)), 0.6);
-    if (analyser) {
+    if (analyser && playing) {
       analyser.getByteFrequencyData(freq);
       // Split the spectrum into COLS *logarithmic* bands (like a real graphic
       // EQ) so bass doesn't hog the left side, and tilt the gain up towards the
@@ -274,7 +271,7 @@ const vizEq = (() => {
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
-  return { onPlay, attach };
+  return { onPlay, ensureCtx, setAnalyser };
 })();
 
 const fmt = (s) => (!s || isNaN(s)) ? '0:00' : Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
@@ -518,42 +515,59 @@ function pollVenue() {
 // the UI both quickly (feels responsive) and once the swap has landed.
 function pollVenueSoon() { setTimeout(pollVenueOnce, 250); setTimeout(pollVenueOnce, 850); }
 
-// ---- "Listen here": hear the live room mix on THIS device ------------------
-// The box plays to the room; this streams the same mix to your phone/laptop on
-// demand, so you can monitor from anywhere without turning this device into a
-// second player. Toggle it off when you're done. (Don't use it on a device
-// sitting next to the speakers — you'll hear a slight echo.)
-let monitorEl = null;
-let monitoring = false;
-let monitorAttached = false;
+// ---- room audio on THIS device: real visualiser + optional "Listen here" ---
+// The box plays to the room; this device can't read that audio directly, so we
+// pull the live room stream and route it two ways:
+//   stream ─┬─▶ analyser        (silent — drives the REAL visualiser)
+//           └─▶ gain ─▶ speakers (gain 0 by default; 1 when "Listen here" is on)
+// So the meter always moves to the actual song, and you can also listen on
+// demand — without this device ever becoming a second player (no echo unless
+// you turn Listen here on next to the speakers).
+let roomStream = null;
+let roomGain = null;
+let roomStarted = false;
+let listening = false;
+
+function startRoomAudio() {
+  if (roomStarted) return true;
+  const ctx = vizEq.ensureCtx();
+  if (!ctx) return false;
+  try {
+    roomStream = new Audio('/stream?_=' + Date.now());
+    roomStream.preload = 'auto';
+    const src = ctx.createMediaElementSource(roomStream);
+    const a = ctx.createAnalyser();
+    a.fftSize = 512;
+    a.smoothingTimeConstant = 0.6;
+    roomGain = ctx.createGain();
+    roomGain.gain.value = 0; // silent until Listen here is switched on
+    src.connect(a);                       // analysis path (not wired to speakers)
+    src.connect(roomGain).connect(ctx.destination); // audible path
+    vizEq.setAnalyser(a);                 // meter now reads the real room spectrum
+    roomStream.play().catch(() => {});
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+    roomStarted = true;
+    return true;
+  } catch (e) { return false; }
+}
+
 function updateListenBtn() {
   const b = $('listen-here'); if (!b) return;
-  b.classList.toggle('on', monitoring);
-  b.setAttribute('aria-pressed', monitoring ? 'true' : 'false');
-  b.title = monitoring ? 'Listening to the room on this device — tap to stop' : "Hear what's playing in the room, on this device";
-  const t = b.querySelector('.modebtn-txt'); if (t) t.textContent = monitoring ? 'Listening' : 'Listen here';
+  b.classList.toggle('on', listening);
+  b.setAttribute('aria-pressed', listening ? 'true' : 'false');
+  b.title = listening ? 'Listening to the room on this device — tap to stop' : "Hear what's playing in the room, on this device";
+  const t = b.querySelector('.modebtn-txt'); if (t) t.textContent = listening ? 'Listening' : 'Listen here';
 }
 function setupListenHere() {
   const btn = $('listen-here'); if (!btn) return;
-  monitorEl = new Audio();
-  monitorEl.preload = 'none';
-  monitorEl.volume = 1; // loudness is set by this device's own volume buttons
-  // The <audio> 'playing' event can lag (buffering) — flip the button on tap
-  // and let 'error'/'pause' correct it, so it never looks dead.
-  monitorEl.addEventListener('error', () => { monitoring = false; updateListenBtn(); });
   btn.addEventListener('click', () => {
-    if (!monitoring) {
-      monitoring = true; updateListenBtn();
-      monitorEl.src = '/stream?_=' + Date.now(); // always join at the live point
-      if (!monitorAttached) { try { vizEq.attach(monitorEl); monitorAttached = true; } catch (e) { /* ignore */ } }
-      const p = monitorEl.play();
-      if (p && p.catch) p.catch(() => { monitoring = false; updateListenBtn(); });
-    } else {
-      monitoring = false; updateListenBtn();
-      monitorEl.pause();
-      monitorEl.removeAttribute('src');
-      try { monitorEl.load(); } catch (e) { /* ignore */ }
+    if (!startRoomAudio()) return; // this click is the gesture that unlocks audio
+    listening = !listening;
+    if (roomGain) {
+      try { roomGain.gain.value = listening ? 1 : 0; } catch (e) { /* ignore */ }
     }
+    if (listening && roomStream && roomStream.paused) roomStream.play().catch(() => {});
+    updateListenBtn();
   });
   updateListenBtn();
 }
@@ -1703,6 +1717,11 @@ async function boot() {
 
   if (venueMode) {
     venuePollTimer = setTimeout(pollVenue, 3000);
+    // Feed the visualiser the REAL room audio. Browsers require a user gesture
+    // before audio can start, so arm it on the first tap/keypress.
+    const armRoomViz = () => { startRoomAudio(); };
+    window.addEventListener('pointerdown', armRoomViz, { once: true });
+    window.addEventListener('keydown', armRoomViz, { once: true });
   } else {
     applySchedule(true);
     // Re-apply a saved override (e.g. the venue box rebooted mid-service).
