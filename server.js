@@ -103,18 +103,31 @@ let data = loadData();
 
 // ---- library scan ----------------------------------------------------------
 
-// Turn a filename into a friendly display title:
-// "cafe-01-sunrise.mp3" -> "Sunrise", "chill_organic_house.mp3" -> "Chill Organic House"
-function prettyTitle(file) {
-  let base = path.basename(file, path.extname(file));
+// Parse a bare filename into { artist, title } for tracks with no embedded
+// tags — e.g. Pixabay downloads like "9jackjack8 Anatolian Tears Turkish Deep
+// House 413141.mp3" → artist "9jackjack8", title "Anatolian Tears Turkish Deep
+// House" (the trailing stock-ID number is dropped).
+function parseFileName(file) {
+  const base = path.basename(file, path.extname(file));
   let tokens = base.split(/[-_\s]+/).filter(Boolean);
-  // Drop a leading "cafe" tag and any leading pure-number tokens (track numbers).
-  while (tokens.length > 1 && (/^\d+$/.test(tokens[0]) || tokens[0].toLowerCase() === 'cafe')) {
-    tokens.shift();
-  }
-  return tokens
-    .map((t) => (t.length ? t[0].toUpperCase() + t.slice(1) : t))
-    .join(' ');
+  // Drop a leading "cafe" tag and leading pure-number track numbers.
+  while (tokens.length > 1 && (/^\d+$/.test(tokens[0]) || tokens[0].toLowerCase() === 'cafe')) tokens.shift();
+  // Drop a trailing long number — Pixabay/stock IDs (4+ digits).
+  while (tokens.length > 1 && /^\d{4,}$/.test(tokens[tokens.length - 1])) tokens.pop();
+  // A leading "handle" (letters mixed with a digit, e.g. "9jackjack8") is the
+  // uploader, not part of the title → pull it out as the artist. Require 4+
+  // letters so real titles like "3am" or "80s" aren't mistaken for a handle.
+  let artist = null;
+  const t0 = tokens[0] || '';
+  if (tokens.length > 1 && /\d/.test(t0) && (t0.match(/[a-z]/gi) || []).length >= 4) artist = tokens.shift();
+  const cap = (t) => (t.length ? t[0].toUpperCase() + t.slice(1) : t);
+  return { artist: artist ? cap(artist) : null, title: tokens.map(cap).join(' ') };
+}
+
+// Turn a filename into a friendly display title (artist handle + trailing stock
+// ID stripped out — see parseFileName).
+function prettyTitle(file) {
+  return parseFileName(file).title || path.basename(file, path.extname(file));
 }
 
 // Approximate track length in seconds (CBR MP3 from file size / bitrate; 0 if unknown).
@@ -339,7 +352,7 @@ function scanLibrary() {
         // a manually-set genre wins over the file's tag (Pixabay tracks
         // often ship with no genre, so staff can set one that sticks)
         genre: (data.genres && data.genres[f]) || m.genre || '',
-        artist: m.artist || (data.credits && data.credits[f] && data.credits[f].artist) || '',
+        artist: m.artist || (data.credits && data.credits[f] && data.credits[f].artist) || parseFileName(f).artist || '',
         bpm: m.analyzedBpm || m.bpm || null,
         energy: m.energy != null ? m.energy : null,
         vibe: normalizeVibe((data.vibes && data.vibes[f]) || m.vibe),
@@ -1310,7 +1323,7 @@ function trackInfo(file) {
   const credit = (data.credits && data.credits[file]) || {};
   return {
     title: (m.title && m.title.trim()) || prettyTitle(file),
-    artist: (m.artist && m.artist.trim()) || (credit.artist || '').trim() || null,
+    artist: (m.artist && m.artist.trim()) || (credit.artist || '').trim() || parseFileName(file).artist || null,
     genre: (data.genres && data.genres[file]) || m.genre || null,
   };
 }

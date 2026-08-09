@@ -14,7 +14,8 @@ let libFilter = '';       // library search term
 let libGenre = '';        // library genre filter
 let libVibe = '';         // library vibe filter (Chill/Lively)
 let libRating = '';       // library rating filter (like/dislike/rated/none)
-let libSort = 'title';    // library sort key
+let libSortCol = 'track'; // library sort column: track | artist | genre
+let libSortDir = 1;       // 1 = A→Z, -1 = Z→A
 let libSelect = false;    // multi-select (long-press) mode in the library
 const libSelected = new Set(); // files currently selected
 
@@ -774,10 +775,26 @@ $('shuffle-btn').addEventListener('click', () => {
 $('crossfade').addEventListener('input', (e) => { state.settings.crossfade = Number(e.target.value); $('cf-val').textContent = e.target.value + 's'; });
 $('crossfade').addEventListener('change', (e) => saveSettings({ crossfade: Number(e.target.value) }));
 
-// library search + filters + sort
+// library search + filter + click-a-column-header to sort
 $('lib-search').addEventListener('input', (e) => { libFilter = e.target.value.trim().toLowerCase(); renderEditor(); });
 $('lib-genre').addEventListener('change', (e) => { libGenre = e.target.value; renderEditor(); });
-$('lib-sort').addEventListener('change', (e) => { libSort = e.target.value; renderEditor(); });
+document.querySelectorAll('#lib-colhead .colh').forEach((h) => {
+  h.addEventListener('click', () => {
+    const col = h.dataset.sort;
+    if (libSortCol === col) libSortDir = -libSortDir; // same column → flip direction
+    else { libSortCol = col; libSortDir = 1; }
+    updateColHead();
+    renderEditor();
+  });
+});
+function updateColHead() {
+  document.querySelectorAll('#lib-colhead .colh').forEach((h) => {
+    const on = h.dataset.sort === libSortCol;
+    h.classList.toggle('on', on);
+    h.dataset.dir = on ? (libSortDir > 0 ? 'asc' : 'desc') : '';
+  });
+}
+updateColHead();
 $('lib-playall').addEventListener('click', () => {
   const files = library.filter((t) => !t.licensed).map((t) => t.file);
   if (!files.length) return;
@@ -1009,13 +1026,12 @@ function filteredLibrary() {
     (!libGenre || t.genre === libGenre) &&
     (!libVibe || t.vibe === libVibe) &&
     ratingMatch(t));
-  return shown.sort((a, b) => {
-    if (libSort === 'vibe') return (vibeRank[a.vibe] ?? 9) - (vibeRank[b.vibe] ?? 9) || a.title.localeCompare(b.title);
-    if (libSort === 'bpm') return (a.bpm || 999) - (b.bpm || 999) || a.title.localeCompare(b.title);
-    if (libSort === 'genre') return (a.genre || '~').localeCompare(b.genre || '~') || a.title.localeCompare(b.title);
-    if (libSort === 'duration') return (a.duration || 0) - (b.duration || 0) || a.title.localeCompare(b.title);
-    return a.title.localeCompare(b.title);
-  });
+  const key = (t) => {
+    if (libSortCol === 'artist') return (t.artist || '~').toLowerCase();
+    if (libSortCol === 'genre') return (t.genre || '~').toLowerCase();
+    return (t.title || '').toLowerCase(); // 'track'
+  };
+  return shown.sort((a, b) => (key(a).localeCompare(key(b)) || a.title.localeCompare(b.title)) * libSortDir);
 }
 
 function preview(file) {
@@ -1170,16 +1186,12 @@ function renderEditor() {
     aimg.src = '/api/art?file=' + encodeURIComponent(t.file);
     art.appendChild(aimg);
 
-    // title + artist always lead the row and truncate before anything else
-    const meta = document.createElement('div');
-    meta.className = 'row-meta';
-    const title = document.createElement('div');
-    title.className = 'row-title'; title.textContent = t.title;
-    const artist = document.createElement('div');
-    artist.className = 'row-artist'; artist.textContent = t.artist || '—';
-    meta.append(title, artist);
-    meta.title = t.title + (t.artist ? ' — ' + t.artist : '');
-    meta.addEventListener('click', () => { if (!libSelect) preview(t.file); });
+    // Columns: Track | Artist | Genre. Click the track to preview.
+    const trackCell = document.createElement('div');
+    trackCell.className = 'col-track'; trackCell.textContent = t.title; trackCell.title = t.title;
+    trackCell.addEventListener('click', () => { if (!libSelect) preview(t.file); });
+    const artistCell = document.createElement('div');
+    artistCell.className = 'col-artist'; artistCell.textContent = t.artist || '—'; artistCell.title = t.artist || '';
 
     attachLongPress(li, t.file);
     li.addEventListener('click', () => {
@@ -1188,11 +1200,11 @@ function renderEditor() {
     });
     if (libSelected.has(t.file)) li.classList.add('sel');
 
-    // badges: one vibe chip + one genre chip (rating shows on the buttons)
-    const badges = document.createElement('div');
-    badges.className = 'row-badges';
-    if (t.vibe) { const v = document.createElement('span'); v.className = 'tag vibe-' + t.vibe.toLowerCase(); v.textContent = t.vibe; badges.appendChild(v); }
-    if (t.genre) { const g = document.createElement('span'); g.className = 'tag tag-genre'; g.textContent = t.genre; badges.appendChild(g); }
+    // Genre column (vibe still shows as the art tile colour).
+    const genreCell = document.createElement('div');
+    genreCell.className = 'col-genre';
+    if (t.genre) { const g = document.createElement('span'); g.className = 'tag tag-genre'; g.textContent = t.genre; genreCell.appendChild(g); }
+    else { genreCell.textContent = '—'; genreCell.classList.add('col-empty'); }
 
     // The Library is for organising, so rows get Categorise + Delete.
     // (Like / ban live on Now Playing, for reacting to what's in the room.)
@@ -1220,7 +1232,7 @@ function renderEditor() {
     // Delete
     const del = document.createElement('button');
     del.className = 'iact iact-del'; del.title = 'Delete from library'; del.setAttribute('aria-label', 'Delete');
-    del.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>';
+    del.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
     del.addEventListener('click', (e) => {
       e.stopPropagation();
       if (!confirm('Delete "' + t.title + '" from the library?')) return;
@@ -1228,7 +1240,7 @@ function renderEditor() {
     });
 
     acts.append(catWrap, del);
-    li.append(art, meta, badges, acts);
+    li.append(art, trackCell, artistCell, genreCell, acts);
     libUl.appendChild(li);
   });
 }

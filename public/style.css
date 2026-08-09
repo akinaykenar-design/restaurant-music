@@ -98,7 +98,7 @@ body {
 }
 .lockbtn svg { width: 21px; height: 21px; fill: currentColor; }
 .lockbtn:hover { color: var(--text); border-color: var(--border-strong); }
-.lockbtn.on { color: var(--accent); border-color: var(--accent); background: var(--accent-tint); }
+.lockbtn.on { color: var(--play); border-color: var(--play); background: var(--play-tint); }
 #header-power:hover { color: var(--bad); border-color: var(--bad); background: var(--bad-tint); }
 
 main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60px; }
@@ -169,7 +169,7 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 .transport button:active { transform: scale(0.93); }
 .transport svg { width: 27px; height: 27px; fill: currentColor; }
 .tbtn { width: 60px; height: 60px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border-strong); color: var(--text); }
-.tbtn:hover { border-color: var(--accent); color: var(--accent); }
+.tbtn:hover { border-color: var(--play); color: var(--play); }
 .play { width: 92px; height: 92px; border-radius: 50%; background: var(--play); color: #fff; box-shadow: 0 12px 30px -10px var(--play); }
 .play svg { width: 38px; height: 38px; }
 .play:hover { background: var(--play-press); transform: scale(1.05); }
@@ -202,7 +202,7 @@ input[type='range']::-moz-range-thumb { width: 28px; height: 28px; border: 3px s
 .modebtn.on .ic-shuffle { display: inline; }
 .modebtn:not(.on) .ic-order { display: inline; }
 .modebtn.on { color: var(--text); border-color: var(--border-strong); background: var(--surface); }
-.modebtn:hover { border-color: var(--accent); color: var(--text); }
+.modebtn:hover { border-color: var(--play); color: var(--text); }
 /* shuffle is a bare Spotify-style icon — no label; teal when shuffling */
 #shuffle-btn { width: 46px; min-width: 46px; padding: 9px; }
 #shuffle-btn .modebtn-txt { display: none; }
@@ -222,11 +222,11 @@ input[type='range']::-moz-range-thumb { width: 28px; height: 28px; border: 3px s
 /* scenes — one-tap crowd modes */
 .scenes { display: flex; flex-wrap: wrap; gap: 10px; margin: 34px 0 10px; max-width: var(--ctl, 460px); }
 .scene { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.14s ease; }
-.scene:hover:not(:disabled) { border-color: var(--accent); transform: translateY(-1px); }
+.scene:hover:not(:disabled) { border-color: var(--play); }
 .scene:disabled { opacity: 0.4; cursor: not-allowed; }
-.scene.on { color: var(--bg); background: var(--accent); border-color: var(--accent); box-shadow: 0 8px 18px -8px var(--accent); }
+.scene.on { color: var(--play); background: var(--play-tint); border-color: var(--play); }
 .scene-ic { font-size: 0.98rem; line-height: 1; }
-.scene-auto.on { background: var(--warn); border-color: var(--warn); box-shadow: 0 8px 18px -8px var(--warn); }
+.scene-auto.on { color: var(--play); background: var(--play-tint); border-color: var(--play); }
 
 .add-all { width: 100%; margin-bottom: 12px; font-size: 0.84rem; }
 .add-all:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -246,32 +246,47 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .row-art.vibe-warm { background: linear-gradient(150deg, var(--warn), var(--lively-deep)); }
 .row-art.vibe-lively { background: linear-gradient(150deg, var(--lively), var(--lively-deep)); }
 .tracklist li .dur { color: var(--faint); font-size: 0.76rem; font-variant-numeric: tabular-nums; flex: none; }
-.tracklist li .name:hover { color: var(--accent); }
-.tracklist li.current { border-color: var(--accent); background: var(--accent-tint); }
-.tracklist li.current .name { color: var(--accent); font-weight: 600; }
+.tracklist li .name:hover { color: var(--play); }
+.tracklist li.current { border-color: var(--play); background: var(--play-tint); }
+.tracklist li.current .name { color: var(--play); font-weight: 600; }
 .tracklist li.empty { justify-content: flex-start; color: var(--muted); font-style: italic; border-style: dashed; background: transparent; }
 .muted-list li { opacity: 0.72; }
 .tracklist button { width: 27px; height: 27px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; font-size: 0.8rem; flex: none; }
 .tracklist button:disabled { opacity: 0.3; cursor: not-allowed; }
-.tracklist button:hover:not(:disabled) { border-color: var(--accent); }
+.tracklist button:hover:not(:disabled) { border-color: var(--play); }
 .tracklist .del:hover { border-color: var(--bad); color: var(--bad); }
 .tracklist .liked { color: var(--warn); border-color: var(--warn); }
 .tracklist .lessed { color: var(--warn); border-color: var(--warn); }
 .tracklist .disliked { color: var(--bad); border-color: var(--bad); }
 
-/* ---------- library rows: title+artist, two actions, a "…" menu ---------- */
-#lib-tracks li { gap: 12px; padding: 10px 12px; }
-#lib-tracks .row-meta { flex: 1; min-width: 0; cursor: pointer; line-height: 1.25; }
-#lib-tracks .row-title { font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#lib-tracks .row-artist { color: var(--muted); font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#lib-tracks .row-meta:hover .row-title { color: var(--accent); }
-#lib-tracks .row-badges { display: flex; gap: 6px; flex: none; }
-#lib-tracks .row-badges .tag { font-size: 0.72rem; font-weight: 600; padding: 4px 9px; border-radius: 999px; white-space: nowrap; }
-#lib-tracks .row-acts { display: flex; gap: 6px; flex: none; align-items: center; }
+/* ---------- library rows: columns (Track | Artist | Genre | actions) ---------- */
+.tracklist-cols li { display: grid; grid-template-columns: 38px minmax(0, 1.7fr) minmax(0, 1fr) 140px 92px; align-items: center; gap: 12px; padding: 9px 12px; }
+#lib-tracks .col-track { font-weight: 600; font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+#lib-tracks .col-track:hover { color: var(--play); }
+#lib-tracks .col-artist { color: var(--muted); font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#lib-tracks .col-genre { min-width: 0; }
+#lib-tracks .col-genre .tag { display: inline-block; max-width: 100%; font-size: 0.72rem; font-weight: 600; padding: 4px 9px; border-radius: 999px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#lib-tracks .col-genre.col-empty { color: var(--faint); font-size: 0.85rem; }
+#lib-tracks .row-acts { display: flex; gap: 6px; align-items: center; justify-content: flex-end; }
+/* clickable column headers */
+.lib-colhead { display: grid; grid-template-columns: 38px minmax(0, 1.7fr) minmax(0, 1fr) 140px 92px; align-items: center; gap: 12px; padding: 2px 12px 8px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.lib-colhead .colh { background: transparent; border: none; color: var(--muted); font: inherit; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; cursor: pointer; text-align: left; padding: 4px 0; display: inline-flex; align-items: center; gap: 5px; }
+.lib-colhead .colh:hover { color: var(--text); }
+.lib-colhead .colh.on { color: var(--play); }
+.lib-colhead .colh.on::after { content: '▲'; font-size: 0.6rem; }
+.lib-colhead .colh.on[data-dir="desc"]::after { content: '▼'; }
+@media (max-width: 680px) {
+  .tracklist-cols li, .lib-colhead { grid-template-columns: 38px minmax(0, 1.6fr) minmax(0, 1fr) 92px; }
+  #lib-tracks .col-genre, .lib-colhead .colh[data-sort="genre"] { display: none; }
+}
+@media (max-width: 460px) {
+  .tracklist-cols li, .lib-colhead { grid-template-columns: 38px minmax(0, 1fr) 92px; }
+  #lib-tracks .col-artist, .lib-colhead .colh[data-sort="artist"] { display: none; }
+}
 .iact { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; display: grid; place-items: center; transition: color .14s, border-color .14s, background .14s; }
 .iact svg { width: 19px; height: 19px; }
-.iact:hover { border-color: var(--border-strong); color: var(--text); }
-.iact.on-like { color: var(--text); background: var(--accent-tint); border-color: transparent; }
+.iact:hover { border-color: var(--play); color: var(--text); }
+.iact.on-like { color: var(--play); background: var(--play-tint); border-color: transparent; }
 .iact.on-ban { color: var(--bad); background: var(--bad-tint); border-color: transparent; }
 .iact.iact-del:hover { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, transparent); background: var(--bad-tint); }
 .row-menu-wrap { position: relative; }
@@ -286,7 +301,7 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 /* ---------- accent cards ---------- */
 .accent-card { margin-top: 16px; }
 .ghost { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 9px 15px; cursor: pointer; font: inherit; font-size: 0.86rem; font-weight: 600; }
-.ghost:hover { border-color: var(--accent); }
+.ghost:hover { border-color: var(--play); }
 /* Admin: uniform spacing between cards (was a mix of ad-hoc margins). */
 #admin-content { display: flex; flex-direction: column; gap: 22px; }
 #admin-content[hidden] { display: none; } /* stay hidden until unlocked (author CSS beats UA) */
@@ -322,7 +337,12 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .ah-card h3 { color: var(--warn); }
 .ah-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .ah-row input, .ah-row select { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 9px 12px; font: inherit; }
-.ah-row .warnbtn { background: var(--warn); color: #fff; border: none; border-radius: 10px; padding: 9px 15px; cursor: pointer; font: inherit; font-size: 0.86rem; font-weight: 600; }
+/* Primary action = teal (Unlock, Play after-hours, Play licensed). */
+.ah-row .warnbtn, .warnbtn { background: var(--play); color: #fff; border: none; border-radius: 10px; padding: 9px 15px; cursor: pointer; font: inherit; font-size: 0.86rem; font-weight: 600; }
+.ah-row .warnbtn:hover, .warnbtn:hover { background: var(--play-press); }
+/* Destructive = red outline (Shut down the box). */
+.dangerbtn { background: var(--bad-tint); color: var(--bad); border: 1px solid var(--bad); border-radius: 10px; padding: 9px 15px; cursor: pointer; font: inherit; font-size: 0.86rem; font-weight: 600; }
+.dangerbtn:hover { background: var(--bad); color: #fff; }
 /* segmented two-way switch: the box (jack) vs this browser */
 .playmode-switch { display: inline-flex; gap: 4px; padding: 4px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; }
 .playmode-switch[hidden] { display: none; }
@@ -366,7 +386,7 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .lib-add-row .dropzone { flex: 1; margin-bottom: 0; }
 .lib-add-row .auto-all-btn { flex: none; width: auto; min-width: 210px; margin-top: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 @media (max-width: 600px) { .lib-add-row { flex-direction: column; } .lib-add-row .auto-all-btn { width: 100%; min-width: 0; } }
-.auto-all-btn { display: block; width: 100%; background: var(--text); color: var(--bg); border: none; border-radius: 12px; padding: 15px; font: inherit; font-size: 1.05rem; font-weight: 700; cursor: pointer; margin-top: 4px; transition: opacity 0.14s, transform 0.1s; }
+.auto-all-btn { display: block; width: 100%; background: var(--play); color: #fff; border: none; border-radius: 12px; padding: 15px; font: inherit; font-size: 1.05rem; font-weight: 700; cursor: pointer; margin-top: 4px; transition: opacity 0.14s, transform 0.1s; }
 .auto-all-btn small { display: block; font-weight: 400; font-size: 0.8rem; opacity: 0.85; margin-top: 2px; }
 .auto-all-btn:hover { opacity: 0.88; }
 .auto-all-btn:active { transform: scale(0.99); }

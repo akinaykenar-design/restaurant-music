@@ -129,27 +129,27 @@
               <h3>Your music <span class="count" id="lib-count">0</span></h3>
               <button id="lib-playall" class="ghost">▶ Play all</button>
             </div>
-            <input id="lib-search" class="lib-search" type="text" placeholder="Filter your tracks…" />
+            <input id="lib-search" class="lib-search" type="text" placeholder="Search" />
             <div class="lib-tools">
               <select id="lib-genre" class="lib-filter" title="Filter by genre"><option value="">All genres</option></select>
-              <select id="lib-sort" class="lib-filter" title="Sort tracks">
-                <option value="title">A–Z</option>
-                <option value="vibe">By vibe</option>
-                <option value="bpm">By tempo</option>
-                <option value="genre">By genre</option>
-                <option value="duration">By length</option>
-              </select>
             </div>
             <div id="lib-selbar" class="lib-selbar" hidden>
               <span id="lib-selcount">0 selected</span>
               <span class="selbar-actions">
                 <button id="lib-selgenre" class="ghost">♪ Set genre</button>
                 <button id="lib-selban" class="ghost">⊘ Ban</button>
-                <button id="lib-seldel" class="ghost del">🗑 Delete</button>
+                <button id="lib-seldel" class="ghost del">Delete</button>
                 <button id="lib-selcancel" class="ghost">Cancel</button>
               </span>
             </div>
-            <ul id="lib-tracks" class="tracklist"></ul>
+            <div class="lib-colhead" id="lib-colhead">
+              <span class="colh-art"></span>
+              <button class="colh" data-sort="track">Track</button>
+              <button class="colh" data-sort="artist">Artist</button>
+              <button class="colh" data-sort="genre">Genre</button>
+              <span class="colh-acts"></span>
+            </div>
+            <ul id="lib-tracks" class="tracklist tracklist-cols"></ul>
           </div>
 
           <details class="lib-advanced">
@@ -233,7 +233,7 @@
             <h3>Power</h3>
             <div class="ah-row">
               <button id="power-restart" class="ghost">↻ Restart the box</button>
-              <button id="power-off" class="warnbtn">⏻ Shut down the box</button>
+              <button id="power-off" class="dangerbtn">⏻ Shut down the box</button>
             </div>
             <div id="power-status" class="upload-status"></div>
           </div>
