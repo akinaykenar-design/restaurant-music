@@ -103,10 +103,31 @@ let data = loadData();
 
 // ---- library scan ----------------------------------------------------------
 
-// Parse a bare filename into { artist, title } for tracks with no embedded
-// tags — e.g. Pixabay downloads like "9jackjack8 Anatolian Tears Turkish Deep
-// House 413141.mp3" → artist "9jackjack8", title "Anatolian Tears Turkish Deep
-// House" (the trailing stock-ID number is dropped).
+// Genre phrases we can recognise inside a filename/title, longest first so
+// "deep house" wins over "house". Add more here as the library grows.
+const KNOWN_GENRES = [
+  'lo-fi hip hop', 'lofi hip hop', 'melodic techno', 'melodic house', 'organic house',
+  'progressive house', 'afro house', 'deep house', 'tech house', 'nu disco', 'future bass',
+  'drum and bass', 'trip hop', 'bossa nova', 'chill out', 'deep tech', 'liquid dnb',
+  'balearic', 'chillout', 'chillhop', 'downtempo', 'ambient', 'lounge', 'house', 'techno',
+  'trance', 'disco', 'garage', 'dubstep', 'lo-fi', 'lofi', 'jazz', 'soul', 'funk', 'reggae',
+  'dub', 'chillstep', 'chill',
+].sort((a, b) => b.length - a.length);
+
+const titleCase = (s) => s.replace(/\b([a-z])/g, (m) => m.toUpperCase());
+
+// Find a known genre phrase in `text` (as whole words). Returns the phrase or null.
+function detectGenre(text) {
+  const low = ' ' + text.toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
+  for (const g of KNOWN_GENRES) if (low.includes(' ' + g + ' ')) return g;
+  return null;
+}
+
+// Parse a bare filename into { artist, title, genre } for tracks with no
+// embedded tags — e.g. "9jackjack8 Anatolian Tears Turkish Deep House 413141.mp3"
+// → artist "9jackjack8", genre "Deep House", title "Anatolian Tears Turkish"
+// (uploader handle pulled out, the genre phrase lifted into its own field, and
+// the trailing stock-ID number dropped).
 function parseFileName(file) {
   const base = path.basename(file, path.extname(file));
   let tokens = base.split(/[-_\s]+/).filter(Boolean);
@@ -121,7 +142,17 @@ function parseFileName(file) {
   const t0 = tokens[0] || '';
   if (tokens.length > 1 && /\d/.test(t0) && (t0.match(/[a-z]/gi) || []).length >= 4) artist = tokens.shift();
   const cap = (t) => (t.length ? t[0].toUpperCase() + t.slice(1) : t);
-  return { artist: artist ? cap(artist) : null, title: tokens.map(cap).join(' ') };
+  let title = tokens.map(cap).join(' ');
+  // Lift a known genre phrase out of the title into its own field.
+  const g = detectGenre(title);
+  let genre = null;
+  if (g) {
+    genre = titleCase(g);
+    const re = new RegExp('\\b' + g.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\b', 'ig');
+    const stripped = title.replace(re, '').replace(/\s{2,}/g, ' ').trim();
+    if (stripped) title = stripped; // keep the genre in the title if that's all there was
+  }
+  return { artist: artist ? cap(artist) : null, title, genre };
 }
 
 // Turn a filename into a friendly display title (artist handle + trailing stock
@@ -351,7 +382,7 @@ function scanLibrary() {
         duration: m.duration || 0,
         // a manually-set genre wins over the file's tag (Pixabay tracks
         // often ship with no genre, so staff can set one that sticks)
-        genre: (data.genres && data.genres[f]) || m.genre || '',
+        genre: (data.genres && data.genres[f]) || m.genre || parseFileName(f).genre || '',
         artist: m.artist || (data.credits && data.credits[f] && data.credits[f].artist) || parseFileName(f).artist || '',
         bpm: m.analyzedBpm || m.bpm || null,
         energy: m.energy != null ? m.energy : null,
@@ -1324,7 +1355,7 @@ function trackInfo(file) {
   return {
     title: (m.title && m.title.trim()) || prettyTitle(file),
     artist: (m.artist && m.artist.trim()) || (credit.artist || '').trim() || parseFileName(file).artist || null,
-    genre: (data.genres && data.genres[file]) || m.genre || null,
+    genre: (data.genres && data.genres[file]) || m.genre || parseFileName(file).genre || null,
   };
 }
 

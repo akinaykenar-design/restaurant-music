@@ -1200,11 +1200,16 @@ function renderEditor() {
     });
     if (libSelected.has(t.file)) li.classList.add('sel');
 
-    // Genre column (vibe still shows as the art tile colour).
+    // Genre column — click to set/change it right here (vibe still shows as the
+    // art tile colour).
     const genreCell = document.createElement('div');
     genreCell.className = 'col-genre';
-    if (t.genre) { const g = document.createElement('span'); g.className = 'tag tag-genre'; g.textContent = t.genre; genreCell.appendChild(g); }
-    else { genreCell.textContent = '—'; genreCell.classList.add('col-empty'); }
+    const gbtn = document.createElement('button');
+    gbtn.className = 'genre-edit' + (t.genre ? '' : ' col-empty');
+    gbtn.textContent = t.genre || '+ genre';
+    gbtn.title = t.genre ? 'Change genre' : 'Set genre';
+    gbtn.addEventListener('click', (e) => { e.stopPropagation(); setTrackGenre(t); });
+    genreCell.appendChild(gbtn);
 
     // The Library is for organising, so rows get Categorise + Delete.
     // (Like / ban live on Now Playing, for reacting to what's in the room.)
@@ -1224,7 +1229,6 @@ function renderEditor() {
     catMenu.className = 'row-menu'; catMenu.hidden = true;
     catMenu.appendChild(mItem(catMenu, (t.vibe === 'Chill' ? '✓ ' : '') + '🌙 Chill', '', () => setVibe('Chill')));
     catMenu.appendChild(mItem(catMenu, (t.vibe === 'Lively' ? '✓ ' : '') + '⚡ Lively', '', () => setVibe('Lively')));
-    catMenu.appendChild(mItem(catMenu, t.genre ? '♪ Genre: ' + t.genre : '♪ Set genre…', '', () => setTrackGenre(t)));
     if (editing) catMenu.appendChild(mItem(catMenu, '+ Add to “' + editing + '”', '', () => { if (!state.playlists[editing].includes(t.file)) state.playlists[editing].push(t.file); markCustom(editing); savePlaylists(); }));
     cat.addEventListener('click', (e) => { e.stopPropagation(); const willOpen = catMenu.hidden; closeRowMenus(); catMenu.hidden = !willOpen; });
     catWrap.append(cat, catMenu);
@@ -1232,7 +1236,7 @@ function renderEditor() {
     // Delete
     const del = document.createElement('button');
     del.className = 'iact iact-del'; del.title = 'Delete from library'; del.setAttribute('aria-label', 'Delete');
-    del.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    del.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="7" x2="7" y2="17"/><line x1="7" y1="7" x2="17" y2="17"/></svg>';
     del.addEventListener('click', (e) => {
       e.stopPropagation();
       if (!confirm('Delete "' + t.title + '" from the library?')) return;
