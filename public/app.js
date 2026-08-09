@@ -174,6 +174,14 @@ const vizEq = (() => {
     wireAudio();
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
   }
+  // Feed an external audio element (e.g. the "Listen here" room stream) into the
+  // same analyser so the meter shows the real spectrum of what you're hearing.
+  function attach(el) {
+    wireAudio();
+    if (!audioCtx || !analyser) return;
+    try { audioCtx.createMediaElementSource(el).connect(analyser); } catch (e) { /* already wired */ }
+    if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+  }
 
   function sample(playing, t) {
     // Scale the meter by the actual output volume — the analyser reads the raw
@@ -266,7 +274,7 @@ const vizEq = (() => {
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
-  return { onPlay };
+  return { onPlay, attach };
 })();
 
 const fmt = (s) => (!s || isNaN(s)) ? '0:00' : Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
@@ -509,6 +517,46 @@ function pollVenue() {
 // After an action that triggers a ~500ms fade + track swap on the box, refresh
 // the UI both quickly (feels responsive) and once the swap has landed.
 function pollVenueSoon() { setTimeout(pollVenueOnce, 250); setTimeout(pollVenueOnce, 850); }
+
+// ---- "Listen here": hear the live room mix on THIS device ------------------
+// The box plays to the room; this streams the same mix to your phone/laptop on
+// demand, so you can monitor from anywhere without turning this device into a
+// second player. Toggle it off when you're done. (Don't use it on a device
+// sitting next to the speakers — you'll hear a slight echo.)
+let monitorEl = null;
+let monitoring = false;
+let monitorAttached = false;
+function updateListenBtn() {
+  const b = $('listen-here'); if (!b) return;
+  b.classList.toggle('on', monitoring);
+  b.setAttribute('aria-pressed', monitoring ? 'true' : 'false');
+  b.title = monitoring ? 'Listening to the room on this device — tap to stop' : "Hear what's playing in the room, on this device";
+  const t = b.querySelector('.modebtn-txt'); if (t) t.textContent = monitoring ? 'Listening' : 'Listen here';
+}
+function setupListenHere() {
+  const btn = $('listen-here'); if (!btn) return;
+  monitorEl = new Audio();
+  monitorEl.preload = 'none';
+  monitorEl.volume = 1; // loudness is set by this device's own volume buttons
+  // The <audio> 'playing' event can lag (buffering) — flip the button on tap
+  // and let 'error'/'pause' correct it, so it never looks dead.
+  monitorEl.addEventListener('error', () => { monitoring = false; updateListenBtn(); });
+  btn.addEventListener('click', () => {
+    if (!monitoring) {
+      monitoring = true; updateListenBtn();
+      monitorEl.src = '/stream?_=' + Date.now(); // always join at the live point
+      if (!monitorAttached) { try { vizEq.attach(monitorEl); monitorAttached = true; } catch (e) { /* ignore */ } }
+      const p = monitorEl.play();
+      if (p && p.catch) p.catch(() => { monitoring = false; updateListenBtn(); });
+    } else {
+      monitoring = false; updateListenBtn();
+      monitorEl.pause();
+      monitorEl.removeAttribute('src');
+      try { monitorEl.load(); } catch (e) { /* ignore */ }
+    }
+  });
+  updateListenBtn();
+}
 
 // Volume in venue mode: write the level (0–100) to the box, debounced.
 function setVenueVolume(v01) {
@@ -1725,6 +1773,7 @@ async function boot() {
   setupVenuePlayer();
   setupAdmin();
   setupLicensed();
+  setupListenHere();
   refreshAhPlaylists();
 }
 boot();
