@@ -1768,6 +1768,45 @@ function setupLicensed() {
       pollVenueSoon();
     });
   });
+
+  // ---- after-hours gate: manual switch, or auto by closing time ----
+  const mode = $('ah-mode'), freeze = $('ah-freeze'), times = $('ah-times'), closeT = $('ah-close'), openT = $('ah-open');
+  if (mode && freeze) {
+    mode.addEventListener('change', () => { saveSettings({ afterHoursMode: mode.checked }); updateAhGate(); });
+    freeze.addEventListener('change', () => { saveSettings({ afterHoursFreeze: freeze.checked }); updateAhGate(); });
+    if (closeT) closeT.addEventListener('change', () => { saveSettings({ venueCloseTime: closeT.value }); updateAhGate(); });
+    if (openT) openT.addEventListener('change', () => { saveSettings({ venueOpenTime: openT.value }); updateAhGate(); });
+    updateAhGate();
+    setInterval(updateAhGate, 60000); // re-evaluate the time window each minute
+  }
+}
+
+// Mirror the server's gate logic so the switch/label update live.
+function afterHoursGateOpen() {
+  const s = state.settings || {};
+  if (s.afterHoursFreeze) {
+    const toMin = (t) => { const m = /^(\d{1,2}):(\d{2})$/.exec(t || ''); return m ? (+m[1]) * 60 + (+m[2]) : null; };
+    const c = toMin(s.venueCloseTime), o = toMin(s.venueOpenTime);
+    if (c == null || o == null || c === o) return true;
+    const now = new Date(); const cur = now.getHours() * 60 + now.getMinutes();
+    return c < o ? (cur >= c && cur < o) : (cur >= c || cur < o);
+  }
+  return !!s.afterHoursMode;
+}
+function updateAhGate() {
+  const s = state.settings || {};
+  const mode = $('ah-mode'), freeze = $('ah-freeze'), times = $('ah-times'), closeT = $('ah-close'), openT = $('ah-open'), lbl = $('ah-gate-state');
+  if (!mode || !freeze) return;
+  freeze.checked = !!s.afterHoursFreeze;
+  mode.checked = !!s.afterHoursMode;
+  mode.disabled = !!s.afterHoursFreeze; // auto mode controls it
+  if (times) times.hidden = !s.afterHoursFreeze;
+  if (closeT) closeT.value = s.venueCloseTime || '22:00';
+  if (openT) openT.value = s.venueOpenTime || '09:00';
+  const open = afterHoursGateOpen();
+  if (lbl) lbl.textContent = open
+    ? '🟢 On — licensed music can play'
+    : (s.afterHoursFreeze ? '🔴 Off until ' + (s.venueCloseTime || '') + ' (closing time)' : '🔴 Off');
 }
 
 // ---- after-hours staff mode ------------------------------------------------

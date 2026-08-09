@@ -66,6 +66,11 @@ function defaultData() {
       audioDevice: '', audioCard: null, audioControl: null,
       afterHoursPassword: 'staff', // change it in the unlocked panel
       adminLock: true, // require the password to open Admin (staff can turn off)
+      // After-hours music gate. afterHoursMode is the manual on/off switch;
+      // when afterHoursFreeze is on, the gate follows the clock (closed window)
+      // instead of the switch. Licensed music only plays when the gate is open.
+      afterHoursMode: false, afterHoursFreeze: false,
+      venueCloseTime: '22:00', venueOpenTime: '09:00',
     },
   };
 }
@@ -75,6 +80,7 @@ function publicSettings() {
   const s = Object.assign({}, data.settings);
   delete s.afterHoursPassword;
   s.afterHoursSet = !!data.settings.afterHoursPassword;
+  s.afterHoursOpen = afterHoursAllowed(); // is the gate currently open?
   return s;
 }
 
@@ -575,6 +581,20 @@ app.put('/api/settings', (req, res) => {
 // turn the lock off (Admin > Security) so their own box opens without asking.
 function adminRequired() {
   return data.settings.adminLock !== false && !!data.settings.afterHoursPassword;
+}
+// Is the after-hours gate open? Either the manual switch, or (if the time-lock
+// is on) the current time is inside the closed window (close → open).
+function afterHoursAllowed() {
+  const s = data.settings;
+  if (s.afterHoursFreeze) {
+    const toMin = (t) => { const m = /^(\d{1,2}):(\d{2})$/.exec(t || ''); return m ? (+m[1]) * 60 + (+m[2]) : null; };
+    const close = toMin(s.venueCloseTime), open = toMin(s.venueOpenTime);
+    if (close == null || open == null || close === open) return true;
+    const now = new Date();
+    const cur = now.getHours() * 60 + now.getMinutes();
+    return close < open ? (cur >= close && cur < open) : (cur >= close || cur < open);
+  }
+  return !!s.afterHoursMode;
 }
 app.post('/api/afterhours/unlock', (req, res) => {
   if (!adminRequired()) return res.json({ ok: true });
@@ -1354,6 +1374,7 @@ app.post('/api/player/play', (req, res) => {
     // Licensed music — only ever after close, and only with the admin password,
     // so it can never be triggered to a room full of guests.
     if (!adminOk(req)) return res.status(403).json({ ok: false, error: 'admin password required' });
+    if (!afterHoursAllowed()) return res.status(403).json({ ok: false, error: 'After-hours mode is off — switch it on (or wait until you’re closed).' });
     const { files, label } = resolvePlayToken(token);
     if (!files.length) return res.status(400).json({ ok: false, error: 'no licensed tracks added yet' });
     station.playFiles(files, label);

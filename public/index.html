@@ -347,6 +347,17 @@
             </div>
             <span id="licensed-status" class="upload-status"></span>
             <ul id="licensed-list" class="licensed-list"></ul>
+
+            <div class="ah-gate">
+              <label class="ah-toggle"><input type="checkbox" id="ah-mode" /> <span>After-hours mode</span></label>
+              <span id="ah-gate-state" class="hint"></span>
+            </div>
+            <label class="ah-toggle" style="margin-top:8px"><input type="checkbox" id="ah-freeze" /> <span>Switch on automatically after close</span></label>
+            <div class="ah-row" id="ah-times" style="margin-top:8px" hidden>
+              <label class="chip"><span>Closes</span><input type="time" id="ah-close" /></label>
+              <label class="chip"><span>Opens</span><input type="time" id="ah-open" /></label>
+            </div>
+
             <div class="ah-row" style="margin-top:12px">
               <button id="licensed-play" class="warnbtn">▶ Play licensed music now</button>
               <button id="licensed-schedule" class="ghost">↩ Back to schedule</button>

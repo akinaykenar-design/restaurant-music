@@ -321,7 +321,9 @@ h3 { margin: 0 0 12px; font-size: 0.76rem; text-transform: uppercase; letter-spa
 .restore-label { display: inline-flex; align-items: center; cursor: pointer; }
 .lib-main-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .lib-main-head h3 { margin: 0; }
+.ah-gate { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
 .ah-toggle { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; }
+.ah-toggle input:disabled { opacity: 0.5; }
 .ah-toggle input { width: 20px; height: 20px; accent-color: var(--play); cursor: pointer; }
 
 /* Admin code fields: masked like a password but NOT a real password input, so
