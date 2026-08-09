@@ -233,36 +233,7 @@
 
         <div id="admin-content" hidden>
 
-          <div class="card">
-            <h3>Venue name</h3>
-            <div class="ah-row" style="margin-top: 10px;">
-              <input type="text" id="venue-name" placeholder="Venue name" maxlength="40" autocomplete="off" />
-              <button id="venue-save" class="ghost">Save</button>
-              <span id="venue-status" class="hint"></span>
-            </div>
-          </div>
-
-          <div class="card share-card" id="share-card" hidden>
-            <h3>Open on staff phones &amp; iPads</h3>
-            <p class="hint">On the <b>same WiFi</b>, scan this code (or type the address) in a browser, then tap <b>Add to Home Screen</b> for an app icon.</p>
-            <div class="share-row">
-              <div class="qr-box"><img id="qr-img" alt="Scan to open the app" /></div>
-              <div class="share-addr">
-                <div class="addr-label">Address</div>
-                <div class="big-addr" id="big-addr">—</div>
-                <div class="share-btns">
-                  <button id="copy-addr" class="ghost">Copy address</button>
-                  <button id="print-poster" class="ghost">🖨 Print poster</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card accent-card" id="stream-card" hidden>
-            <h3>Venue stream (for Q-SYS)</h3>
-            <p class="hint">Give this address to whoever programs your Q-SYS Core, or test it in VLC:</p>
-            <div id="stream-urls"></div>
-          </div>
+          <!-- Admin cards, ordered most-used → least-used -->
 
           <div class="card accent-card" id="player-card" hidden>
             <h3>Venue output (this box)</h3>
@@ -294,37 +265,6 @@
             <div id="power-status" class="upload-status"></div>
           </div>
 
-          <div class="card" id="playback-card">
-            <h3>Playback settings</h3>
-            <div class="playback-row">
-              <label class="chip range"><span>Crossfade</span>
-                <input type="range" id="crossfade" min="0" max="12" step="1" />
-                <b id="cf-val">4s</b>
-              </label>
-              <label class="chip"><span>Auto-stop in</span>
-                <select id="sleep" aria-label="Auto-stop countdown">
-                  <option value="0">Off</option>
-                  <option value="30">30 min</option>
-                  <option value="60">1 hour</option>
-                  <option value="90">1½ hours</option>
-                  <option value="120">2 hours</option>
-                </select>
-              </label>
-              <label class="chip"><span>Stop at</span>
-                <input type="time" id="stop-at" aria-label="Stop at clock time" />
-              </label>
-            </div>
-          </div>
-
-          <div class="card ah-card" id="ah-card">
-            <h3>After-hours staff music</h3>
-            <p class="hint">Play a playlist off-schedule (e.g. after close). Turns off Follow-schedule.</p>
-            <div class="ah-row">
-              <select id="ah-playlist"></select>
-              <button id="ah-play" class="warnbtn">Play (after hours)</button>
-            </div>
-          </div>
-
           <div class="card ah-card" id="licensed-card">
             <h3>After-hours licensed music</h3>
             <p class="hint">Add your own <b>commercial / licensed</b> tracks (Spotify rips, purchased MP3s, chart music) to play <b>after close, when there are no guests</b>. These are kept out of the trading-hours rotation, so they <b>never play to customers</b> — no APRA/PPCA risk. Only play them once the venue is closed.</p>
@@ -351,6 +291,15 @@
             </div>
           </div>
 
+          <div class="card ah-card" id="ah-card">
+            <h3>After-hours staff music</h3>
+            <p class="hint">Play a playlist off-schedule (e.g. after close). Turns off Follow-schedule.</p>
+            <div class="ah-row">
+              <select id="ah-playlist"></select>
+              <button id="ah-play" class="warnbtn">Play (after hours)</button>
+            </div>
+          </div>
+
           <div class="card" id="update-card">
             <h3>App updates</h3>
             <div class="ah-row">
@@ -359,9 +308,57 @@
             </div>
           </div>
 
-          <div class="card" id="device-card">
-            <h3>This device</h3>
-            <div id="device-info" class="device-info"></div>
+          <div class="card" id="playback-card">
+            <h3>Playback settings</h3>
+            <div class="playback-row">
+              <label class="chip range"><span>Crossfade</span>
+                <input type="range" id="crossfade" min="0" max="12" step="1" />
+                <b id="cf-val">4s</b>
+              </label>
+              <label class="chip"><span>Auto-stop in</span>
+                <select id="sleep" aria-label="Auto-stop countdown">
+                  <option value="0">Off</option>
+                  <option value="30">30 min</option>
+                  <option value="60">1 hour</option>
+                  <option value="90">1½ hours</option>
+                  <option value="120">2 hours</option>
+                </select>
+              </label>
+              <label class="chip"><span>Stop at</span>
+                <input type="time" id="stop-at" aria-label="Stop at clock time" />
+              </label>
+            </div>
+          </div>
+
+          <div class="card share-card" id="share-card" hidden>
+            <h3>Open on staff phones &amp; iPads</h3>
+            <p class="hint">On the <b>same WiFi</b>, scan this code (or type the address) in a browser, then tap <b>Add to Home Screen</b> for an app icon.</p>
+            <div class="share-row">
+              <div class="qr-box"><img id="qr-img" alt="Scan to open the app" /></div>
+              <div class="share-addr">
+                <div class="addr-label">Address</div>
+                <div class="big-addr" id="big-addr">—</div>
+                <div class="share-btns">
+                  <button id="copy-addr" class="ghost">Copy address</button>
+                  <button id="print-poster" class="ghost">🖨 Print poster</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Venue name</h3>
+            <div class="ah-row" style="margin-top: 10px;">
+              <input type="text" id="venue-name" placeholder="Venue name" maxlength="40" autocomplete="off" />
+              <button id="venue-save" class="ghost">Save</button>
+              <span id="venue-status" class="hint"></span>
+            </div>
+          </div>
+
+          <div class="card accent-card" id="stream-card" hidden>
+            <h3>Venue stream (for Q-SYS)</h3>
+            <p class="hint">Give this address to whoever programs your Q-SYS Core, or test it in VLC:</p>
+            <div id="stream-urls"></div>
           </div>
 
           <div class="card" id="security-card">
@@ -378,6 +375,11 @@
               <label class="ghost restore-label">↩ Restore from file<input type="file" id="restore-file" accept="application/json,.json" hidden /></label>
             </div>
             <button id="admin-relock" class="ghost" style="margin-top:14px">Lock admin</button>
+          </div>
+
+          <div class="card" id="device-card">
+            <h3>This device</h3>
+            <div id="device-info" class="device-info"></div>
           </div>
         </div>
       </section>
