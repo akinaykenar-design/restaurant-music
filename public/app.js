@@ -1367,7 +1367,7 @@ function closeRowMenus() { document.querySelectorAll('.row-menu:not([hidden])').
 document.addEventListener('click', closeRowMenus);
 
 function reloadLibrary() {
-  return api('/api/library').then((lib) => { library = lib.tracks; renderEditor(); renderQueue(); renderHistory(); updateOnboard(); renderScenes(); renderLicensed(); });
+  return api('/api/library').then((lib) => { library = lib.tracks; renderEditor(); renderQueue(); renderHistory(); updateOnboard(); renderScenes(); });
 }
 
 // ---- venue name (editable, shown in the header + poster) -------------------
@@ -1711,87 +1711,20 @@ function setupVenuePlayer() {
 }
 
 // Pick which physical output the box plays out of (3.5mm / HDMI / USB DAC).
-// ---- after-hours licensed music (staff, off-schedule) ----------------------
-// Commercial/licensed tracks staff add for after close. Kept out of the
-// trading-hours rotation on the server; only played via the admin-gated
-// "afterhours" token so they never reach guests.
-function renderLicensed() {
-  const ul = $('licensed-list'); if (!ul) return;
-  const items = library.filter((t) => t.licensed);
-  if (!items.length) { ul.innerHTML = '<li class="hint">No licensed tracks yet — add some above.</li>'; return; }
-  ul.innerHTML = '';
-  items.forEach((t) => {
-    const li = document.createElement('li');
-    const span = document.createElement('span');
-    span.className = 'lic-name';
-    span.textContent = t.title + (t.artist ? ' — ' + t.artist : '');
-    const rm = document.createElement('button');
-    rm.className = 'ghost';
-    rm.textContent = 'Remove';
-    rm.addEventListener('click', () => {
-      if (!confirm('Remove “' + t.title + '” from the box?')) return;
-      fetch('/api/track?name=' + encodeURIComponent(t.file), { method: 'DELETE' })
-        .then((r) => r.json()).then(() => reloadLibrary());
-    });
-    li.appendChild(span);
-    li.appendChild(rm);
-    ul.appendChild(li);
-  });
-}
-
-async function uploadLicensed(files) {
-  const list = Array.from(files || []).filter((f) => /\.(mp3|m4a|aac|ogg|oga|wav|flac|webm)$/i.test(f.name));
-  const st = $('licensed-status');
-  if (!list.length) { if (st) st.textContent = 'Please choose audio files.'; return; }
-  let done = 0, dupes = 0;
-  if (st) st.textContent = 'Adding…';
-  for (const f of list) {
-    try {
-      const r = await fetch('/api/upload?licensed=1&name=' + encodeURIComponent(f.name), { method: 'POST', body: f }).then((x) => x.json());
-      if (r && r.duplicate) dupes += 1; else done += 1;
-      if (st) st.textContent = 'Adding ' + (done + dupes) + '/' + list.length + '…';
-    } catch { /* skip this file */ }
-  }
-  if (st) st.textContent = 'Added ' + done + ' track' + (done === 1 ? '' : 's') + (dupes ? ' · ' + dupes + ' already there (skipped)' : '') + '.';
-  await reloadLibrary();
-}
+// ---- after-hours: hand the room over to Spotify ----------------------------
+// After close, staff switch the Q-SYS to their Spotify input. This just needs
+// to pause Watermans' own player so the two sources don't fight. The manual
+// switch pauses/resumes on the spot; "Switch on automatically after close"
+// lets the server do it by the clock (see the gate in server.js).
 function setupLicensed() {
-  const input = $('licensed-file');
-  if (input) input.addEventListener('change', (e) => { uploadLicensed(e.target.files); input.value = ''; });
-  // dashed dropzone (same as the Library +music box): click / Enter / drag-drop
-  const zone = $('licensed-drop');
-  if (zone && input) {
-    zone.addEventListener('click', (e) => { if (e.target.tagName !== 'INPUT') input.click(); });
-    zone.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); } });
-    ['dragenter', 'dragover'].forEach((ev) => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.add('drag'); }));
-    ['dragleave', 'drop'].forEach((ev) => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.remove('drag'); }));
-    zone.addEventListener('drop', (e) => { uploadLicensed((e.dataTransfer && e.dataTransfer.files) || []); });
-  }
-
-  const play = $('licensed-play');
-  if (play) play.addEventListener('click', () => {
-    const st = $('licensed-status');
-    if (!library.some((t) => t.licensed)) { if (st) st.textContent = 'Add some licensed tracks first.'; return; }
-    if (!confirm('Play licensed music now?\n\nOnly do this AFTER CLOSE — it must not play while guests are in.')) return;
-    venuePost('/api/player/play', { token: 'afterhours', password: adminPass }).then((r) => {
-      if (!r || r.ok === false) { if (st) st.textContent = (r && r.error) || 'Could not start.'; return; }
-      if (st) st.textContent = 'Playing licensed music (after hours).';
-      pollVenueSoon();
-    });
-  });
-
-  const sched = $('licensed-schedule');
-  if (sched) sched.addEventListener('click', () => {
-    venuePost('/api/player/play', { token: 'schedule' }).then(() => {
-      const st = $('licensed-status'); if (st) st.textContent = 'Back on the schedule.';
-      pollVenueSoon();
-    });
-  });
-
-  // ---- after-hours gate: manual switch, or auto by closing time ----
-  const mode = $('ah-mode'), freeze = $('ah-freeze'), times = $('ah-times'), closeT = $('ah-close'), openT = $('ah-open');
+  const mode = $('ah-mode'), freeze = $('ah-freeze'), closeT = $('ah-close'), openT = $('ah-open');
   if (mode && freeze) {
-    mode.addEventListener('change', () => { saveSettings({ afterHoursMode: mode.checked }); updateAhGate(); });
+    mode.addEventListener('change', () => {
+      saveSettings({ afterHoursMode: mode.checked });
+      // Manual switch: pause Watermans (Spotify takes over) or resume it.
+      venuePost('/api/player/pause', { on: mode.checked }).then(() => pollVenueSoon());
+      updateAhGate();
+    });
     freeze.addEventListener('change', () => { saveSettings({ afterHoursFreeze: freeze.checked }); updateAhGate(); });
     if (closeT) closeT.addEventListener('change', () => { saveSettings({ venueCloseTime: closeT.value }); updateAhGate(); });
     if (openT) openT.addEventListener('change', () => { saveSettings({ venueOpenTime: openT.value }); updateAhGate(); });
@@ -1824,8 +1757,8 @@ function updateAhGate() {
   if (openT) openT.value = s.venueOpenTime || '09:00';
   const open = afterHoursGateOpen();
   if (lbl) lbl.textContent = open
-    ? '🟢 On — licensed music can play'
-    : (s.afterHoursFreeze ? '🔴 Off until ' + (s.venueCloseTime || '') + ' (closing time)' : '🔴 Off');
+    ? '🟢 On — Watermans paused (Spotify)'
+    : (s.afterHoursFreeze ? '🔴 Playing until ' + (s.venueCloseTime || '') + ' (closing time)' : '🔴 Playing Watermans');
 }
 
 // ---- after-hours staff mode ------------------------------------------------
@@ -1851,7 +1784,7 @@ function setupAdmin() {
     try { if (adminPass) sessionStorage.setItem('wm-adminpass', adminPass); } catch (e) { /* ignore */ }
     $('admin-lock').hidden = true; $('admin-content').hidden = false;
     const lt = $('admin-lock-toggle'); if (lt) lt.checked = (state.settings.adminLock !== false);
-    renderLicensed();
+    updateAhGate();
   };
   const tryUnlock = () => {
     const password = $('admin-pass').value;

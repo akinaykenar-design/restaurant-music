@@ -1623,8 +1623,9 @@ app.post('/api/player/volume', (req, res) => {
   res.json({ ok: true, volume: level });
 });
 
-app.post('/api/player/pause', (_req, res) => {
-  playerPaused = !playerPaused;
+function setPaused(want) {
+  if (want === playerPaused) return; // already in the requested state
+  playerPaused = want;
   if (playerPaused) {
     // Fade out, then stop. No playerNoAdvance: the exit handler returns early
     // while paused, so there's no advance to suppress (and nothing to leak).
@@ -1633,8 +1634,24 @@ app.post('/api/player/pause', (_req, res) => {
     fadeInNext = true; // ease back in when resuming
     playerPlayCurrent();
   }
+}
+
+app.post('/api/player/pause', (req, res) => {
+  // Explicit {on:true/false} sets the state (used by the after-hours / Spotify
+  // switch so it's idempotent); no body just toggles (Now Playing pause button).
+  const want = req.body && typeof req.body.on === 'boolean' ? req.body.on : !playerPaused;
+  setPaused(want);
   res.json({ ok: true, paused: playerPaused });
 });
+
+// Auto after-hours: when "switch on automatically after close" is on, let the
+// clock pause Watermans (so the Q-SYS Spotify input owns the room) and resume
+// it when the venue re-opens — without anyone needing the browser open.
+setInterval(() => {
+  if (!HEADLESS_PLAYER || playerBroken) return;
+  if (!data.settings.afterHoursFreeze) return;
+  setPaused(afterHoursAllowed()); // gate open = after close = pause our music
+}, 30000);
 
 app.listen(PORT, HOST, () => {
   console.log(`Venue Music running at http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT}`);
