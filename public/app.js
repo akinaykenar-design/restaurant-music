@@ -263,9 +263,19 @@ const vizEq = (() => {
     g.closePath();
   }
 
+  function isLight() {
+    const dt = document.documentElement.getAttribute('data-theme');
+    if (dt === 'light') return true;
+    if (dt === 'dark') return false;
+    return !window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
   function draw() {
     g.clearRect(0, 0, W, H);
-    g.fillStyle = '#0a0a0a'; rr(0, 0, W, H, 9); g.fill(); // near-black panel
+    const light = isLight();
+    // Light theme = a light panel with off-LEDs as pale cells; dark = classic
+    // near-black meter with dim segments.
+    g.fillStyle = light ? '#efe8db' : '#0a0a0a'; rr(0, 0, W, H, 9); g.fill();
+    const UNLIT = light ? [219, 210, 195] : null; // pale "off" cell in light mode
     const padX = W * 0.06, padTop = H * 0.08, padBot = H * 0.08;
     const pitchX = (W - padX * 2) / COLS;
     const barW = pitchX * 0.8;              // wide bars, thin gaps between columns
@@ -280,10 +290,11 @@ const vizEq = (() => {
       for (let r = 0; r < ROWS; r++) {
         const frac = r / (ROWS - 1);
         const on = r < lit;
-        // fixed colour zones: green low, amber mid, red top; unlit = dim version
-        const c = frac < 0.58 ? (on ? [46, 210, 70] : [12, 44, 18])
-          : frac < 0.82 ? (on ? [245, 224, 20] : [44, 40, 4])
-            : (on ? [255, 46, 46] : [52, 12, 12]);
+        // green low, amber mid, red top. Lit colours are deepened a touch in
+        // light mode for contrast; unlit is a pale cell instead of a dim one.
+        const c = frac < 0.58 ? (on ? (light ? [32, 176, 92] : [46, 210, 70]) : (UNLIT || [12, 44, 18]))
+          : frac < 0.82 ? (on ? (light ? [226, 168, 22] : [245, 224, 20]) : (UNLIT || [44, 40, 4]))
+            : (on ? (light ? [216, 62, 52] : [255, 46, 46]) : (UNLIT || [52, 12, 12]));
         const y = baseY - (r + 1) * pitchY + (pitchY - segH) / 2;
         g.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`;
         g.fillRect(x, y, barW, segH);
