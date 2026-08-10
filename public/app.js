@@ -521,16 +521,32 @@ function crossfadeTo(idx, seconds) {
   })(t0);
 }
 
+// Find the next index (stepping by dir) whose file DIFFERS from the current
+// one. The weighted queue repeats liked tracks (3×) and neutral (2×), so the
+// immediate neighbour is frequently the SAME file — without this, a skip would
+// just reload that file and play it from 0:00 (i.e. "restart the track").
+function distinctIndex(fromIdx, dir) {
+  if (!queue.length) return 0;
+  const cur = queue[fromIdx];
+  let i = fromIdx;
+  for (let n = 0; n < queue.length; n++) {
+    i = (i + dir + queue.length) % queue.length;
+    if (queue[i] !== cur) return i;
+  }
+  return (fromIdx + dir + queue.length) % queue.length; // only one distinct track
+}
+
 function beginCrossfade(cf) {
   if (crossing || queue.length < 2) return;
-  crossfadeTo((queueIndex + 1) % queue.length, Math.max(0.1, cf));
+  crossfadeTo(distinctIndex(queueIndex, 1), Math.max(0.1, cf));
 }
 
 function skip(dir) {
   if (venueMode) { venuePost(dir < 0 ? '/api/player/prev' : '/api/player/skip').then(() => pollVenueSoon()); return; }
   if (!queue.length) return;
-  // Quick crossfade to the neighbour (never a hard cut). Works mid-fade too.
-  crossfadeTo((queueIndex + dir + queue.length) % queue.length, 0.7);
+  // Quick crossfade to the next DISTINCT track (never a hard cut, never a
+  // restart). Works mid-fade too.
+  crossfadeTo(distinctIndex(queueIndex, dir), 0.7);
 }
 
 // deck events (wired once)
@@ -545,7 +561,7 @@ decks.forEach((d, idx) => {
   });
   d.addEventListener('ended', () => {
     if (idx !== active || crossing) return;
-    if (queue.length) startTrack((queueIndex + 1) % queue.length, true);
+    if (queue.length) startTrack(distinctIndex(queueIndex, 1), true);
   });
   d.addEventListener('play', () => { vizEq.onPlay(); if (idx === active) setPlayingUI(true); });
   d.addEventListener('pause', () => { if (idx === active && !crossing) setPlayingUI(false); });

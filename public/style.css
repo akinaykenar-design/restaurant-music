@@ -499,11 +499,20 @@ h4 { margin: 0 0 12px; font-size: 0.98rem; display: flex; align-items: center; g
 .block-row .del { width: 42px; height: 42px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--faint); cursor: pointer; flex: none; font-size: 1rem; }
 .block-row .del:hover:not(:disabled) { border-color: var(--play); color: var(--play); }
 .block-row .del:disabled { opacity: 0.3; cursor: not-allowed; }
+/* phones: block name gets its own full-width line so it never clips ("Afternoon") */
+@media (max-width: 480px) {
+  .block-row { flex-wrap: wrap; }
+  .block-row .blk-label { flex: 1 1 100%; }
+  .block-row .blk-time { flex: 1; width: auto; }
+  #schedule-table select { min-width: 96px; }
+}
 
 /* ---------- schedule ---------- */
 .sched-auto { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 4px 0 14px; }
 .sched-auto .hint { margin: 0; }
-.table-wrap { overflow-x: auto; padding: 8px; }
+.table-wrap { overflow-x: auto; padding: 8px; -webkit-overflow-scrolling: touch; }
+/* keep the day label pinned while the block columns scroll sideways */
+#schedule-table tbody th { position: sticky; left: 0; background: var(--surface); z-index: 1; }
 #schedule-table { border-collapse: separate; border-spacing: 6px; width: 100%; }
 #schedule-table th, #schedule-table td { text-align: center; }
 #schedule-table thead th { color: var(--muted); font-weight: 600; font-size: 0.84rem; padding-bottom: 3px; }
