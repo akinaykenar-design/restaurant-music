@@ -28,6 +28,9 @@
   /* the two "vibe" accents, centralised (were scattered hex literals) */
   --chill: #3a8fb0; --chill-deep: #1c4a5c;
   --lively: #d9704e; --lively-deep: #6e2f1c;
+  /* visualiser frame — light in light mode so it doesn't look like a dark box */
+  --viz-frame: linear-gradient(150deg, #eae2d4, #d7ccb7);
+  --viz-shadow: 0 12px 28px -12px rgba(60,50,35,0.28);
 }
 /* dark tokens — applied when the OS is dark (and the user hasn't forced light),
    or when the user manually picks dark via the toggle. */
@@ -41,6 +44,8 @@
     --warn: #a29c94; --warn-tint: #a29c941f; --bad: #ef8377; --bad-tint: #ef83771f;
     --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
     --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 14px 32px -18px rgba(0,0,0,0.6);
+    --viz-frame: linear-gradient(150deg, #2c3238, #14181c);
+    --viz-shadow: 0 14px 34px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
   }
 }
 :root[data-theme='dark'] {
@@ -51,6 +56,8 @@
   --warn: #9ba0a6; --warn-tint: #9ba0a61f; --bad: #ef8377; --bad-tint: #ef83771f;
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
   --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 14px 32px -18px rgba(0,0,0,0.6);
+  --viz-frame: linear-gradient(150deg, #2c3238, #14181c);
+  --viz-shadow: 0 14px 34px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
 }
 
 * { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
@@ -133,10 +140,10 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 .player.has-art::after, .player.has-wash::after { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(130% 100% at 50% 60%, color-mix(in srgb, var(--surface) 55%, transparent) 0%, color-mix(in srgb, var(--surface) 18%, transparent) 72%); }
 .art {
   width: 176px; height: 176px; border-radius: var(--radius-sm);
-  background: linear-gradient(150deg, #2c3238, #14181c);
+  background: var(--viz-frame);
   display: flex; align-items: flex-end; justify-content: center;
   position: relative; overflow: hidden;
-  box-shadow: 0 14px 34px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+  box-shadow: var(--viz-shadow);
 }
 .art::before {
   content: ''; position: absolute; inset: -45%;
