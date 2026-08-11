@@ -166,8 +166,8 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 .ptime { display: flex; justify-content: space-between; margin-top: 7px; font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 
 .np-block { color: var(--warn); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; }
-.np-title { font-size: 1.7rem; margin: 7px 0 3px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; overflow-wrap: break-word; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; min-height: 2.4em; } /* reserve 2 lines so the layout never shifts with title length */
-.np-artist { color: var(--text); font-size: 1rem; font-weight: 600; margin: -2px 0 6px; height: 1.4em; line-height: 1.4em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* fixed single line so the box never resizes between artist / no-artist tracks */
+.np-title { font-size: 1.7rem; margin: 4px 0 2px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.18; overflow-wrap: break-word; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; } /* up to 2 lines; height follows the title so there's no reserved blank line */
+.np-artist { color: var(--text); font-size: 1rem; font-weight: 600; margin: 0 0 4px; height: 1.35em; line-height: 1.35em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* fixed single line so the box never resizes between artist / no-artist tracks */
 .np-sub { color: var(--muted); font-size: 0.92rem; overflow-wrap: break-word; }
 .np-meta { min-width: 0; --ctl: 460px; } /* shrink for long titles; --ctl = shared control width */
 /* Grid children default to min-width:auto (=content width); force 0 so one
@@ -234,8 +234,10 @@ input[type='range']::-moz-range-thumb { width: 28px; height: 28px; border: 3px s
 /* scenes = time blocks (own row); genres = a second, scrollable row below */
 .scenes { display: flex; flex-wrap: wrap; gap: 10px; margin: 32px 0 18px; max-width: var(--ctl, 460px); }
 /* "Browse genres" section heading + a wrapping row (no more cut-off) */
-.genre-head { color: var(--faint); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 10px; max-width: var(--ctl, 460px); }
-.genres { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 6px; max-width: var(--ctl, 460px); }
+.genre-head { color: var(--faint); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 8px; display: block; }
+.genre-pick { display: block; margin: 0 0 6px; max-width: var(--ctl, 460px); }
+.genre-pick select { width: 100%; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 9px; padding: 11px 12px; font: inherit; font-size: 0.92rem; font-weight: 600; cursor: pointer; }
+.genre-pick select:focus { outline: none; border-color: var(--play); }
 .scene { display: inline-flex; align-items: center; gap: 7px; height: 46px; padding: 0 20px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: inherit; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: border-color 0.14s ease, color 0.14s ease, background 0.14s ease; }
 .scene-ic { font-size: 1.05rem; }
 .scene:hover:not(:disabled) { border-color: var(--play); }
@@ -680,6 +682,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visi
   .np-sub { font-size: 1rem; margin-top: 2px; }
   .np-block { font-size: 0.78rem; }
   .lib-filter, .lib-search, #schedule-table select, .ah-row input, .ah-row select,
+  .genre-pick select,
   .block-row input, .pl-new input, #add-playlist, #new-playlist { padding: 13px 14px; font-size: 0.98rem; }
   #playlist-names li { padding: 14px 14px; }
   .more-opts > summary { font-size: 0.95rem; padding: 10px 0; }

@@ -776,27 +776,22 @@ function renderScenes() {
   // "Play all" reflects the same "all" state as the All-genres chip.
   const pa = $('lib-playall'); if (pa) pa.classList.toggle('on', activeScene === 'all');
 
-  // genre quick-picks — on their own row so the time blocks stay uncluttered.
-  // Leads with "All genres" to play everything / reset the genre narrowing.
-  const gbox = $('genres');
-  if (gbox) {
-    gbox.innerHTML = '';
-    const all = document.createElement('button');
-    all.className = 'scene scene-genre' + (activeScene === 'all' ? ' on' : '');
-    all.title = 'Play everything';
-    all.textContent = 'All genres';
-    all.addEventListener('click', () => { playVibeAll(); activeScene = 'all'; renderScenes(); });
-    gbox.appendChild(all);
+  // genre quick-pick — a single dropdown so the time blocks stay uncluttered.
+  // "All genres" plays everything / resets the genre narrowing.
+  const gsel = $('genre-select');
+  if (gsel) {
+    const escg = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const genres = [...new Set(library.filter((t) => !t.licensed).map((t) => t.genre).filter(Boolean))].sort();
-    genres.forEach((g) => {
-      const b = document.createElement('button');
-      b.className = 'scene scene-genre' + (activeScene === 'genre:' + g ? ' on' : '');
-      b.title = 'Play ' + g + ' tracks now';
-      b.innerHTML = '<span class="scene-ic">♪</span>';
-      b.appendChild(document.createTextNode(g));
-      b.addEventListener('click', () => playGenre(g));
-      gbox.appendChild(b);
-    });
+    const cur = activeScene === 'all' ? 'all'
+      : (activeScene && activeScene.slice(0, 6) === 'genre:' ? activeScene : '');
+    gsel.innerHTML = '<option value="">Pick a genre…</option><option value="all">All genres</option>'
+      + genres.map((g) => `<option value="genre:${escg(g)}">${escg(g)}</option>`).join('');
+    gsel.value = cur;
+    gsel.onchange = () => {
+      const v = gsel.value;
+      if (v === 'all') { playVibeAll(); activeScene = 'all'; renderScenes(); }
+      else if (v.slice(0, 6) === 'genre:') playGenre(v.slice(6));
+    };
   }
 }
 
