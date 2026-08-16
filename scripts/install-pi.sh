@@ -47,6 +47,9 @@ Environment=PLAYER=1
 ExecStart=$(command -v node) $APP_DIR/server.js
 Restart=always
 RestartSec=3
+# SIGTERM goes to node only (not mpg123), so the app can mute the mixer before
+# stopping the player — otherwise restarts thud/pop through the venue speakers.
+KillMode=mixed
 
 [Install]
 WantedBy=multi-user.target

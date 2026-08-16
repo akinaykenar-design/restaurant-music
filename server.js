@@ -67,10 +67,11 @@ function defaultData() {
       audioDevice: '', audioCard: null, audioControl: null,
       afterHoursPassword: 'staff', // change it in the unlocked panel
       adminLock: true, // require the password to open Admin (staff can turn off)
-      // After-hours music gate. afterHoursMode is the manual on/off switch;
-      // when afterHoursFreeze is on, the gate follows the clock (closed window)
-      // instead of the switch. Licensed music only plays when the gate is open.
-      afterHoursMode: false, afterHoursFreeze: false,
+      // After-hours Spotify handover. spotifyMode is the manual pause switch;
+      // spotifyAutoSwitch makes the clock pause/resume around the closed window.
+      // NOTE: deliberately NEW keys (old afterHoursMode/afterHoursFreeze data
+      // from the removed licensed-uploads feature must never arm auto-pausing).
+      spotifyMode: false, spotifyAutoSwitch: false,
       venueCloseTime: '22:00', venueOpenTime: '09:00',
     },
   };
@@ -794,11 +795,11 @@ app.put('/api/settings', (req, res) => {
 function adminRequired() {
   return data.settings.adminLock !== false && !!data.settings.afterHoursPassword;
 }
-// Is the after-hours gate open? Either the manual switch, or (if the time-lock
+// Is the Spotify handover active? Either the manual switch, or (if auto-switch
 // is on) the current time is inside the closed window (close → open).
 function afterHoursAllowed() {
   const s = data.settings;
-  if (s.afterHoursFreeze) {
+  if (s.spotifyAutoSwitch) {
     const toMin = (t) => { const m = /^(\d{1,2}):(\d{2})$/.exec(t || ''); return m ? (+m[1]) * 60 + (+m[2]) : null; };
     const close = toMin(s.venueCloseTime), open = toMin(s.venueOpenTime);
     if (close == null || open == null || close === open) return true;
@@ -806,7 +807,7 @@ function afterHoursAllowed() {
     const cur = now.getHours() * 60 + now.getMinutes();
     return close < open ? (cur >= close && cur < open) : (cur >= close || cur < open);
   }
-  return !!s.afterHoursMode;
+  return !!s.spotifyMode;
 }
 app.post('/api/afterhours/unlock', (req, res) => {
   if (!adminRequired()) return res.json({ ok: true });
@@ -1647,10 +1648,17 @@ app.post('/api/player/pause', (req, res) => {
 // Auto after-hours: when "switch on automatically after close" is on, let the
 // clock pause Watermans (so the Q-SYS Spotify input owns the room) and resume
 // it when the venue re-opens — without anyone needing the browser open.
+// Only act on TRANSITIONS of the gate (closed→open / open→closed): a manual
+// play or pause in between must stick, never be fought every tick.
+let lastSpotifyGate = null;
 setInterval(() => {
   if (!HEADLESS_PLAYER || playerBroken) return;
-  if (!data.settings.afterHoursFreeze) return;
-  setPaused(afterHoursAllowed()); // gate open = after close = pause our music
+  if (!data.settings.spotifyAutoSwitch) { lastSpotifyGate = null; return; }
+  const gate = afterHoursAllowed();
+  if (gate !== lastSpotifyGate) {
+    if (lastSpotifyGate != null) setPaused(gate); // skip the first tick: observe, don't enforce
+    lastSpotifyGate = gate;
+  }
 }, 30000);
 
 app.listen(PORT, HOST, () => {
@@ -1663,8 +1671,18 @@ app.listen(PORT, HOST, () => {
   startBroadcast();
   if (HEADLESS_PLAYER) {
     console.log('Headless player ON — playing scheduled music out this device.');
-    applyVenueVolume(venueTargetVol());
     station.refresh(true);
+    fadeInNext = true; // ease in from silence on boot — no full-volume thud
     playerPlayCurrent();
   }
 });
+
+// On service stop/restart, mute the output BEFORE killing mpg123 so the hard
+// cut doesn't thud through the venue speakers.
+function quietExit() {
+  try { amixerSet(0); } catch { /* best effort */ }
+  try { if (playerProc) { playerNoAdvance = true; playerProc.kill('SIGKILL'); } } catch { /* already gone */ }
+  setTimeout(() => process.exit(0), 120); // give amixer a beat to land
+}
+process.on('SIGTERM', quietExit);
+process.on('SIGINT', quietExit);

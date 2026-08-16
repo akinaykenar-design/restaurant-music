@@ -1715,12 +1715,18 @@ function setupLicensed() {
   const mode = $('ah-mode'), freeze = $('ah-freeze'), closeT = $('ah-close'), openT = $('ah-open');
   if (mode && freeze) {
     mode.addEventListener('change', () => {
-      saveSettings({ afterHoursMode: mode.checked });
+      saveSettings({ spotifyMode: mode.checked });
       // Manual switch: pause Watermans (Spotify takes over) or resume it.
       venuePost('/api/player/pause', { on: mode.checked }).then(() => pollVenueSoon());
       updateAhGate();
     });
-    freeze.addEventListener('change', () => { saveSettings({ afterHoursFreeze: freeze.checked }); updateAhGate(); });
+    freeze.addEventListener('change', () => {
+      saveSettings({ spotifyAutoSwitch: freeze.checked });
+      // Apply immediately: ticking inside the closed window pauses now; unticking
+      // always brings the music back (don't wait for the server's next tick).
+      venuePost('/api/player/pause', { on: freeze.checked ? afterHoursGateOpen() : false }).then(() => pollVenueSoon());
+      updateAhGate();
+    });
     if (closeT) closeT.addEventListener('change', () => { saveSettings({ venueCloseTime: closeT.value }); updateAhGate(); });
     if (openT) openT.addEventListener('change', () => { saveSettings({ venueOpenTime: openT.value }); updateAhGate(); });
     updateAhGate();
@@ -1731,29 +1737,29 @@ function setupLicensed() {
 // Mirror the server's gate logic so the switch/label update live.
 function afterHoursGateOpen() {
   const s = state.settings || {};
-  if (s.afterHoursFreeze) {
+  if (s.spotifyAutoSwitch) {
     const toMin = (t) => { const m = /^(\d{1,2}):(\d{2})$/.exec(t || ''); return m ? (+m[1]) * 60 + (+m[2]) : null; };
     const c = toMin(s.venueCloseTime), o = toMin(s.venueOpenTime);
     if (c == null || o == null || c === o) return true;
     const now = new Date(); const cur = now.getHours() * 60 + now.getMinutes();
     return c < o ? (cur >= c && cur < o) : (cur >= c || cur < o);
   }
-  return !!s.afterHoursMode;
+  return !!s.spotifyMode;
 }
 function updateAhGate() {
   const s = state.settings || {};
   const mode = $('ah-mode'), freeze = $('ah-freeze'), times = $('ah-times'), closeT = $('ah-close'), openT = $('ah-open'), lbl = $('ah-gate-state');
   if (!mode || !freeze) return;
-  freeze.checked = !!s.afterHoursFreeze;
-  mode.checked = !!s.afterHoursMode;
-  mode.disabled = !!s.afterHoursFreeze; // auto mode controls it
-  if (times) times.hidden = !s.afterHoursFreeze;
+  freeze.checked = !!s.spotifyAutoSwitch;
+  mode.checked = !!s.spotifyMode;
+  mode.disabled = !!s.spotifyAutoSwitch; // auto mode controls it
+  if (times) times.hidden = !s.spotifyAutoSwitch;
   if (closeT) closeT.value = s.venueCloseTime || '22:00';
   if (openT) openT.value = s.venueOpenTime || '09:00';
   const open = afterHoursGateOpen();
   if (lbl) lbl.textContent = open
     ? '🟢 On — Watermans paused (Spotify)'
-    : (s.afterHoursFreeze ? '🔴 Playing until ' + (s.venueCloseTime || '') + ' (closing time)' : '🔴 Playing Watermans');
+    : (s.spotifyAutoSwitch ? '🔴 Playing until ' + (s.venueCloseTime || '') + ' (closing time)' : '🔴 Playing Watermans');
 }
 
 // ---- after-hours staff mode ------------------------------------------------
