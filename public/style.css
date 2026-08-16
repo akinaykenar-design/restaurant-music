@@ -200,6 +200,7 @@ main { max-width: 980px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 40px) 60
 #dislike.on { color: var(--bad); border-color: var(--bad); background: var(--bad-tint); }
 
 .vol-row { display: flex; align-items: center; gap: 14px; max-width: var(--ctl, 460px); margin: 34px 0 14px; }
+.vol-row[hidden] { display: none; } /* venue mode: volume lives on the Q-SYS */
 .vic { width: 24px; height: 24px; fill: var(--muted); flex: none; }
 input[type='range'] { -webkit-appearance: none; appearance: none; height: 12px; border-radius: 999px; background: var(--border-strong); outline: none; flex: 1; }
 input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 3px solid var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,0.25); }

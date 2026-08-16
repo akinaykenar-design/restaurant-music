@@ -592,6 +592,8 @@ function updateVenueUI(s) {
   }
   // Highlight the active scene button to match the box.
   activeScene = s.onSchedule ? null : activeScene;
+  // Mirror the box's real pause state on the Spotify switch (it IS a pause).
+  const sw = $('spotify-switch'); if (sw) sw.checked = !!s.paused;
 }
 
 function pollVenueOnce() {
@@ -657,10 +659,32 @@ function startRoomAudio() {
   } catch (e) { return false; }
 }
 
+// Bring the analysis stream back to life after the tab was backgrounded.
+function resumeRoomAudio() {
+  if (!venueMode) return;
+  const ctx = vizEq.ensureCtx();
+  if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {});
+  if (roomStream) { if (roomStream.paused) roomStream.play().catch(() => {}); }
+  else if (!roomStarted) startRoomAudio();
+}
+
 // "Where the music plays" (Admin) — switch between the venue box driving your
 // sound system (default) and this browser playing locally (for testing away
 // from the venue). Per-device, remembered here; switching reloads so playback
 // starts cleanly in the chosen mode.
+// Manual Spotify handover: ONE switch, no clock, no stored setting. It's a
+// remote pause of the venue player — the checkbox mirrors the box's real
+// paused state on every poll, and flipping it posts an explicit pause/resume.
+// The server never touches it on its own, so it can't silence the room by itself.
+function setupSpotifySwitch(serverHeadless) {
+  const card = $('spotify-card'); if (!card) return;
+  if (!serverHeadless) { card.hidden = true; return; } // no venue box → nothing to pause
+  const sw = $('spotify-switch');
+  if (sw) sw.addEventListener('change', () => {
+    venuePost('/api/player/pause', { on: sw.checked }).then(() => pollVenueSoon());
+  });
+}
+
 function setupPlayHere(serverHeadless, playMode) {
   const wrap = $('playmode-switch'); if (!wrap) return;
   if (!serverHeadless) { wrap.hidden = true; return; } // no venue box → nothing to switch
@@ -1891,14 +1915,41 @@ async function boot() {
   try { playMode = localStorage.getItem('wm-playmode') || 'venue'; } catch (e) { /* ignore */ }
   venueMode = serverHeadless && playMode !== 'device';
   setupPlayHere(serverHeadless, playMode);
+  setupSpotifySwitch(serverHeadless);
 
   if (venueMode) {
     venuePollTimer = setTimeout(pollVenue, 3000);
+    // Volume lives on the Q-SYS — the Pi runs at a fixed output level, so no
+    // slider here (staff adjust loudness from the Q-SYS app, one knob only).
+    const vr = document.querySelector('.vol-row'); if (vr) vr.hidden = true;
     // Feed the visualiser the REAL room audio. Browsers require a user gesture
     // before audio can start, so arm it on the first tap/keypress.
     const armRoomViz = () => { startRoomAudio(); };
     window.addEventListener('pointerdown', armRoomViz, { once: true });
     window.addEventListener('keydown', armRoomViz, { once: true });
+    // Phones freeze background tabs: timers stall, the analysis stream gets
+    // paused or discarded, and the page comes back stale ("stops updating").
+    // On every return to the foreground, refresh state and revive the stream;
+    // a watchdog also rebuilds the stream if its clock stops moving.
+    const revive = () => { pollVenueOnce(); resumeRoomAudio(); };
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') revive(); });
+    window.addEventListener('pageshow', revive);
+    window.addEventListener('focus', revive);
+    let lastStreamT = 0, lastStreamStamp = 0;
+    setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      if (!roomStream || !roomStarted) return;
+      const t = roomStream.currentTime;
+      const now = Date.now();
+      if (t !== lastStreamT) { lastStreamT = t; lastStreamStamp = now; return; }
+      if (lastStreamStamp && now - lastStreamStamp > 12000) { // stalled >12s — rebuild
+        lastStreamStamp = now;
+        roomStarted = false;
+        try { roomStream.pause(); } catch (e) { /* ignore */ }
+        roomStream = null;
+        startRoomAudio();
+      }
+    }, 4000);
   } else {
     const pb = $('pbar'); if (pb) pb.classList.add('seekable'); // scrubbing OK when playing on this device
     applySchedule(true);
