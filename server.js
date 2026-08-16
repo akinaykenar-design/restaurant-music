@@ -1338,9 +1338,16 @@ const station = {
 
 const streamClients = new Set();
 
+// Bumped whenever the queue JUMPS (skip / prev / play-token): the pump abandons
+// the file it's mid-way through and restarts on the new current track, so the
+// stream (visualiser + any Q-SYS stream input) follows what the room hears.
+let streamGen = 0;
+function streamFollowQueue() { streamGen++; }
+
 function startBroadcast() {
   station.refresh(true);
   (function playNext() {
+    const myGen = streamGen;
     const file = station.current();
     if (!file) {
       setTimeout(() => { station.refresh(true); playNext(); }, 1000);
@@ -1358,7 +1365,18 @@ function startBroadcast() {
     const interval = (CHUNK / byteRate) * 1000; // pace at real-time
     let off = 0;
     (function pump() {
+      if (myGen !== streamGen) return playNext(); // a skip moved the queue — follow it
       if (off >= audio.length) {
+        // End of file. When the box player (mpg123) is running, IT owns the
+        // queue — advancing here too would double-step it and desync the
+        // stream from the room. Wait briefly for its advance, then follow.
+        if (HEADLESS_PLAYER && !playerBroken) {
+          let waited = 0;
+          return (function waitNext() {
+            if (myGen !== streamGen || station.current() !== file || (waited += 250) > 8000) return playNext();
+            setTimeout(waitNext, 250);
+          })();
+        }
         station.advance();
         return playNext();
       }
@@ -1573,12 +1591,14 @@ app.post('/api/player/skip', (_req, res) => {
     station.advance();
     playerFadeRestart();
   }
+  streamFollowQueue();
   res.json({ ok: true, track: station.current() || null });
 });
 
 app.post('/api/player/prev', (_req, res) => {
   station.prev();
   playerFadeRestart();
+  streamFollowQueue();
   res.json({ ok: true, track: station.current() || null });
 });
 
@@ -1602,6 +1622,7 @@ app.post('/api/player/play', (req, res) => {
     station.playFiles(files, label);
   }
   playerFadeRestart();
+  streamFollowQueue();
   res.json({ ok: true, track: station.current() || null, mode: station.override ? station.override.label : 'Schedule' });
 });
 

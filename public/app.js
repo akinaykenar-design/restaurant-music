@@ -621,6 +621,10 @@ let roomStarted = false;
 
 // Feed the visualiser the real room audio (the box's /stream), analysed only —
 // never wired to this device's speakers, so it stays silent here.
+// NOTE: the element must NOT be muted — muting an element also silences its
+// MediaElementSource (the analyser would read pure zeros = flat bars). Silence
+// on this device comes from the graph instead: source → analyser, with no
+// connection to the speakers.
 function startRoomAudio() {
   if (roomStarted) return true;
   const ctx = vizEq.ensureCtx();
@@ -628,14 +632,25 @@ function startRoomAudio() {
   try {
     roomStream = new Audio('/stream?_=' + Date.now());
     roomStream.preload = 'auto';
-    roomStream.muted = true; // analysis only — no sound out of this device
-    const src = ctx.createMediaElementSource(roomStream);
+    const src = ctx.createMediaElementSource(roomStream); // detaches element from speakers
     const a = ctx.createAnalyser();
     a.fftSize = 512;
     a.smoothingTimeConstant = 0.6;
-    src.connect(a);                       // analysis path (not wired to speakers)
+    src.connect(a);                       // analysis path only — nothing reaches output
     vizEq.setAnalyser(a);                 // meter now reads the real room spectrum
-    roomStream.play().catch(() => {});
+    // If the stream drops (box restarted, wifi blip), rebuild it after a beat.
+    const retry = () => {
+      if (!roomStarted) return;
+      roomStarted = false;
+      try { roomStream.pause(); } catch (e) { /* ignore */ }
+      roomStream = null;
+      setTimeout(() => { startRoomAudio(); }, 4000);
+    };
+    ['error', 'ended', 'stalled'].forEach((ev) => roomStream.addEventListener(ev, retry));
+    roomStream.play().catch(() => { // autoplay refused — re-arm on the next tap
+      roomStarted = false;
+      window.addEventListener('pointerdown', () => startRoomAudio(), { once: true });
+    });
     if (ctx.state === 'suspended') ctx.resume().catch(() => {});
     roomStarted = true;
     return true;
