@@ -1542,10 +1542,13 @@ function playerFadeRestart() {
   fadeThen(() => { fadeInNext = true; playerNoAdvance = true; playerProc.kill('SIGTERM'); });
 }
 
+const APP_VERSION = 'r16b-no-autopause'; // bump when debugging deploys
+
 app.get('/api/player/state', (_req, res) => {
   const track = station.current() || null;
   const info = trackInfo(track);
   res.json({
+    version: APP_VERSION,
     enabled: HEADLESS_PLAYER,
     broken: playerBroken,
     paused: playerPaused,
@@ -1645,6 +1648,9 @@ app.listen(PORT, HOST, () => {
     station.refresh(true);
     fadeInNext = true; // ease in from silence on boot — no full-volume thud
     playerPlayCurrent();
+    // Failsafe: whatever happened to the fade-in, make sure the hardware mixer
+    // lands at the venue level shortly after boot — never stuck muted.
+    setTimeout(() => applyVenueVolume(venueTargetVol()), 3000);
   }
 });
 
