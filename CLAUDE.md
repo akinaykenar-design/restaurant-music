@@ -8,7 +8,8 @@
 # The venue Pi (Watermans Music box)
 
 Claude has NO access to the Pi — it's on the venue LAN at the restaurant
-(Bentley, Perth). The user runs all commands on it and pastes output back.
+(Sydney — timezone Australia/Sydney). The user runs all commands on it and
+pastes output back.
 
 - App runs as a systemd service: `watermans-music`, port **3100**, repo at
   `~/restaurant-music` on the Pi.
