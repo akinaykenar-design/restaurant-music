@@ -1,0 +1,12 @@
+{
+  "name": "Watermans Music",
+  "short_name": "Watermans",
+  "description": "Scheduled background music for the venue.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f4f5f7",
+  "theme_color": "#10917b",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

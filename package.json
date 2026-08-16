@@ -1,0 +1,17 @@
+{
+  "name": "restaurant-music",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Scheduled background music for restaurants and venues, using royalty-free tracks you supply.",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "music": "node scripts/generate-music.js",
+    "tones": "node scripts/generate-tones.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "qrcode-generator": "^2.0.4"
+  }
+}

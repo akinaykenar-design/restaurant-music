@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Watermans Music</title>
+    <meta name="theme-color" content="#0d1210" />
+    <link rel="icon" href="icon.svg" />
+    <link rel="apple-touch-icon" href="icon.svg" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Watermans Music" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 100 100" aria-hidden="true">
+          <rect width="100" height="100" rx="23" fill="#10917b" />
+          <rect x="21" y="30" width="8" height="40" rx="4" fill="#fff" />
+          <rect x="71" y="30" width="8" height="40" rx="4" fill="#fff" />
+          <circle cx="50" cy="50" r="15.5" fill="none" stroke="#ff8a34" stroke-width="8" />
+        </svg>
+        <div class="brand-text">
+          <span class="brand-name" id="brand-name">Watermans</span>
+          <span class="brand-sub">MUSIC</span>
+        </div>
+      </div>
+      <nav class="tabs">
+        <button class="tab active" data-tab="now">Now Playing</button>
+        <button class="tab" data-tab="playlists">Library</button>
+        <button class="tab" data-tab="schedule">Schedule</button>
+        <button class="tab" data-tab="admin">Admin</button>
+      </nav>
+      <div class="topbar-actions">
+        <button id="theme" class="lockbtn" title="Toggle dark / light" aria-label="Toggle dark or light mode">
+          <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18V3z"/></svg>
+        </button>
+        <button id="header-power" class="lockbtn" title="Shut down the box" aria-label="Shut down the box">
+          <svg viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17-1.42 1.42A6.92 6.92 0 0 1 19 12a7 7 0 0 1-14 0 6.92 6.92 0 0 1 2.59-5.41L6.17 5.17A9 9 0 1 0 21 12a8.94 8.94 0 0 0-3.17-6.83z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <!-- ===== NOW PLAYING ===== -->
+      <section id="tab-now" class="tab-panel active">
+        <div class="player">
+          <div class="player-bg" id="player-bg" aria-hidden="true"></div>
+          <div class="art" id="art">
+            <canvas class="viz-eq" id="viz-eq" aria-hidden="true"></canvas>
+          </div>
+          <div class="np-meta">
+            <div class="np-block" id="now-block">—</div>
+            <h2 class="np-title" id="now-title">Nothing playing</h2>
+            <div class="np-artist" id="now-artist"></div>
+            <div class="np-sub" id="now-sub">Add music on the Library tab to begin</div>
+
+            <div class="progress">
+              <div class="pbar" id="pbar"><div class="pfill" id="pfill"></div></div>
+              <div class="ptime"><span id="t-cur">0:00</span><span id="t-dur">0:00</span></div>
+            </div>
+
+            <div class="transport">
+              <button id="dislike" class="rate rate-ban" title="Ban — never play this track again" aria-label="Ban track">
+                <svg viewBox="0 0 24 24"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg>
+              </button>
+              <button id="prev" class="tbtn" title="Previous" aria-label="Previous track">
+                <svg viewBox="0 0 24 24"><path d="M6 5v14a1 1 0 0 0 1.5.87L18 12 7.5 4.13A1 1 0 0 0 6 5z" transform="scale(-1,1) translate(-24,0)"/><rect x="5" y="5" width="2.4" height="14" rx="1"/></svg>
+              </button>
+              <button id="playpause" class="play" title="Play / Pause" aria-label="Play or pause">
+                <svg class="ic-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg class="ic-pause" viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+              </button>
+              <button id="next" class="tbtn" title="Skip" aria-label="Skip track">
+                <svg viewBox="0 0 24 24"><path d="M6 5v14a1 1 0 0 0 1.5.87L18 12 7.5 4.13A1 1 0 0 0 6 5z"/><rect x="16.6" y="5" width="2.4" height="14" rx="1"/></svg>
+              </button>
+              <button id="like" class="rate rate-like" title="Like — play more often" aria-label="Like track">
+                <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              </button>
+            </div>
+
+            <div class="scenes" id="scenes" aria-label="Time blocks for the current crowd"></div>
+            <label class="genre-pick">
+              <span class="genre-head">Browse genres</span>
+              <select id="genre-select" aria-label="Play a genre now"></select>
+            </label>
+
+            <div class="vol-row">
+              <button id="mute" class="mutebtn" title="Mute" aria-label="Mute">
+                <svg class="vic" id="vic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 5V4L8 9H4z"/></svg>
+              </button>
+              <input type="range" id="volume" min="0" max="1" step="0.01" aria-label="Volume" />
+            </div>
+
+            <div class="toggles">
+              <button id="lib-playall" class="modebtn" type="button" title="Play your whole library"><span class="modebtn-txt">▶ Play all</span></button>
+              <button id="shuffle-btn" class="modebtn" type="button" aria-pressed="true" title="Shuffle">
+                <svg class="ic-shuffle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+                <svg class="ic-order" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3.5" y1="6" x2="3.52" y2="6"/><line x1="3.5" y1="12" x2="3.52" y2="12"/><line x1="3.5" y1="18" x2="3.52" y2="18"/></svg>
+                <span class="modebtn-txt">Shuffle</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card onboard" id="onboard" hidden>
+          <h3>Get started</h3>
+          <ol class="steps">
+            <li>Open the <b>Library</b> tab and drop in some MP3s — see <code>MUSIC-LIBRARY.md</code> for free, venue-safe tracks.</li>
+            <li>Create a <b>Lunch</b> and a <b>Dinner</b> playlist, add tracks with <b>+</b>.</li>
+            <li>Set them on the <b>Schedule</b> tab — the music switches automatically through the day.</li>
+          </ol>
+        </div>
+
+      </section>
+
+      <!-- ===== LIBRARY ===== -->
+      <section id="tab-playlists" class="tab-panel">
+        <div class="lib-easy">
+
+          <div class="card lib-steps">
+            <h3>Add music</h3>
+            <div id="dropzone" class="dropzone" role="button" tabindex="0" title="Drop music here, or click to add files">
+              <svg class="dz-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4m0 0 4 4m-4-4-4 4"/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg>
+              <input type="file" id="file-input" accept="audio/*,.mp3,.m4a,.aac,.ogg,.wav,.flac" multiple hidden />
+              <input type="file" id="folder-input" webkitdirectory directory multiple hidden />
+              <div id="upload-status" class="upload-status"></div>
+            </div>
+            <div class="get-music">
+              <span class="get-lead">Need more? Free, venue-safe sources — download, then drop above:</span>
+              <div class="get-btns">
+                <a class="ghost" href="https://pixabay.com/music/search/deep%20house/" target="_blank" rel="noopener">Pixabay</a>
+                <a class="ghost" href="https://archive.org/details/netlabels?query=downtempo" target="_blank" rel="noopener">Archive.org</a>
+                <a class="ghost" href="https://freemusicarchive.org/genre/Electronic/" target="_blank" rel="noopener">Free Music Archive</a>
+                <a class="ghost" href="https://www.chosic.com/free-music/chill/" target="_blank" rel="noopener">Chosic</a>
+                <a class="ghost" href="https://kahvi.org/" target="_blank" rel="noopener">Kahvi</a>
+                <a class="ghost" href="https://ektoplazm.com/" target="_blank" rel="noopener">Ektoplazm</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="card lib-main-card">
+            <div class="lib-main-head">
+              <h3>Your music <span class="count" id="lib-count">0</span></h3>
+            </div>
+            <input id="lib-search" class="lib-search" type="text" placeholder="Search" />
+            <div class="lib-tools">
+              <select id="lib-genre" class="lib-filter" title="Filter by genre"><option value="">All genres</option></select>
+            </div>
+            <div id="lib-selbar" class="lib-selbar" hidden>
+              <span id="lib-selcount">0 selected</span>
+              <span class="selbar-actions">
+                <button id="lib-selgenre" class="ghost">♪ Set genre</button>
+                <button id="lib-selban" class="ghost">⊘ Ban</button>
+                <button id="lib-seldel" class="ghost del">Delete</button>
+                <button id="lib-selcancel" class="ghost">Cancel</button>
+              </span>
+            </div>
+            <div class="lib-colhead" id="lib-colhead">
+              <span class="colh-art"></span>
+              <button class="colh" data-sort="track">Track</button>
+              <button class="colh" data-sort="artist">Artist</button>
+              <button class="colh" data-sort="genre">Genre</button>
+              <span class="colh-acts"></span>
+            </div>
+            <ul id="lib-tracks" class="tracklist tracklist-cols"></ul>
+          </div>
+
+          <details class="lib-advanced">
+            <summary>Advanced — build a custom playlist by hand</summary>
+            <p class="hint" style="margin:10px 0 14px">Only if you want a specific hand-picked set (e.g. a Christmas playlist). Pick or create a playlist, then use the <b>+</b> on any track above to add it.</p>
+            <div class="pl-layout">
+              <aside class="pl-side card">
+                <h3>Playlists</h3>
+                <ul id="playlist-names"></ul>
+                <div class="pl-new">
+                  <input id="new-playlist" placeholder="New playlist name" />
+                  <button id="add-playlist">Add</button>
+                </div>
+                <button id="auto-vibe" class="ghost auto-vibe" title="Group analysed tracks into Chill / Lively playlists">✨ Build vibe playlists</button>
+                <button id="analyze-btn" class="ghost" title="Listen to each track and tag its tempo &amp; energy" style="width:100%;margin-top:8px">✨ Analyse audio only</button>
+              </aside>
+              <div class="pl-main">
+                <div class="card">
+                  <h3 id="editing-name">Select a playlist</h3>
+                  <button id="add-all" class="ghost add-all" disabled>+ Add all shown to playlist</button>
+                  <ul id="pl-tracks" class="tracklist"></ul>
+                </div>
+              </div>
+            </div>
+          </details>
+
+        </div>
+      </section>
+
+      <!-- ===== SCHEDULE ===== -->
+      <section id="tab-schedule" class="tab-panel">
+        <div class="card" style="margin-bottom:16px">
+          <h3>Time blocks</h3>
+          <div id="blocks-editor" class="blocks-editor"></div>
+          <button id="add-block" class="ghost" style="margin-top:10px">+ Add time block</button>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <h3>Fill the week automatically</h3>
+          <button id="auto-schedule" class="auto-all-btn">✨ Auto-schedule<small>Sorts your music by style, chill by day and livelier at dinner</small></button>
+          <div id="sched-status" class="upload-status"></div>
+        </div>
+        <div class="card">
+          <h3>Or set the week by hand</h3>
+          <div class="table-wrap">
+            <table id="schedule-table"></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== ADMIN (password-gated) ===== -->
+      <section id="tab-admin" class="tab-panel">
+        <div id="admin-lock" class="card admin-lock" hidden>
+          <h3>🔒 Admin — password required</h3>
+          <div class="ah-row">
+            <input type="text" id="admin-pass" class="maskpw" placeholder="Admin password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" name="wm-admin-code" data-lpignore="true" data-1p-ignore data-form-type="other" />
+            <button id="admin-unlock" class="warnbtn">Unlock</button>
+          </div>
+        </div>
+
+        <div id="admin-content" hidden>
+
+          <!-- Admin cards, ordered most-used → least-used -->
+
+          <div class="card" id="update-card">
+            <h3>App updates</h3>
+            <div class="ah-row">
+              <button id="app-update" class="ghost">⤓ Update</button>
+              <span id="update-status" class="upload-status"></span>
+            </div>
+          </div>
+
+          <div class="card accent-card" id="player-card" hidden>
+            <h3>Output</h3>
+            <div class="ah-row" id="playmode-switch">
+              <button class="ghost" id="pm-venue" type="button">Venue</button>
+              <button class="ghost" id="pm-device" type="button">Device</button>
+            </div>
+          </div>
+
+          <div class="card" id="power-card">
+            <h3>Power</h3>
+            <div class="ah-row">
+              <button id="power-restart" class="ghost">↻ Restart</button>
+              <button id="power-off" class="ghost">⏻ Shut down</button>
+            </div>
+            <div id="power-status" class="upload-status"></div>
+          </div>
+
+          <div class="card" id="spotify-card">
+            <h3>Spotify (after close)</h3>
+            <p class="hint">Pauses Watermans so the Q-SYS Spotify input has the room. Flip it back off to resume the schedule.</p>
+            <label class="ah-toggle"><input type="checkbox" id="spotify-switch" /> <span>Spotify mode — pause Watermans</span></label>
+          </div>
+
+
+          <div class="card" id="playback-card">
+            <h3>Playback settings</h3>
+            <div class="playback-row">
+              <label class="chip range"><span>Crossfade</span>
+                <input type="range" id="crossfade" min="0" max="12" step="1" />
+                <b id="cf-val">4s</b>
+              </label>
+              <label class="chip"><span>Auto-stop in</span>
+                <select id="sleep" aria-label="Auto-stop countdown">
+                  <option value="0">Off</option>
+                  <option value="30">30 min</option>
+                  <option value="60">1 hour</option>
+                  <option value="90">1½ hours</option>
+                  <option value="120">2 hours</option>
+                </select>
+              </label>
+              <label class="chip"><span>Stop at</span>
+                <input type="time" id="stop-at" aria-label="Stop at clock time" />
+              </label>
+            </div>
+          </div>
+
+          <div class="card share-card" id="share-card" hidden>
+            <h3>Open on staff phones &amp; iPads</h3>
+            <p class="hint">Scan on the <b>same WiFi</b>.</p>
+            <div class="share-row">
+              <div class="qr-box"><img id="qr-img" alt="Scan to open the app" /></div>
+              <div class="share-addr">
+                <div class="addr-label">Address</div>
+                <div class="big-addr" id="big-addr">—</div>
+                <div class="share-btns">
+                  <button id="copy-addr" class="ghost">Copy address</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Venue name</h3>
+            <div class="ah-row" style="margin-top: 10px;">
+              <input type="text" id="venue-name" placeholder="Venue name" maxlength="40" autocomplete="off" />
+              <button id="venue-save" class="ghost">Save</button>
+              <span id="venue-status" class="hint"></span>
+            </div>
+          </div>
+
+          <div class="card accent-card" id="stream-card" hidden>
+            <h3>Venue stream (for Q-SYS)</h3>
+            <div id="stream-urls"></div>
+          </div>
+
+          <div class="card" id="security-card">
+            <h3>Security &amp; backup</h3>
+            <label class="ah-toggle" style="margin-bottom:14px"><input type="checkbox" id="admin-lock-toggle" /> <span>Require password to open Admin</span></label>
+            <div class="ah-row">
+              <input type="text" id="admin-newpass" class="maskpw" placeholder="New admin password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" name="wm-admin-newcode" data-lpignore="true" data-1p-ignore data-form-type="other" />
+              <button id="admin-setpass" class="ghost">Change password</button>
+            </div>
+            <div class="ah-row" style="margin-top:14px">
+              <button id="backup-dl" class="ghost">⬇ Download backup</button>
+              <label class="ghost restore-label">↩ Restore from file<input type="file" id="restore-file" accept="application/json,.json" hidden /></label>
+            </div>
+            <button id="admin-relock" class="ghost" style="margin-top:14px">Lock admin</button>
+          </div>
+
+          <div class="card" id="device-card">
+            <h3>This device</h3>
+            <div id="device-info" class="device-info"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- sticky mini-player (phones only) -->
+    <div class="miniplayer" id="miniplayer" hidden>
+      <div class="mini-info"><span class="mini-title" id="mini-title">Nothing playing</span></div>
+      <button id="mini-play" class="mini-btn" aria-label="Play or pause">
+        <svg class="ic-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg class="ic-pause" viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+      </button>
+      <button id="mini-next" class="mini-btn" aria-label="Skip">
+        <svg viewBox="0 0 24 24"><path d="M17 6v12M5 6l9 6-9 6z"/></svg>
+      </button>
+    </div>
+
+    <!-- print-only poster -->
+    <div id="poster" aria-hidden="true">
+      <svg class="poster-logo" viewBox="0 0 100 100"><rect width="100" height="100" rx="23" fill="#10917b"/><rect x="21" y="30" width="8" height="40" rx="4" fill="#fff"/><rect x="71" y="30" width="8" height="40" rx="4" fill="#fff"/><circle cx="50" cy="50" r="15.5" fill="none" stroke="#ff8a34" stroke-width="8"/></svg>
+      <h1>Scan to control the music</h1>
+      <p>Connect to the venue WiFi, then scan with your phone camera.</p>
+      <img id="poster-qr" alt="Scan to open Watermans Music" />
+      <div class="poster-addr" id="poster-addr">—</div>
+      <p class="poster-foot"><span id="poster-name">Watermans</span> Music · Add to Home Screen for an app icon</p>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
