@@ -1461,7 +1461,9 @@ function amixerSet(pct) {
   if (!HEADLESS_PLAYER) return;
   hwVol = Math.max(0, Math.min(100, Math.round(pct)));
   try {
-    const amix = spawn('amixer', ['-c', audioCard(), 'sset', audioControl(), hwVol + '%', 'unmute']);
+    // -M maps % to the human-loudness (dB) scale — without it the Pi's raw
+    // scale makes 50% whisper-quiet and crams all loudness into the top 10%.
+    const amix = spawn('amixer', ['-M', '-c', audioCard(), 'sset', audioControl(), hwVol + '%', 'unmute']);
     amix.on('error', () => { /* amixer missing / control differs — ignore */ });
   } catch { /* ignore */ }
 }
