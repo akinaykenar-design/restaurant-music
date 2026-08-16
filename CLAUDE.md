@@ -13,8 +13,9 @@ pastes output back.
 
 - App runs as a systemd service: `watermans-music`, port **3100**, repo at
   `~/restaurant-music` on the Pi.
-- Web app on venue wifi: `http://watermans.local:3100` (or `http://<pi-ip>:3100`).
-- SSH from a laptop on the same wifi: `ssh <username>@watermans.local`
+- Web app on venue wifi: `http://watermans-3.local:3100` (hostname is
+  `watermans-3`) — or `http://<pi-ip>:3100`.
+- SSH from a laptop on the same wifi: `ssh <username>@watermans-3.local`
 - Pi username / static IP: (not recorded yet — fill in when known)
 - Audio: Pi 3.5mm jack → Q-SYS BGM 1. After-hours Spotify → Bluetooth
   receiver on BGM 2.
